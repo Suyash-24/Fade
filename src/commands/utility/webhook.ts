@@ -37,7 +37,9 @@ const validUrl = (s: string) => s.startsWith('http://') || s.startsWith('https:/
 function parseScript(script: string) {
     return script.split('$v').map(part => {
         const m = part.trim().match(/^\{(\w+):\s*([\s\S]*?)\}$/);
-        return m ? { key: m[1].toLowerCase(), value: m[2].trim() } : null;
+        if (!m) return null;
+        const value = m[2].trim().replace(/\\n/g, '\n');
+        return { key: m[1].toLowerCase(), value };
     }).filter(Boolean) as { key: string; value: string }[];
 }
 
