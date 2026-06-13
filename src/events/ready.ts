@@ -37,21 +37,15 @@ const event: Event<'clientReady'> = {
         startSocialTimer(client);
         startFortniteTimer(client);
 
-        // Rotating presence
-        const activities = [
-            { name: 'Everything. Free.', type: ActivityType.Custom },
-            { name: `${client.guilds.cache.size} servers`, type: ActivityType.Watching },
-            { name: '/help', type: ActivityType.Listening },
-        ];
-
-        let i = 0;
-        const rotate = () => {
-            client.user?.setActivity(activities[i % activities.length]);
-            i++;
-        };
-
-        rotate();
-        setInterval(rotate, 15_000);
+        // Streaming status
+        client.user?.setPresence({
+            activities: [{
+                name: 'locked in',
+                type: ActivityType.Streaming,
+                url: 'https://www.twitch.tv/fade',
+            }],
+            status: 'online',
+        });
         // Ensure application data (including Developer Portal emojis) is fetched
         try {
             await client.application?.fetch();
