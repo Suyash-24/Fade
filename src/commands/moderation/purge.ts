@@ -4,6 +4,7 @@ import { FadeContainer } from '../../components/builders.js';
 import { e, Colours } from '../../components/emojis.js';
 import { hasPermission } from '../../utils/fakePerms.js';
 import type { FadeClient } from '../../client.js';
+import { sendLog, LogColour } from '../../utils/logsender.js';
 
 export default {
     data: { name: 'purge', description: 'Advanced message purging.' },
@@ -151,5 +152,24 @@ export default {
         
         const successMsg = await channel.send({ components: [card] as any, flags: 1 << 15 } as any);
         setTimeout(() => successMsg.delete().catch(() => null), 4000);
+
+        // Send purge log
+        const filterLabel = filter ? sub : 'all';
+        await sendLog({
+            guild:     message.guild!,
+            category:  'mod',
+            event:     'purge',
+            color:     LogColour.MOD,
+            title:     `🗑️ Messages Purged`,
+            fields: [
+                { name: 'Moderator', value: `${message.author.username} (${message.author.toString()})`, inline: true },
+                { name: 'Channel',   value: channel.toString(), inline: true },
+                { name: 'Deleted',   value: `${deletedCount} message${deletedCount !== 1 ? 's' : ''}`, inline: true },
+                { name: 'Filter',    value: `\`${filterLabel}\``, inline: true },
+            ],
+            footer:    `Mod ID: ${message.author.id}`,
+            userId:    message.author.id,
+            channelId: channel.id,
+        });
     }
 } satisfies Command;

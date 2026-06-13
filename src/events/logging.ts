@@ -88,6 +88,17 @@ export const messageDeleteBulk: Event<'messageDeleteBulk'> = {
     async execute(client, messages, channel) {
         if (!channel.guild) return;
 
+        // Check if the bot itself performed the bulk delete (e.g. via purge command)
+        // If so, ignore it here since the purge command sends its own detailed log.
+        try {
+            await new Promise(res => setTimeout(res, 800));
+            const logs = await channel.guild.fetchAuditLogs({ type: AuditLogEvent.MessageBulkDelete, limit: 1 });
+            const entry = logs.entries.first();
+            if (entry && entry.target.id === channel.id && Date.now() - entry.createdTimestamp < 8000) {
+                if (entry.executor?.id === client.user?.id) return;
+            }
+        } catch {}
+
         await sendLog({
             guild:    channel.guild,
             category: 'message',
