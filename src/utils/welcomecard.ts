@@ -94,7 +94,9 @@ function parseScript(script: string): ParsedParam[] {
         // Greedy [\s\S]* + backtrack to last } — correctly handles emoji surrogates and nested {}
         const match = part.trim().match(/^\{(\w+):\s*([\s\S]*)\}$/);
         if (!match) return null;
-        return { key: match[1].toLowerCase(), value: match[2].trim() };
+        // Support \n as newline escape so single-line scripts can have multiline bodies
+        const value = match[2].trim().replace(/\\n/g, '\n');
+        return { key: match[1].toLowerCase(), value };
     }).filter((p): p is ParsedParam => p !== null);
 }
 
