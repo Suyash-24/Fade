@@ -572,7 +572,7 @@ export async function purchaseItem(
 
     if (existing) {
         await db.update(economyPurchases)
-            .set({ quantity: existing.quantity + 1 })
+            .set({ quantity: sql`${economyPurchases.quantity} + 1` })
             .where(eq(economyPurchases.id, existing.id));
     } else {
         await db.insert(economyPurchases).values({ guildId, userId, itemId });

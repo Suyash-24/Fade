@@ -858,7 +858,7 @@ export const economyPurchases = pgTable('economy_purchases', {
     guildId:   snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
     userId:    snowflake('user_id').notNull(),
     itemId:    integer('item_id').notNull().references(() => economyShop.id, { onDelete: 'cascade' }),
-    itemType:  varchar('item_type', { length: 20 }).notNull(),
+    quantity:  integer('quantity').notNull().default(1),
     createdAt: now(),
 }, (t) => [
     index('economy_purchases_guild_user_idx').on(t.guildId, t.userId),
