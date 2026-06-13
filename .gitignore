@@ -1,0 +1,28 @@
+# Fade .gitignore
+
+# Environment — NEVER commit this
+.env
+
+# Compiled output
+dist/
+
+# Dependencies
+node_modules/
+
+# Database files
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+*.vsix
