@@ -40,14 +40,20 @@ const event: Event<'clientReady'> = {
         startGithubStatsSync(client);
 
         // Streaming status
-        client.user?.setPresence({
-            activities: [{
-                name: 'locked in',
-                type: ActivityType.Streaming,
-                url: 'https://www.twitch.tv/fade',
-            }],
-            status: 'online',
-        });
+        const updateStatus = () => {
+            const userCount = client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
+            client.user?.setPresence({
+                activities: [{
+                    name: `${userCount.toLocaleString()} users`,
+                    type: ActivityType.Streaming,
+                    url: 'https://www.twitch.tv/fade',
+                }],
+                status: 'online',
+            });
+        };
+
+        updateStatus();
+        setInterval(updateStatus, 15 * 60 * 1000); // Update every 15 minutes
         // Ensure application data (including Developer Portal emojis) is fetched
         try {
             await client.application?.fetch();
