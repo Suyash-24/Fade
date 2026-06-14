@@ -16,29 +16,34 @@ const CATEGORIES: Record<string, { emoji: string; description: string }> = {
 };
 
 const buildOverview = (client: any) => {
-    const grouped = new Map<string, string[]>();
+    const grouped = new Map<string, { cmds: string[]; count: number }>();
     let totalSubcommands = 0;
 
     for (const cmd of client.commands.values()) {
         const cat = (cmd as any).category ?? 'general';
         if (cat === 'developer') continue; // Hide developer commands
-        if (!grouped.has(cat)) grouped.set(cat, []);
-        grouped.get(cat)!.push(cmd.data.name);
+        if (!grouped.has(cat)) grouped.set(cat, { cmds: [], count: 0 });
+        
+        const group = grouped.get(cat)!;
+        group.cmds.push(cmd.data.name);
+        group.count += 1;
 
         if (cmd.subcommands) {
             totalSubcommands += cmd.subcommands.length;
+            group.count += cmd.subcommands.length;
         } else if (cmd.data.options) {
             // Count slash command subcommands
             const subs = cmd.data.options.filter((o: any) => o.toJSON().type === 1 || o.toJSON().type === 2);
             totalSubcommands += subs.length;
+            group.count += subs.length;
         }
     }
 
     const total = client.commands.size + totalSubcommands;
 
-    const lines = [...grouped.entries()].map(([cat, cmds]) => {
+    const lines = [...grouped.entries()].map(([cat, data]) => {
         const meta = CATEGORIES[cat] ?? { emoji: e('star') };
-        return `${meta.emoji}  **${cat.charAt(0).toUpperCase() + cat.slice(1)}** — \`${cmds.length} command${cmds.length === 1 ? '' : 's'}\``;
+        return `${meta.emoji}  **${cat.charAt(0).toUpperCase() + cat.slice(1)}** — \`${data.count} command${data.count === 1 ? '' : 's'}\``;
     });
 
     return new FadeContainer(Colours.FADE)
@@ -53,6 +58,37 @@ const buildOverview = (client: any) => {
             linkBtn('https://discord.gg/SmdUGNXjYv', 'Support Server'),
             linkBtn(`https://discord.com/oauth2/authorize?client_id=${client.user?.id || ''}&permissions=8&integration_type=0&scope=bot`, 'Invite Bot')
         )
+        .build();
+};
+
+const buildCategoryInfo = (client: any, category: string) => {
+    const cmds: any[] = [];
+    for (const cmd of client.commands.values()) {
+        if (((cmd as any).category ?? 'general') === category) {
+            cmds.push(cmd);
+        }
+    }
+    
+    const meta = CATEGORIES[category] ?? { emoji: e('star') };
+    const title = `## ${meta.emoji} ${category.charAt(0).toUpperCase() + category.slice(1)} Commands`;
+    
+    const lines = cmds.map(cmd => {
+        let text = `**/${cmd.data.name}** — ${cmd.data.description}`;
+        if (cmd.subcommands && cmd.subcommands.length > 0) {
+            text += `\n*Subcommands:* ${cmd.subcommands.map((s: any) => `\`${s.name}\``).join(', ')}`;
+        } else if (cmd.data.options) {
+            const subs = cmd.data.options.filter((o: any) => o.toJSON().type === 1 || o.toJSON().type === 2);
+            if (subs.length > 0) {
+                text += `\n*Subcommands:* ${subs.map((s: any) => `\`${s.toJSON().name}\``).join(', ')}`;
+            }
+        }
+        return text;
+    });
+
+    return new FadeContainer(Colours.FADE)
+        .text(title)
+        .separator(true)
+        .text(lines.join('\n\n'))
         .build();
 };
 
@@ -139,8 +175,14 @@ export default {
                      ?? client.commands.get(client.aliases.get(cmdName.toLowerCase()) ?? '');
 
             if (!cmd) {
+                // Check if it's a category
+                if (CATEGORIES[cmdName.toLowerCase()]) {
+                    await sendResponse(interaction, [buildCategoryInfo(client, cmdName.toLowerCase())], true);
+                    return;
+                }
+
                 await interaction.reply({
-                    content: `${e('error')} No command named \`${cmdName}\` found.`,
+                    content: `${e('error')} No command or module named \`${cmdName}\` found.`,
                     flags: MessageFlags.Ephemeral,
                 });
                 return;
@@ -162,7 +204,13 @@ export default {
                      ?? client.commands.get(client.aliases.get(cmdName) ?? '');
 
             if (!cmd) {
-                await message.reply(`${e('error')} No command named \`${cmdName}\` found.`);
+                // Check if it's a category
+                if (CATEGORIES[cmdName]) {
+                    await sendMessage(message, [buildCategoryInfo(client, cmdName)]);
+                    return;
+                }
+
+                await message.reply(`${e('error')} No command or module named \`${cmdName}\` found.`);
                 return;
             }
 
