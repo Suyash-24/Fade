@@ -11,6 +11,7 @@ import { Message, PermissionFlagsBits } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { FadeContainer } from '../../components/builders.js';
 import { e } from '../../components/emojis.js';
+import { isBotOwner } from '../../utils/owner.js';
 import type { FadeClient } from '../../client.js';
 
 const BOT_WEBSITE = 'https://fadebot.me/';
@@ -42,10 +43,10 @@ function resolveImageUrl(message: Message, args: string[]): string | null {
     return url ?? null;
 }
 
-function isAuthorised(message: Message): boolean {
+async function isAuthorised(client: FadeClient, message: Message): Promise<boolean> {
     return (
         message.guild!.ownerId === message.author.id ||
-        message.author.id === process.env.OWNER_ID ||
+        (await isBotOwner(client, message.author.id)) ||
         message.member!.permissions.has(PermissionFlagsBits.Administrator)
     );
 }
@@ -57,10 +58,10 @@ export default {
     category: 'server',
     cooldown: 5,
 
-    async prefixExecute(message: Message, args: string[], _client: FadeClient) {
+    async prefixExecute(message: Message, args: string[], client: FadeClient) {
         if (!message.guild || !message.member) return;
 
-        if (!isAuthorised(message)) {
+        if (!(await isAuthorised(client, message))) {
             await send(message,
                 buildCard(
                     `${e('error')} **Permission Denied**`,
