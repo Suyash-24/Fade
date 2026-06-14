@@ -13,6 +13,7 @@ import { startTimerMessages } from '../utils/timerMessages.js';
 import { startBirthdayTimer } from '../utils/birthdayTimer.js';
 import { startSocialTimer } from '../utils/socialTimer.js';
 import { startFortniteTimer } from '../utils/fortniteTimer.js';
+import { startGithubStatsSync } from '../utils/githubStats.js';
 
 const event: Event<'clientReady'> = {
     name:  'clientReady',
@@ -36,6 +37,7 @@ const event: Event<'clientReady'> = {
         startBirthdayTimer(client);
         startSocialTimer(client);
         startFortniteTimer(client);
+        startGithubStatsSync(client);
 
         // Streaming status
         client.user?.setPresence({
