@@ -45,6 +45,33 @@ const event: Event<'messageCreate'> = {
         const DEFAULT_PREFIX = process.env.DEFAULT_PREFIX ?? 'f!';
         const guildPrefix    = await getPrefix(guild.id); // cached, fast
 
+        // ── Bot Mention Handler ───────────────────────────────────────────
+        if (client.user?.id && (message.content === `<@${client.user.id}>` || message.content === `<@!${client.user.id}>`)) {
+            const lines = [
+                `Hello! I'm **${client.user.username}**, an all-in-one community bot.`,
+                '',
+                `✦ **Default Prefix:** \`${DEFAULT_PREFIX}\``
+            ];
+            
+            if (guildPrefix && guildPrefix !== DEFAULT_PREFIX) {
+                lines.push(`✦ **Server Prefix:** \`${guildPrefix}\``);
+                lines.push(`*(You can use either prefix in this server!)*`);
+            }
+            
+            lines.push('');
+            lines.push('Need help? Use the `help` command to see everything I can do!');
+            lines.push('🌐 **[Website & Dashboard](https://fadebot.me/)**');
+
+            const card = new FadeContainer()
+                .header(`Hey there! ✨`)
+                .thumbnail(client.user.displayAvatarURL({ size: 256 }))
+                .text(lines.join('\n'))
+                .build();
+                
+            await sendMessage(message, [card]);
+            return;
+        }
+
         // Resolve which prefix was used — custom prefix OR always-on default
         let prefix: string | null = null;
         let isNoPrefix = false;
