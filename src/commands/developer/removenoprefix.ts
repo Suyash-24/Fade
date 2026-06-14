@@ -5,6 +5,7 @@ import { FadeContainer, sendMessage } from '../../components/builders.js';
 import { e } from '../../components/emojis.js';
 import type { FadeClient } from '../../client.js';
 import { removeNoPrefixUser } from '../../db/queries/noPrefix.js';
+import { isBotOwner } from '../../utils/owner.js';
 
 export default {
     data: { name: 'removenoprefix', description: 'Remove no-prefix status from a user.' },
@@ -12,13 +13,8 @@ export default {
     category: 'developer',
     
     async prefixExecute(message: Message, args: string[], client: FadeClient) {
-        // Fetch application to get owner if not cached
-        if (!client.application?.owner) await client.application?.fetch().catch(() => null);
-        
-        const ownerId = process.env.OWNER_ID || client.application?.owner?.id;
-
         // Silently ignore if not bot owner
-        if (message.author.id !== ownerId) return;
+        if (!(await isBotOwner(client, message.author.id))) return;
 
         const targetArg = args[0];
         if (!targetArg) {

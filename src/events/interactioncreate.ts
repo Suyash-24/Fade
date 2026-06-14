@@ -8,6 +8,7 @@ import type { Event } from '../types/event.js';
 import { updateResponse } from '../components/builders.js';
 import { checkCommandRestrictions } from '../utils/commandCheck.js';
 import { logger } from '../utils/logger.js';
+import { isBotOwner } from '../utils/owner.js';
 import { e } from '../components/emojis.js';
 
 const event: Event<'interactionCreate'> = {
@@ -71,7 +72,7 @@ const event: Event<'interactionCreate'> = {
             }
 
             // ── Owner-only guard ──────────────────────────────────────────────
-            if (command.ownerOnly && interaction.user.id !== process.env.OWNER_ID) {
+            if (command.ownerOnly && !(await isBotOwner(client, interaction.user.id))) {
                 await interaction.reply({
                     content: '❌ This command is restricted to the bot owner.',
                     flags: MessageFlags.Ephemeral,

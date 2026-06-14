@@ -3,6 +3,7 @@ import { MessageFlags, PermissionsBitField } from 'discord.js';
 import type { FadeClient } from '../client.js';
 import type { Event } from '../types/event.js';
 import { logger } from '../utils/logger.js';
+import { isBotOwner } from '../utils/owner.js';
 import { getAlias } from '../db/queries/commandAliases.js';
 import { checkCommandRestrictions } from '../utils/commandCheck.js';
 import { handleStickyMessage } from '../utils/stickyMessages.js';
@@ -169,10 +170,7 @@ const event: Event<'messageCreate'> = {
 
             // ── Owner-only guard ──────────────────────────────────────────────
             if (command.ownerOnly) {
-                if (!client.application?.owner) await client.application?.fetch().catch(() => null);
-                const ownerId = process.env.OWNER_ID || client.application?.owner?.id;
-                
-                if (message.author.id !== ownerId) {
+                if (!(await isBotOwner(client, message.author.id))) {
                     await message.reply('❌ This command is restricted to the bot owner.');
                     return;
                 }
