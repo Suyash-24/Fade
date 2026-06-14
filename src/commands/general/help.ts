@@ -42,12 +42,11 @@ const buildOverview = (client: any) => {
     const total = client.commands.size + totalSubcommands;
 
     const lines = [...grouped.entries()].map(([cat, data]) => {
-        const meta = CATEGORIES[cat] ?? { emoji: e('star') };
-        return `${meta.emoji}  **${cat.charAt(0).toUpperCase() + cat.slice(1)}** — \`${data.count} command${data.count === 1 ? '' : 's'}\``;
+        return `${e('heartdot')}  **${cat.charAt(0).toUpperCase() + cat.slice(1)}** — \`${data.count} command${data.count === 1 ? '' : 's'}\``;
     });
 
     return new FadeContainer(Colours.FADE)
-        .text(`## ${e('star')} Fade Help`)
+        .text(`## ${e('logs')} Fade Help`)
         .text(`-# ${total} commands · Use \`/help command:<name>\` for details`)
         .separator(true)
         .text(lines.join('\n'))
@@ -69,8 +68,7 @@ const buildCategoryInfo = (client: any, category: string) => {
         }
     }
     
-    const meta = CATEGORIES[category] ?? { emoji: e('star') };
-    const title = `## ${meta.emoji} ${category.charAt(0).toUpperCase() + category.slice(1)} Commands`;
+    const title = `## ${e('heartdot')} ${category.charAt(0).toUpperCase() + category.slice(1)} Commands`;
     
     const lines = cmds.map(cmd => {
         let text = `**/${cmd.data.name}** — ${cmd.data.description}`;
