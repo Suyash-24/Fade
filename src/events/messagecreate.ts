@@ -10,7 +10,7 @@ import { handleStickyMessage } from '../utils/stickyMessages.js';
 import { e } from '../components/emojis.js';
 import { getPrefix } from '../db/queries/guilds.js';
 import { getNoPrefixUser } from '../db/queries/noPrefix.js';
-import { FadeContainer, sendMessage } from '../components/builders.js';
+import { FadeContainer, sendMessage, thumb } from '../components/builders.js';
 import { getGuildRoleAliases, getReqRole } from '../db/queries/roleAliases.js';
 
 // Per-guild alias cache: guildId → Map<alias, command>
@@ -63,9 +63,10 @@ const event: Event<'messageCreate'> = {
             lines.push('🌐 **[Website & Dashboard](https://fadebot.me/)**');
 
             const card = new FadeContainer()
-                .header(`Hey there! ✨`)
-                .thumbnail(client.user.displayAvatarURL({ size: 256 }))
-                .text(lines.join('\n'))
+                .section(
+                    [`**Hey there! ✨**\n${lines.join('\n')}`],
+                    thumb(client.user.displayAvatarURL({ size: 256 }))
+                )
                 .build();
                 
             await sendMessage(message, [card]);
