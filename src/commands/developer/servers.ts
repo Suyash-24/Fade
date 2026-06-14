@@ -1,5 +1,5 @@
 // src/commands/developer/servers.ts
-import { Message, ComponentType } from 'discord.js';
+import { Message, ComponentType, PermissionFlagsBits, Guild } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { FadeContainer, sendMessage, btn, updateResponse, ButtonStyle } from '../../components/builders.js';
 import { e, Colours } from '../../components/emojis.js';
@@ -7,7 +7,7 @@ import type { FadeClient } from '../../client.js';
 import { isBotOwner } from '../../utils/owner.js';
 
 export default {
-    data: { name: 'servers', description: 'List all servers the bot is in.' },
+    data: { name: 'inserver', description: 'List all servers the bot is in.' },
     prefixOnly: true,
     category: 'developer',
     
@@ -30,20 +30,44 @@ export default {
         const totalPages = Math.ceil(guilds.length / ITEMS_PER_PAGE);
         let currentPage = 1;
 
-        const generatePage = (page: number) => {
+        const getInvite = async (guild: Guild) => {
+            if (guild.vanityURLCode) return `https://discord.gg/${guild.vanityURLCode}`;
+            
+            try {
+                const invites = await guild.invites.fetch({ cache: false });
+                const validInvite = invites.find(i => i.maxAge === 0 || (i.maxAge ?? 0) > 86400);
+                if (validInvite) return validInvite.url;
+            } catch {}
+
+            try {
+                const channel = guild.channels.cache.find(c => 
+                    c.isTextBased() && 
+                    guild.members.me?.permissionsIn(c).has(PermissionFlagsBits.CreateInstantInvite)
+                );
+                if (channel) {
+                    const invite = await (channel as any).createInvite({ maxAge: 86400, maxUses: 1, unique: true });
+                    return invite.url;
+                }
+            } catch {}
+            
+            return 'No Invite Perms';
+        };
+
+        const generatePage = async (page: number) => {
             const start = (page - 1) * ITEMS_PER_PAGE;
             const end = start + ITEMS_PER_PAGE;
             const currentGuilds = guilds.slice(start, end);
 
-            const lines = currentGuilds.map((g, i) => {
+            const lines = await Promise.all(currentGuilds.map(async (g, i) => {
                 const index = start + i + 1;
-                return `**${index}.** \`${g.name}\` — \`${g.memberCount} members\` (${g.id})`;
-            });
+                const inv = await getInvite(g);
+                return `**${index}.** \`${g.name}\` — \`${g.memberCount} members\` (${g.id})\n↳ ${inv}`;
+            }));
 
             const container = new FadeContainer(Colours.FADE)
                 .text(`## ${e('server')} Bot Servers`)
                 .separator(true)
-                .text(lines.join('\n'))
+                .text(lines.join('\n\n'))
                 .separator(true)
                 .text(`-# Page ${page} of ${totalPages} · Total Servers: ${guilds.length}`);
 
@@ -57,7 +81,7 @@ export default {
             return container.build();
         };
 
-        const responseMsg = await sendMessage(message, [generatePage(currentPage)]);
+        const responseMsg = await sendMessage(message, [await generatePage(currentPage)]);
 
         if (totalPages === 1) return;
 
@@ -78,17 +102,12 @@ export default {
                 currentPage++;
             }
 
-            await updateResponse(i, [generatePage(currentPage)]);
+            await updateResponse(i, [await generatePage(currentPage)]);
         });
 
         collector.on('end', async () => {
-            const expiredContainer = new FadeContainer(Colours.FADE)
-                .text(`## ${e('server')} Bot Servers`)
-                .separator(true)
-                .text(guilds.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((g, idx) => `**${(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}.** \`${g.name}\` — \`${g.memberCount} members\` (${g.id})`).join('\n'))
-                .separator(true)
-                .text(`-# Page ${currentPage} of ${totalPages} · Total Servers: ${guilds.length}`);
-            await responseMsg.edit({ components: [expiredContainer.build()], flags: 1 << 13 /* IsComponentsV2 */ } as any).catch(() => null);
+            const finalPage = await generatePage(currentPage) as any;
+            await responseMsg.edit({ embeds: finalPage.embeds, components: [], flags: 1 << 13 /* IsComponentsV2 */ } as any).catch(() => null);
         });
     },
 } satisfies Command;
