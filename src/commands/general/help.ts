@@ -70,23 +70,14 @@ const buildCategoryInfo = (client: any, category: string) => {
     
     const title = `## ${e('heartdot')} ${category.charAt(0).toUpperCase() + category.slice(1)} Commands`;
     
-    const lines = cmds.map(cmd => {
-        let text = `**/${cmd.data.name}** — ${cmd.data.description}`;
-        if (cmd.subcommands && cmd.subcommands.length > 0) {
-            text += `\n*Subcommands:* ${cmd.subcommands.map((s: any) => `\`${s.name}\``).join(', ')}`;
-        } else if (cmd.data.options) {
-            const subs = cmd.data.options.filter((o: any) => o.toJSON().type === 1 || o.toJSON().type === 2);
-            if (subs.length > 0) {
-                text += `\n*Subcommands:* ${subs.map((s: any) => `\`${s.toJSON().name}\``).join(', ')}`;
-            }
-        }
-        return text;
-    });
+    const lines = cmds.map(cmd => `**/${cmd.data.name}** — ${cmd.data.description}`);
 
     return new FadeContainer(Colours.FADE)
         .text(title)
         .separator(true)
-        .text(lines.join('\n\n'))
+        .text(lines.join('\n'))
+        .separator(true)
+        .text(`-# Use \`/help command:<name>\` to see detailed subcommands and usage.`)
         .build();
 };
 
