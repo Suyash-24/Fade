@@ -15,7 +15,7 @@ function getFiles(dir: string): string[] {
         const full = join(dir, entry);
         if (statSync(full).isDirectory()) {
             results.push(...getFiles(full));
-        } else if (full.endsWith('.ts') || full.endsWith('.js')) {
+        } else if ((full.endsWith('.ts') || full.endsWith('.js')) && !full.endsWith('.d.ts')) {
             results.push(full);
         }
     }

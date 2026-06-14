@@ -31,7 +31,7 @@ export async function loadEvents(client: FadeClient): Promise<void> {
     let loaded = 0;
 
     for (const file of readdirSync(eventsPath)) {
-        if (!file.endsWith('.ts') && !file.endsWith('.js')) continue;
+        if ((!file.endsWith('.ts') && !file.endsWith('.js')) || file.endsWith('.d.ts')) continue;
 
         const full = join(eventsPath, file);
         try {
