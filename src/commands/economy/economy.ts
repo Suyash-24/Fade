@@ -320,6 +320,22 @@ export default {
     userPermissions: [PermissionFlagsBits.ManageGuild],
     aliases:         ['economy', 'eco'],
     cooldown:        3,
+    subcommands: [
+        { name: 'setup', description: 'View current economy configuration' },
+        { name: 'toggle', description: 'Enable or disable the economy system' },
+        { name: 'currency', description: 'Set currency name and emoji' },
+        { name: 'daily', description: 'Set daily reward amount' },
+        { name: 'work', description: 'Set work reward range' },
+        { name: 'rob', description: 'Toggle rob feature' },
+        { name: 'robrate', description: 'Set rob success rate (0-100)' },
+        { name: 'maxbet', description: 'Set maximum gambling bet' },
+        { name: 'streak', description: 'Toggle daily streak bonus' },
+        { name: 'additem', description: 'Add a new item to the shop' },
+        { name: 'removeitem', description: 'Remove an item from the shop' },
+        { name: 'give', description: 'Grant coins to a user' },
+        { name: 'take', description: 'Deduct coins from a user' },
+        { name: 'reset', description: 'Reset a user\'s wallet to zero' },
+    ],
 
     async execute(interaction) {
         await interaction.reply({ content: 'Economy admin commands are prefix-only. Use `f!economy`.', flags: 64 });

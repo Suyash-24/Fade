@@ -3,8 +3,8 @@
 // The default f! always works regardless of the custom prefix.
 //
 // Usage:
-//   f!prefix <new_prefix>  — set custom prefix
-//   f!prefix reset         — reset back to f!
+//   f!prefix set <new_prefix>  — set custom prefix
+//   f!prefix reset             — reset back to f!
 //
 // Permission: Administrator or Server Owner
 
@@ -55,10 +55,10 @@ export default {
             return;
         }
 
-        const input = args[0]?.trim();
+        const subCommand = args[0]?.toLowerCase();
 
         // ── No arg: show current prefix ───────────────────────────────────────
-        if (!input) {
+        if (!subCommand) {
             const current = await getPrefix(message.guild.id);
             const isCustom = current !== DEFAULT_PREFIX;
             await send(message, buildCard(
@@ -66,14 +66,14 @@ export default {
                 `Current prefix: \`${current}\`\n` +
                 (isCustom ? `Default prefix \`${DEFAULT_PREFIX}\` also always works.\n\n` : '') +
                 `**Usage:**\n` +
-                `\`${current}prefix <new_prefix>\` — set a custom prefix\n` +
+                `\`${current}prefix set <new_prefix>\` — set a custom prefix\n` +
                 `\`${current}prefix reset\` — reset back to \`${DEFAULT_PREFIX}\``
             ));
             return;
         }
 
         // ── Reset ─────────────────────────────────────────────────────────────
-        if (input.toLowerCase() === 'reset') {
+        if (subCommand === 'reset') {
             await updateGuild(message.guild.id, { prefix: DEFAULT_PREFIX });
             await send(message, buildCard(
                 `${e('success')} **Prefix Reset**`,
@@ -82,31 +82,49 @@ export default {
             return;
         }
 
-        // ── Validate ──────────────────────────────────────────────────────────
-        if (input.length > MAX_PREFIX_LEN) {
+        // ── Set ───────────────────────────────────────────────────────────────
+        if (subCommand === 'set') {
+            const input = args[1]?.trim();
+            if (!input) {
+                await send(message, buildCard(
+                    `${e('error')} **Missing Prefix**`,
+                    `You must specify a new prefix to set.\nUsage: \`prefix set <new_prefix>\``
+                ));
+                return;
+            }
+
+            if (input.length > MAX_PREFIX_LEN) {
+                await send(message, buildCard(
+                    `${e('error')} **Too Long**`,
+                    `Prefix must be ${MAX_PREFIX_LEN} characters or fewer. You provided ${input.length}.`
+                ));
+                return;
+            }
+
+            if (/\s/.test(input)) {
+                await send(message, buildCard(
+                    `${e('error')} **Invalid Prefix**`,
+                    'The prefix cannot contain spaces.'
+                ));
+                return;
+            }
+
+            await updateGuild(message.guild.id, { prefix: input });
+
             await send(message, buildCard(
-                `${e('error')} **Too Long**`,
-                `Prefix must be ${MAX_PREFIX_LEN} characters or fewer. You provided ${input.length}.`
+                `${e('success')} **Prefix Updated**`,
+                `Custom prefix set to \`${input}\`\n\n` +
+                `Both \`${input}\` and \`${DEFAULT_PREFIX}\` will work in this server.\n` +
+                `To reset: \`${input}prefix reset\``
             ));
             return;
         }
 
-        if (/\s/.test(input)) {
-            await send(message, buildCard(
-                `${e('error')} **Invalid Prefix**`,
-                'The prefix cannot contain spaces.'
-            ));
-            return;
-        }
-
-        // ── Save ──────────────────────────────────────────────────────────────
-        await updateGuild(message.guild.id, { prefix: input });
-
+        // ── Invalid subcommand ────────────────────────────────────────────────
+        const current = await getPrefix(message.guild.id);
         await send(message, buildCard(
-            `${e('success')} **Prefix Updated**`,
-            `Custom prefix set to \`${input}\`\n\n` +
-            `Both \`${input}\` and \`${DEFAULT_PREFIX}\` will work in this server.\n` +
-            `To reset: \`${input}prefix reset\``
+            `${e('error')} **Invalid Command**`,
+            `Please use \`${current}prefix set <new>\` or \`${current}prefix reset\`.`
         ));
     },
 } satisfies Command;

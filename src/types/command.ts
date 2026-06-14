@@ -59,6 +59,9 @@ export interface Command {
     // Command category (used in /help)
     category?: string;
 
+    // Subcommands metadata for help menu
+    subcommands?: { name: string; description: string }[];
+
     // If true, command will not be registered as a slash command
     prefixOnly?: boolean;
 }

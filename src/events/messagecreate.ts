@@ -60,7 +60,7 @@ const event: Event<'messageCreate'> = {
             
             lines.push('');
             lines.push('Need help? Use the `help` command to see everything I can do!');
-            lines.push('🌐 **[Website & Dashboard](https://fadebot.me/)**');
+            lines.push('🌐 **[Website](https://fadebot.me/)**');
 
             const card = new FadeContainer()
                 .section(
