@@ -29,7 +29,14 @@ export async function getGuild(guildId: string): Promise<Guild> {
     if (!guild) {
         [guild] = await db.insert(guilds)
             .values({ guildId })
+            .onConflictDoNothing()
             .returning();
+
+        if (!guild) {
+            guild = (await db.query.guilds.findFirst({
+                where: eq(guilds.guildId, guildId),
+            }))!;
+        }
 
         logger.debug('Created guild config', { guildId });
     }
