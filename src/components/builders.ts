@@ -161,11 +161,19 @@ export async function sendMessage(
     message: Message,
     containers: ContainerBuilder[],
 ): Promise<Message> {
-    return message.reply({
+    const payload = {
         components: containers,
         flags: MessageFlags.IsComponentsV2,
         allowedMentions: { repliedUser: false },
-    } as any);
+    } as any;
+
+    return message.reply(payload).catch((err) => {
+        // If message was deleted (Invalid Form Body for message_reference), fallback to channel send
+        if (err.code === 10008 || err.code === 50035) {
+            return (message.channel as any).send(payload);
+        }
+        throw err;
+    });
 }
 
 // Update existing message (button refresh)
