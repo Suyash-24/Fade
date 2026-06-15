@@ -92,10 +92,14 @@ interface ParsedParam {
 function parseScript(script: string): ParsedParam[] {
     return script.split('$v').map(part => {
         // Greedy [\s\S]* + backtrack to last } — correctly handles emoji surrogates and nested {}
-        const match = part.trim().match(/^\{(\w+):\s*([\s\S]*)\}$/);
+        const match = part.trim().match(/^\{(\w+):([\s\S]*)\}$/);
         if (!match) return null;
-        // Support \n as newline escape so single-line scripts can have multiline bodies
-        const value = match[2].trim().replace(/\\n/g, '\n');
+        
+        let value = match[2];
+        if (value.startsWith(' ')) value = value.slice(1);
+        value = value.replace(/\\n/g, '\n').replace(/\s+$/, '');
+        value = value.replace(/^[ ]+/gm, (spaces) => '\u2800'.repeat(spaces.length));
+        
         return { key: match[1].toLowerCase(), value };
     }).filter((p): p is ParsedParam => p !== null);
 }

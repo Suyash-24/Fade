@@ -37,9 +37,12 @@ function resolveVars(text: string, msg: any): string {
 
 function parseScript(script: string) {
     return script.split('$v').map(part => {
-        const m = part.trim().match(/^\{(\w+):\s*([\s\S]*?)\}$/);
+        const m = part.trim().match(/^\{(\w+):([\s\S]*?)\}$/);
         if (!m) return null;
-        const value = m[2].trim().replace(/\\n/g, '\n');
+        let value = m[2];
+        if (value.startsWith(' ')) value = value.slice(1);
+        value = value.replace(/\\n/g, '\n').replace(/\s+$/, '');
+        value = value.replace(/^[ ]+/gm, (spaces) => '\u2800'.repeat(spaces.length));
         return { key: m[1].toLowerCase(), value };
     }).filter(Boolean) as { key: string; value: string }[];
 }
