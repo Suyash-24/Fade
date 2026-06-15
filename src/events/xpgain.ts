@@ -109,7 +109,8 @@ async function handleLevelUp(
                     .replace(/\{user\.avatar\}/g,   avatarUrl)
                     .replace(/\{user\.icon\}/g,     avatarUrl)
                     .replace(/{usericon}/g,         avatarUrl)
-                    .replace(/{servericon}/g,       member.guild.iconURL({ size: 256 }) ?? '');
+                    .replace(/{servericon}/g,       member.guild.iconURL({ size: 256 }) ?? '')
+                    .replace(/^[ ]+/gm, (spaces) => '\u2800'.repeat(spaces.length));
                 if (text.trim()) {
                     await announceChannel.send({ content: text }).catch(() => null);
                 }

@@ -68,11 +68,13 @@ export function startBirthdayTimer(client: FadeClient): void {
                         }, 24 * 60 * 60 * 1000);
                     }
 
-                    const text = config.message
+                    let text = config.message
                         ? config.message
                             .replace(/{user}/g, member.toString())
                             .replace(/{date}/g, entry.birthday)
                         : `🎂 Happy Birthday ${member.toString()}! 🎉`;
+                    
+                    text = text.replace(/^[ ]+/gm, (spaces) => '\u2800'.repeat(spaces.length));
 
                     const style = (config as any).style ?? 'text';
 
