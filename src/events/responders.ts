@@ -24,11 +24,14 @@ export function invalidateResponderCache(guildId: string) {
 }
 
 function resolveVars(text: string, message: any): string {
-    return text
+    const resolved = text
         .replace(/{user}/g,    message.author.toString())
         .replace(/{username}/g,message.author.username)
         .replace(/{server}/g,  message.guild?.name ?? '')
         .replace(/{channel}/g, message.channel.toString());
+    
+    // Bleed-style space preservation
+    return resolved.replace(/^[ ]+/gm, (spaces) => '\u2800'.repeat(spaces.length));
 }
 
 const event: Event<'messageCreate'> = {
