@@ -12,7 +12,6 @@ if (!process.env.DATABASE_URL) {
 // Connection pool — tuned for Supabase free tier
 const client = postgres(process.env.DATABASE_URL, {
     max:             10,       // max connections (Supabase free: up to 15)
-    idle_timeout:    30,       // drop idle connections after 30s
     max_lifetime:    1800,     // recycle connections every 30 min to avoid stale state
     connect_timeout: 10,       // fail fast if can't connect in 10s
 });
