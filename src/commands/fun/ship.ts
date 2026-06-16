@@ -144,7 +144,7 @@ async function generateShipCanvas(user1: any, user2: any, percentage: number): P
     const img1 = await loadImage(av1Url).catch(() => null);
     const img2 = await loadImage(av2Url).catch(() => null);
 
-    // 3. Draw middle connection line
+    // 3. Draw middle connection line and Heart
     ctx.beginPath();
     if (percentage >= 50) {
         ctx.strokeStyle = '#ff69b4'; // Solid pink
@@ -154,9 +154,44 @@ async function generateShipCanvas(user1: any, user2: any, percentage: number): P
     }
     ctx.lineWidth = 6;
     ctx.moveTo(250, 150);
+    ctx.lineTo(310, 150);
+    ctx.moveTo(390, 150);
     ctx.lineTo(450, 150);
     ctx.stroke();
     ctx.setLineDash([]);
+
+    // Draw the Vector Heart in the center
+    ctx.save();
+    ctx.translate(350, 145);
+    const size = 80;
+    
+    ctx.beginPath();
+    ctx.moveTo(0, size * 0.4);
+    ctx.bezierCurveTo(-size * 0.7, -size * 0.1, -size * 0.4, -size * 0.6, 0, -size * 0.2);
+    ctx.bezierCurveTo(size * 0.4, -size * 0.6, size * 0.7, -size * 0.1, 0, size * 0.4);
+    ctx.closePath();
+
+    if (percentage >= 50) {
+        ctx.fillStyle = '#ff69b4';
+        ctx.shadowColor = '#ff69b4';
+        ctx.shadowBlur = 15;
+    } else {
+        ctx.fillStyle = '#555555';
+    }
+    ctx.fill();
+
+    // If < 50, draw a crack down the heart
+    if (percentage < 50) {
+        ctx.beginPath();
+        ctx.moveTo(0, -size * 0.2);
+        ctx.lineTo(-size * 0.15, size * 0.1);
+        ctx.lineTo(size * 0.1, size * 0.2);
+        ctx.lineTo(0, size * 0.4);
+        ctx.strokeStyle = '#1e1e24'; // Match background
+        ctx.lineWidth = 6;
+        ctx.stroke();
+    }
+    ctx.restore();
 
     // 4. Draw Avatars with circular clipping
     const drawAvatar = (img: any, x: number, y: number, size: number) => {
