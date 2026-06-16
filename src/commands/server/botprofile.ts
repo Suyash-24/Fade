@@ -14,6 +14,18 @@ import { e } from '../../components/emojis.js';
 import { isBotOwner } from '../../utils/owner.js';
 import type { FadeClient } from '../../client.js';
 
+// Discord restricts avatars/banners to 10MB
+function formatDiscordApiError(err: any): string {
+    const msg = err.message || '';
+    if (msg.includes('BINARY_TYPE_MAX_SIZE')) {
+        return 'File cannot be larger than **10MB**.';
+    }
+    if (err.code === 50035) {
+        return 'Invalid image (too large or unsupported format).';
+    }
+    return `\`${msg}\``;
+}
+
 const BOT_WEBSITE = 'https://fadebot.me/';
 const VALID_EXTS  = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 
@@ -104,7 +116,7 @@ export default {
                 await send(message, card);
             } catch (err: any) {
                 await send(message,
-                    buildCard(`${e('error')} **Failed**`, `\`${err.message}\``).build()
+                    buildCard(`${e('error')} **Failed**`, formatDiscordApiError(err)).build()
                 );
             }
             return;
@@ -140,11 +152,8 @@ export default {
                     .build();
                 await send(message, card);
             } catch (err: any) {
-                const detail = err.code === 50035
-                    ? 'Invalid image (too large or unsupported format).'
-                    : err.message;
                 await send(message,
-                    buildCard(`${e('error')} **Failed**`, detail).build()
+                    buildCard(`${e('error')} **Failed**`, formatDiscordApiError(err)).build()
                 );
             }
             return;
