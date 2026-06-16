@@ -28,7 +28,15 @@ function calculateShip(id1: string, id2: string): number {
     const ids = [id1, id2].sort();
     const date = new Date().toISOString().split('T')[0];
     const hash = [...(ids.join('') + date)].reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return (hash * 13) % 101;
+    
+    // Generate a pseudo-random uniform float between 0.0 and 1.0
+    const uniform = ((hash * 13) % 101) / 100;
+    
+    // Apply a power curve (1.5) to heavily bias the results towards low and mid numbers.
+    // Example: A uniform 0.5 becomes 0.35 (35%). You must roll a uniform 0.86 to get an 80%.
+    const biased = Math.pow(uniform, 1.5);
+    
+    return Math.floor(biased * 100);
 }
 
 export default {
