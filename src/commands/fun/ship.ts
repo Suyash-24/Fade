@@ -144,26 +144,43 @@ async function generateShipCanvas(user1: any, user2: any, percentage: number): P
     const img1 = await loadImage(av1Url).catch(() => null);
     const img2 = await loadImage(av2Url).catch(() => null);
 
-    // 3. Draw middle connection line and Heart
-    ctx.beginPath();
-    if (percentage >= 50) {
-        ctx.strokeStyle = '#ff69b4'; // Solid pink
+    // Define color and style based on percentage tiers
+    let heartColor = '';
+    let lineDash: number[] = [];
+    
+    if (percentage >= 80) {
+        heartColor = '#ff2a2a'; // Vibrant Red
+    } else if (percentage >= 60) {
+        heartColor = '#ff69b4'; // Hot Pink
+    } else if (percentage >= 40) {
+        heartColor = '#ffb347'; // Orange
+    } else if (percentage >= 20) {
+        heartColor = '#b19cd9'; // Purple
+        lineDash = [15, 10];
     } else {
-        ctx.setLineDash([10, 10]);
-        ctx.strokeStyle = '#555555'; // Dashed gray
+        heartColor = '#555555'; // Dark Gray
+        lineDash = [10, 10];
     }
+
+    // 3. Draw middle connection line
+    ctx.beginPath();
+    ctx.strokeStyle = heartColor;
+    if (lineDash.length > 0) ctx.setLineDash(lineDash);
     ctx.lineWidth = 6;
+    
+    // With heart size 120, center is 350. The heart spans roughly 350-70 to 350+70.
+    // So line goes from 250 to 280, and 420 to 450.
     ctx.moveTo(250, 150);
-    ctx.lineTo(310, 150);
-    ctx.moveTo(390, 150);
+    ctx.lineTo(280, 150);
+    ctx.moveTo(420, 150);
     ctx.lineTo(450, 150);
     ctx.stroke();
     ctx.setLineDash([]);
 
     // Draw the Vector Heart in the center
     ctx.save();
-    ctx.translate(350, 145);
-    const size = 80;
+    ctx.translate(350, 140); // Shift slightly up to perfectly center vertically
+    const size = 120; // Bigger heart
     
     ctx.beginPath();
     ctx.moveTo(0, size * 0.4);
@@ -171,45 +188,54 @@ async function generateShipCanvas(user1: any, user2: any, percentage: number): P
     ctx.bezierCurveTo(size * 0.4, -size * 0.6, size * 0.7, -size * 0.1, 0, size * 0.4);
     ctx.closePath();
 
-    if (percentage >= 50) {
-        ctx.fillStyle = '#ff69b4';
-        ctx.shadowColor = '#ff69b4';
+    ctx.fillStyle = heartColor;
+    if (percentage >= 40) {
+        ctx.shadowColor = heartColor;
         ctx.shadowBlur = 15;
-    } else {
-        ctx.fillStyle = '#555555';
     }
     ctx.fill();
+    ctx.shadowBlur = 0; // reset shadow for text/lines
 
-    // If < 50, draw a crack down the heart
-    if (percentage < 50) {
+    // If < 40, draw a crack down the heart
+    if (percentage < 40) {
         ctx.beginPath();
         ctx.moveTo(0, -size * 0.2);
-        ctx.lineTo(-size * 0.15, size * 0.1);
+        ctx.lineTo(-size * 0.15, size * 0.05);
         ctx.lineTo(size * 0.1, size * 0.2);
         ctx.lineTo(0, size * 0.4);
         ctx.strokeStyle = '#1e1e24'; // Match background
-        ctx.lineWidth = 6;
+        ctx.lineWidth = 8;
         ctx.stroke();
     }
+
+    // Draw Percentage Text INSIDE the heart
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 30px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // If it's broken, offset the text slightly so it's not strictly on the crack, or just draw it.
+    ctx.fillText(`${percentage}%`, 0, -size * 0.05);
+    
     ctx.restore();
 
     // 4. Draw Avatars with circular clipping
-    const drawAvatar = (img: any, x: number, y: number, size: number) => {
+    const drawAvatar = (img: any, x: number, y: number, avSize: number) => {
         if (!img) return;
         ctx.save();
         ctx.beginPath();
-        ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2, true);
+        ctx.arc(x + avSize / 2, y + avSize / 2, avSize / 2, 0, Math.PI * 2, true);
         ctx.closePath();
         ctx.clip();
 
-        ctx.drawImage(img, x, y, size, size);
+        ctx.drawImage(img, x, y, avSize, avSize);
         
         ctx.restore();
 
         // Draw a ring around the avatar
         ctx.beginPath();
-        ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2, true);
-        ctx.strokeStyle = percentage >= 50 ? '#ff69b4' : '#555555';
+        ctx.arc(x + avSize / 2, y + avSize / 2, avSize / 2, 0, Math.PI * 2, true);
+        ctx.strokeStyle = heartColor;
         ctx.lineWidth = 6;
         ctx.stroke();
     };
