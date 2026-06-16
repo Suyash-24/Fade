@@ -9,6 +9,10 @@ import { sendMessage, FadeContainer, fadeReply } from '../../components/builders
 import { e, Colours } from '../../components/emojis.js';
 import { createCanvas, loadImage, GlobalFonts } from '@napi-rs/canvas';
 
+try {
+    GlobalFonts.registerFromPath('C:\\Windows\\Fonts\\arial.ttf', 'Arial');
+} catch { /* ignore */ }
+
 function calculateShip(id1: string, id2: string): number {
     const ids = [id1, id2].sort();
     const date = new Date().toISOString().split('T')[0];
@@ -210,7 +214,7 @@ async function generateShipCanvas(user1: any, user2: any, percentage: number): P
 
     // Draw Percentage Text INSIDE the heart
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 30px sans-serif';
+    ctx.font = 'bold 32px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
