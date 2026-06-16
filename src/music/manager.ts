@@ -86,8 +86,9 @@ export function setupMusic(client: FadeClient): void {
         try {
             const card = buildNowPlayingCard(player, track);
             const msg  = await channel.send({
-                components: [card],
-                flags:      (1 << 15), // IsComponentsV2
+                components:      [card],
+                flags:           (1 << 15), // IsComponentsV2
+                allowedMentions: { parse: [] },
             } as any);
             // Store the now-playing message ID so we can delete it when the track ends
             (player as any).nowPlayingMsgId = msg.id;
