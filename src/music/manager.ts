@@ -188,6 +188,17 @@ export function setupMusic(client: FadeClient): void {
         }
     });
 
+    client.on('voiceStateUpdate', (oldState, newState) => {
+        // If the bot itself gets disconnected (channel deleted, kicked by admin, etc)
+        if (newState.id === client.user?.id && !newState.channelId && oldState.channelId) {
+            const player = client.music?.players.get(newState.guild.id);
+            if (player) {
+                logger.info(`[Music] Bot was disconnected from voice in guild ${newState.guild.id}, destroying player`);
+                player.destroy();
+            }
+        }
+    });
+
     client.music = manager;
     logger.info('[Music] Kazagumo manager initialized');
 }
