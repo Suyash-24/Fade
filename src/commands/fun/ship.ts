@@ -9,9 +9,21 @@ import { sendMessage, FadeContainer, fadeReply } from '../../components/builders
 import { e, Colours } from '../../components/emojis.js';
 import { createCanvas, loadImage, GlobalFonts } from '@napi-rs/canvas';
 
-try {
-    GlobalFonts.registerFromPath('C:\\Windows\\Fonts\\arial.ttf', 'Arial');
-} catch { /* ignore */ }
+let fontLoaded = false;
+async function loadFont() {
+    if (fontLoaded) return;
+    try {
+        // Fetch Roboto Bold directly from Google Fonts GitHub
+        const res = await fetch('https://raw.githubusercontent.com/google/fonts/main/apache/roboto/Roboto-Bold.ttf');
+        if (res.ok) {
+            const buffer = Buffer.from(await res.arrayBuffer());
+            GlobalFonts.register(buffer, 'Roboto');
+            fontLoaded = true;
+        }
+    } catch (e) {
+        console.error('Failed to load remote font', e);
+    }
+}
 
 function calculateShip(id1: string, id2: string): number {
     const ids = [id1, id2].sort();
@@ -120,6 +132,8 @@ export default {
 } satisfies Command;
 
 async function generateShipCanvas(user1: any, user2: any, percentage: number): Promise<Buffer> {
+    await loadFont();
+    
     const canvas = createCanvas(700, 300);
     const ctx = canvas.getContext('2d');
 
@@ -214,7 +228,10 @@ async function generateShipCanvas(user1: any, user2: any, percentage: number): P
 
     // Draw Percentage Text INSIDE the heart
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 32px Arial';
+    // Use dark shadow for text contrast against bright hearts
+    ctx.shadowColor = '#000000';
+    ctx.shadowBlur = 5;
+    ctx.font = 'bold 34px Roboto, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
