@@ -13,8 +13,7 @@ let fontLoaded = false;
 async function loadFont() {
     if (fontLoaded) return;
     try {
-        // Fetch Roboto Bold directly from Google Fonts GitHub
-        const res = await fetch('https://raw.githubusercontent.com/google/fonts/main/apache/roboto/Roboto-Bold.ttf');
+        const res = await fetch('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Bold.ttf');
         if (res.ok) {
             const buffer = Buffer.from(await res.arrayBuffer());
             GlobalFonts.register(buffer, 'Roboto');
