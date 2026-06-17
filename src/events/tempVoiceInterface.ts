@@ -3,6 +3,10 @@
 import {
     MessageFlags,
     PermissionFlagsBits,
+    UserSelectMenuBuilder,
+    StringSelectMenuBuilder,
+    StringSelectMenuOptionBuilder,
+    ActionRowBuilder,
 } from 'discord.js';
 import type { FadeClient } from '../client.js';
 import type { Event } from '../types/event.js';
@@ -11,9 +15,7 @@ import {
     transferOwnership,
 } from '../db/queries/tempvoice.js';
 import {
-    nameModal, limitModal, permitModal,
-    rejectModal, kickModal, transferModal,
-    banModal, unbanModal, muteModal, unmuteModal, deafenModal, undeafenModal,
+    nameModal, limitModal
 } from '../utils/tempVoiceInterface.js';
 import { FadeContainer } from '../components/builders.js';
 import { e, Colours } from '../components/emojis.js';
@@ -71,28 +73,159 @@ const buttonEvent: Event<'interactionCreate'> = {
 
         const id = interaction.customId;
         if (!id.startsWith('tvc_')) return;
-
         try {
+            // ── Select Menu Handlers ──────────────────────────────────────────
+            if (id.startsWith('tvc_select_')) {
+                const action = id.replace('tvc_select_', '');
+                let userId = '';
+                
+                if (interaction.isUserSelectMenu() || interaction.isStringSelectMenu()) {
+                    userId = interaction.values[0];
+                } else {
+                    return;
+                }
+
+                const voiceChannel = (interaction.member as any)?.voice?.channel;
+                if (!voiceChannel) {
+                    await interaction.reply({ content: `${e('error')} You must be in your voice channel.`, flags: MessageFlags.Ephemeral });
+                    return;
+                }
+
+                const data = await getTempChannel(voiceChannel.id);
+                if (!data || data.ownerId !== interaction.user.id) {
+                    await interaction.reply({ content: `${e('error')} You don't own this channel.`, flags: MessageFlags.Ephemeral });
+                    return;
+                }
+
+                // Execute the action
+                if (action === 'permit') {
+                    await voiceChannel.permissionOverwrites.edit(userId, { Connect: true, ViewChannel: true });
+                    await interaction.update({ content: `${e('success')}  <@${userId}> permitted`, components: [] });
+                } else if (action === 'reject') {
+                    await voiceChannel.permissionOverwrites.edit(userId, { Connect: false, ViewChannel: false });
+                    const targetMember = voiceChannel.members?.get(userId);
+                    if (targetMember) await targetMember.voice.disconnect().catch(() => null);
+                    await interaction.update({ content: `${e('success')}  <@${userId}> rejected`, components: [] });
+                } else if (action === 'kick') {
+                    const targetMember = voiceChannel.members?.get(userId);
+                    if (targetMember) await targetMember.voice.disconnect('[Fade TempVoice] Kicked by owner').catch(() => null);
+                    await interaction.update({ content: `${e('success')}  <@${userId}> kicked`, components: [] });
+                } else if (action === 'ban') {
+                    await voiceChannel.permissionOverwrites.edit(userId, { Connect: false, ViewChannel: false });
+                    const targetMember = voiceChannel.members?.get(userId);
+                    if (targetMember) await targetMember.voice.disconnect('[Fade TempVoice] Banned by owner').catch(() => null);
+                    await interaction.update({ content: `${e('success')}  <@${userId}> banned from your channel`, components: [] });
+                } else if (action === 'unban') {
+                    await voiceChannel.permissionOverwrites.delete(userId);
+                    await interaction.update({ content: `${e('success')}  <@${userId}> unbanned`, components: [] });
+                } else if (action === 'mute') {
+                    const targetMember = voiceChannel.members?.get(userId);
+                    if (targetMember) await targetMember.voice.setMute(true, '[Fade TempVoice] Muted by owner').catch(() => null);
+                    await interaction.update({ content: `${e('success')}  <@${userId}> server muted`, components: [] });
+                } else if (action === 'unmute') {
+                    const targetMember = voiceChannel.members?.get(userId);
+                    if (targetMember) await targetMember.voice.setMute(false, '[Fade TempVoice] Unmuted by owner').catch(() => null);
+                    await interaction.update({ content: `${e('success')}  <@${userId}> server unmuted`, components: [] });
+                } else if (action === 'deafen') {
+                    const targetMember = voiceChannel.members?.get(userId);
+                    if (targetMember) await targetMember.voice.setDeaf(true, '[Fade TempVoice] Deafened by owner').catch(() => null);
+                    await interaction.update({ content: `${e('success')}  <@${userId}> server deafened`, components: [] });
+                } else if (action === 'undeafen') {
+                    const targetMember = voiceChannel.members?.get(userId);
+                    if (targetMember) await targetMember.voice.setDeaf(false, '[Fade TempVoice] Undeafened by owner').catch(() => null);
+                    await interaction.update({ content: `${e('success')}  <@${userId}> server undeafened`, components: [] });
+                } else if (action === 'transfer') {
+                    await transferOwnership(voiceChannel.id, userId);
+                    await voiceChannel.permissionOverwrites.edit(userId, { ManageChannels: true, MoveMembers: true });
+                    await voiceChannel.permissionOverwrites.edit(interaction.user.id, { ManageChannels: null, MoveMembers: null });
+                    await interaction.update({ content: `${e('crown')}  Ownership transferred to <@${userId}>`, components: [] });
+                }
+                
+                return;
+            }
             // ── Modals (no ownership check yet — modal handles it) ─────────────
             const modals: Record<string, () => any> = {
                 tvc_name: nameModal,
                 tvc_limit: limitModal,
-                tvc_permit: permitModal,
-                tvc_reject: rejectModal,
-                tvc_kick: kickModal,
-                tvc_transfer: transferModal,
-                tvc_ban: banModal,
-                tvc_unban: unbanModal,
-                tvc_mute: muteModal,
-                tvc_unmute: unmuteModal,
-                tvc_deafen: deafenModal,
-                tvc_undeafen: undeafenModal,
             };
 
             if (modals[id]) {
                 const owned = await verifyOwner(interaction);
                 if (!owned) return;
                 await interaction.showModal(modals[id]());
+                return;
+            }
+
+            // ── Select Menus for user targeting ───────────────────────────────
+
+            const allServerActions: Record<string, string> = {
+                tvc_permit: 'Permit a user',
+                tvc_reject: 'Reject a user',
+                tvc_ban: 'Ban a user from channel',
+                tvc_unban: 'Unban a user',
+            };
+
+            const vcOnlyActions: Record<string, string> = {
+                tvc_kick: 'Kick user from channel',
+                tvc_mute: 'Server mute user',
+                tvc_unmute: 'Server unmute user',
+                tvc_deafen: 'Server deafen user',
+                tvc_undeafen: 'Server undeafen user',
+                tvc_transfer: 'Transfer ownership to user',
+            };
+
+            if (allServerActions[id]) {
+                const owned = await verifyOwner(interaction);
+                if (!owned) return;
+
+                const menu = new UserSelectMenuBuilder()
+                    .setCustomId(`tvc_select_${id.replace('tvc_', '')}`)
+                    .setPlaceholder(allServerActions[id])
+                    .setMinValues(1)
+                    .setMaxValues(1);
+
+                await interaction.reply({
+                    content: `Please select a user:`,
+                    components: [new ActionRowBuilder<UserSelectMenuBuilder>().addComponents(menu)],
+                    flags: MessageFlags.Ephemeral,
+                });
+                return;
+            }
+
+            if (vcOnlyActions[id]) {
+                const owned = await verifyOwner(interaction);
+                if (!owned) return;
+
+                // Build string select menu with current VC members
+                const members = owned.channel.members.filter((m: any) => m.id !== interaction.user.id && !m.user.bot);
+                
+                if (members.size === 0) {
+                    await interaction.reply({
+                        content: `${e('error')} There are no other users in your channel to select.`,
+                        flags: MessageFlags.Ephemeral,
+                    });
+                    return;
+                }
+
+                const menu = new StringSelectMenuBuilder()
+                    .setCustomId(`tvc_select_${id.replace('tvc_', '')}`)
+                    .setPlaceholder(vcOnlyActions[id])
+                    .setMinValues(1)
+                    .setMaxValues(1);
+
+                members.forEach((m: any) => {
+                    menu.addOptions(
+                        new StringSelectMenuOptionBuilder()
+                            .setLabel(m.user.username)
+                            .setValue(m.id)
+                    );
+                });
+
+                await interaction.reply({
+                    content: `Please select a user:`,
+                    components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(menu)],
+                    flags: MessageFlags.Ephemeral,
+                });
                 return;
             }
 

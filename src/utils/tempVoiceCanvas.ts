@@ -46,7 +46,6 @@ export const tvcButtons: TVButtonDefinition[] = [
     
     { id: 'tvc_claim', emojiId: '1516714340336668712', label: 'CLAIM', style: 'primary' },
     { id: 'tvc_transfer', emojiId: '1516714816859930754', label: 'TRANSFER', style: 'primary' },
-    { id: 'tvc_privacy', emojiId: '1516714711075262584', label: 'PRIVACY', style: 'secondary' },
 ];
 
 const imageCache: Map<string, Image> = new Map();
@@ -122,8 +121,8 @@ export async function generateTempVoiceCanvas(): Promise<Buffer> {
         const row = Math.floor(i / cols);
         
         let offsetX = padding + (col * (btnWidth + gapX));
-        if (row === 4) { // Row 5 (3 items)
-            const totalInRow = 3;
+        if (row === 4) { // Row 5 (2 items)
+            const totalInRow = 2;
             const rowWidth = (totalInRow * btnWidth) + ((totalInRow - 1) * gapX);
             const startX = (width - rowWidth) / 2;
             offsetX = startX + (col * (btnWidth + gapX));
