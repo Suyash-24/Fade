@@ -20,32 +20,33 @@ export interface TVButtonDefinition {
     id: string;
     emojiId: string;
     label: string;
+    style: 'secondary' | 'success' | 'danger' | 'primary';
 }
 
 export const tvcButtons: TVButtonDefinition[] = [
-    { id: 'tvc_name', emojiId: '1516714783146250410', label: 'RENAME' },
-    { id: 'tvc_limit', emojiId: '1516714528279236628', label: 'LIMIT' },
-    { id: 'tvc_lock', emojiId: '1516714571942068315', label: 'LOCK' },
-    { id: 'tvc_unlock', emojiId: '1516714967259283566', label: 'UNLOCK' },
+    { id: 'tvc_name', emojiId: '1516714783146250410', label: 'RENAME', style: 'secondary' },
+    { id: 'tvc_limit', emojiId: '1516714528279236628', label: 'LIMIT', style: 'secondary' },
+    { id: 'tvc_lock', emojiId: '1516714571942068315', label: 'LOCK', style: 'danger' },
+    { id: 'tvc_unlock', emojiId: '1516714967259283566', label: 'UNLOCK', style: 'success' },
     
-    { id: 'tvc_hide', emojiId: '1516714416135999689', label: 'HIDE' },
-    { id: 'tvc_unhide', emojiId: '1516714919041699890', label: 'UNHIDE' },
-    { id: 'tvc_permit', emojiId: '1516714675675463700', label: 'PERMIT' },
-    { id: 'tvc_reject', emojiId: '1516714742956429362', label: 'REJECT' },
+    { id: 'tvc_hide', emojiId: '1516714416135999689', label: 'HIDE', style: 'danger' },
+    { id: 'tvc_unhide', emojiId: '1516714919041699890', label: 'UNHIDE', style: 'success' },
+    { id: 'tvc_permit', emojiId: '1516714675675463700', label: 'PERMIT', style: 'success' },
+    { id: 'tvc_reject', emojiId: '1516714742956429362', label: 'REJECT', style: 'danger' },
     
-    { id: 'tvc_mute', emojiId: '1516714622194024478', label: 'MUTE' },
-    { id: 'tvc_unmute', emojiId: '1516715017104527461', label: 'UNMUTE' },
-    { id: 'tvc_deafen', emojiId: '1516714376684372068', label: 'DEAFEN' },
-    { id: 'tvc_undeafen', emojiId: '1516714886959202365', label: 'UNDEAFEN' },
+    { id: 'tvc_mute', emojiId: '1516714622194024478', label: 'MUTE', style: 'danger' },
+    { id: 'tvc_unmute', emojiId: '1516715017104527461', label: 'UNMUTE', style: 'success' },
+    { id: 'tvc_deafen', emojiId: '1516714376684372068', label: 'DEAFEN', style: 'danger' },
+    { id: 'tvc_undeafen', emojiId: '1516714886959202365', label: 'UNDEAFEN', style: 'success' },
     
-    { id: 'tvc_kick', emojiId: '1516714496167645234', label: 'KICK' },
-    { id: 'tvc_ban', emojiId: '1516714296950784210', label: 'BAN' },
-    { id: 'tvc_unban', emojiId: '1516714854864519261', label: 'UNBAN' },
-    { id: 'tvc_info', emojiId: '1516714458041417858', label: 'INFO' },
+    { id: 'tvc_kick', emojiId: '1516714496167645234', label: 'KICK', style: 'danger' },
+    { id: 'tvc_ban', emojiId: '1516714296950784210', label: 'BAN', style: 'danger' },
+    { id: 'tvc_unban', emojiId: '1516714854864519261', label: 'UNBAN', style: 'success' },
+    { id: 'tvc_info', emojiId: '1516714458041417858', label: 'INFO', style: 'secondary' },
     
-    { id: 'tvc_claim', emojiId: '1516714340336668712', label: 'CLAIM' },
-    { id: 'tvc_transfer', emojiId: '1516714816859930754', label: 'TRANSFER' },
-    { id: 'tvc_privacy', emojiId: '1516714711075262584', label: 'PRIVACY' },
+    { id: 'tvc_claim', emojiId: '1516714340336668712', label: 'CLAIM', style: 'primary' },
+    { id: 'tvc_transfer', emojiId: '1516714816859930754', label: 'TRANSFER', style: 'primary' },
+    { id: 'tvc_privacy', emojiId: '1516714711075262584', label: 'PRIVACY', style: 'secondary' },
 ];
 
 const imageCache: Map<string, Image> = new Map();
@@ -129,6 +130,24 @@ export async function generateTempVoiceCanvas(): Promise<Buffer> {
         }
         const offsetY = padding + (row * (btnHeight + gapY));
 
+        let colorTop = '#2b2d35';
+        let colorBottom = '#23242a';
+        let edgeColor = 'rgba(255, 255, 255, 0.08)';
+
+        if (btn.style === 'success') {
+            colorTop = '#1e3323';
+            colorBottom = '#16261a';
+            edgeColor = 'rgba(87, 242, 135, 0.15)'; // subtle green
+        } else if (btn.style === 'danger') {
+            colorTop = '#3a2020';
+            colorBottom = '#2d1818';
+            edgeColor = 'rgba(237, 66, 69, 0.15)'; // subtle red
+        } else if (btn.style === 'primary') {
+            colorTop = '#20263a';
+            colorBottom = '#181c2d';
+            edgeColor = 'rgba(88, 101, 242, 0.15)'; // subtle blurple
+        }
+
         // Drop shadow for floating effect
         ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
         ctx.shadowBlur = 10;
@@ -136,8 +155,8 @@ export async function generateTempVoiceCanvas(): Promise<Buffer> {
         
         // Button Gradient Base
         const btnGradient = ctx.createLinearGradient(offsetX, offsetY, offsetX, offsetY + btnHeight);
-        btnGradient.addColorStop(0, '#2b2d35');
-        btnGradient.addColorStop(1, '#23242a');
+        btnGradient.addColorStop(0, colorTop);
+        btnGradient.addColorStop(1, colorBottom);
         
         drawRoundedRect(ctx, offsetX, offsetY, btnWidth, btnHeight, 12);
         ctx.fillStyle = btnGradient;
@@ -154,7 +173,7 @@ export async function generateTempVoiceCanvas(): Promise<Buffer> {
         ctx.beginPath();
         ctx.moveTo(offsetX, offsetY);
         ctx.lineTo(offsetX + btnWidth, offsetY);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.strokeStyle = edgeColor;
         ctx.lineWidth = 3;
         ctx.stroke();
         ctx.restore();

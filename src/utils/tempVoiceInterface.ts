@@ -43,7 +43,7 @@ export async function buildInterface(): Promise<{
 
     // Build the ActionRows directly from the grid mapping
     const container = new ContainerBuilder()
-        .setAccentColor(Colours.FADE)
+        .setAccentColor(0x2b2d31)
         .addTextDisplayComponents(
             new TextDisplayBuilder().setContent(
                 `## ${e('voice')} Voice Interface\n` +
@@ -63,7 +63,13 @@ export async function buildInterface(): Promise<{
 
     for (let i = 0; i < tvcButtons.length; i++) {
         const btnDef = tvcButtons[i];
-        currentButtons.push(makeBtn(btnDef.id, ButtonStyle.Secondary, btnDef.emojiId));
+        
+        let djsStyle = ButtonStyle.Secondary;
+        if (btnDef.style === 'success') djsStyle = ButtonStyle.Success;
+        else if (btnDef.style === 'danger') djsStyle = ButtonStyle.Danger;
+        else if (btnDef.style === 'primary') djsStyle = ButtonStyle.Primary;
+        
+        currentButtons.push(makeBtn(btnDef.id, djsStyle, btnDef.emojiId));
 
         if (currentButtons.length === 5 || i === tvcButtons.length - 1) {
             container.addActionRowComponents(new ActionRowBuilder<ButtonBuilder>().addComponents(...currentButtons));
