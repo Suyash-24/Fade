@@ -14,6 +14,7 @@ import { startBirthdayTimer } from '../utils/birthdayTimer.js';
 import { startSocialTimer } from '../utils/socialTimer.js';
 import { startFortniteTimer } from '../utils/fortniteTimer.js';
 import { startGithubStatsSync } from '../utils/githubStats.js';
+import { getAll247 } from '../db/queries/twentyFourSeven.js';
 
 const event: Event<'clientReady'> = {
     name:  'clientReady',
@@ -61,6 +62,39 @@ const event: Event<'clientReady'> = {
         } catch (e) {
             logger.warn('Failed to fetch application data', e as any);
         }
+
+        // ── 24/7 Voice Rejoin ──────────────────────────────────────────────────
+        setTimeout(async () => {
+            if (!client.music) return;
+            try {
+                const channels = await getAll247();
+                if (channels.length === 0) return;
+                
+                logger.info(`[24/7] Found ${channels.length} 24/7 configurations. Rejoining...`);
+                let successCount = 0;
+
+                for (const conf of channels) {
+                    try {
+                        await client.music.createPlayer({
+                            guildId:    conf.guildId,
+                            voiceId:    conf.voiceId,
+                            textId:     conf.textId,
+                            deaf:       true,
+                            volume:     80,
+                        });
+                        successCount++;
+                    } catch (e) {
+                        logger.error(`[24/7] Failed to rejoin ${conf.voiceId} in ${conf.guildId}`, e);
+                    }
+                }
+                
+                if (successCount > 0) {
+                    logger.success(`[24/7] Successfully rejoined ${successCount}/${channels.length} channels.`);
+                }
+            } catch (err) {
+                logger.error('[24/7] Failed to fetch 24/7 configurations on startup', err);
+            }
+        }, 5000); // Wait 5 seconds for Lavalink nodes to be fully connected
     },
 };
 

@@ -163,8 +163,16 @@ export function setupMusic(client: FadeClient): void {
             } catch { /* ignore */ }
         }
         // Auto-disconnect after 3 minutes of inactivity
-        setTimeout(() => {
-            if (!player.queue.current) player.destroy();
+        setTimeout(async () => {
+            if (!player.queue.current) {
+                try {
+                    const { get247 } = await import('../db/queries/twentyFourSeven.js');
+                    const is247 = await get247(guildId);
+                    if (!is247) player.destroy();
+                } catch {
+                    player.destroy();
+                }
+            }
         }, 3 * 60 * 1000);
     });
 

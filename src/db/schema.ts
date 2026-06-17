@@ -893,3 +893,14 @@ export const restrictedCommands = pgTable('restricted_commands', {
     index('restricted_commands_guild_idx').on(t.guildId),
     uniqueIndex('restricted_commands_unique_idx').on(t.guildId, t.target, t.type, t.entityId),
 ]);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// MUSIC / VOICE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+export const twentyFourSeven = pgTable('twenty_four_seven', {
+    guildId:   snowflake('guild_id').primaryKey().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    voiceId:   snowflake('voice_id').notNull(),
+    textId:    snowflake('text_id').notNull(),
+    createdAt: now(),
+});
