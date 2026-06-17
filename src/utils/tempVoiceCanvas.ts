@@ -32,7 +32,6 @@ export const tvcButtons: TVButtonDefinition[] = [
     { id: 'tvc_hide', emojiId: '1516714416135999689', label: 'HIDE', style: 'danger' },
     { id: 'tvc_unhide', emojiId: '1516714919041699890', label: 'UNHIDE', style: 'success' },
     { id: 'tvc_permit', emojiId: '1516714675675463700', label: 'PERMIT', style: 'success' },
-    { id: 'tvc_reject', emojiId: '1516714742956429362', label: 'REJECT', style: 'danger' },
     
     { id: 'tvc_mute', emojiId: '1516714622194024478', label: 'MUTE', style: 'danger' },
     { id: 'tvc_unmute', emojiId: '1516715017104527461', label: 'UNMUTE', style: 'success' },
@@ -121,8 +120,8 @@ export async function generateTempVoiceCanvas(): Promise<Buffer> {
         const row = Math.floor(i / cols);
         
         let offsetX = padding + (col * (btnWidth + gapX));
-        if (row === 4) { // Row 5 (2 items)
-            const totalInRow = 2;
+        if (row === 4) { // Row 5 (1 item)
+            const totalInRow = 1;
             const rowWidth = (totalInRow * btnWidth) + ((totalInRow - 1) * gapX);
             const startX = (width - rowWidth) / 2;
             offsetX = startX + (col * (btnWidth + gapX));

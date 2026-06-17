@@ -101,11 +101,6 @@ const buttonEvent: Event<'interactionCreate'> = {
                 if (action === 'permit') {
                     await voiceChannel.permissionOverwrites.edit(userId, { Connect: true, ViewChannel: true });
                     await interaction.update({ content: `${e('success')}  <@${userId}> permitted`, components: [] });
-                } else if (action === 'reject') {
-                    await voiceChannel.permissionOverwrites.edit(userId, { Connect: false, ViewChannel: false });
-                    const targetMember = voiceChannel.members?.get(userId);
-                    if (targetMember) await targetMember.voice.disconnect().catch(() => null);
-                    await interaction.update({ content: `${e('success')}  <@${userId}> rejected`, components: [] });
                 } else if (action === 'kick') {
                     const targetMember = voiceChannel.members?.get(userId);
                     if (targetMember) await targetMember.voice.disconnect('[Fade TempVoice] Kicked by owner').catch(() => null);
@@ -160,7 +155,6 @@ const buttonEvent: Event<'interactionCreate'> = {
 
             const allServerActions: Record<string, string> = {
                 tvc_permit: 'Permit a user',
-                tvc_reject: 'Reject a user',
                 tvc_ban: 'Ban a user from channel',
                 tvc_unban: 'Unban a user',
             };
