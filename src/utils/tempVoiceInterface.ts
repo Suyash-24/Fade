@@ -5,6 +5,12 @@ import {
     ActionRowBuilder,
     MessageFlags,
     ModalBuilder,
+    ContainerBuilder,
+    MediaGalleryBuilder,
+    MediaGalleryItemBuilder,
+    TextDisplayBuilder,
+    SeparatorBuilder,
+    SeparatorSpacingSize,
     TextInputBuilder,
     TextInputStyle,
     AttachmentBuilder,
@@ -27,7 +33,6 @@ const makeBtn = (customId: string, style: ButtonStyle, emoji: string) => {
 // ── Interface card ────────────────────────────────────────────────────────────
 
 export async function buildInterface(): Promise<{
-    content: string;
     components: any[];
     files: AttachmentBuilder[];
     flags: number;
@@ -37,30 +42,39 @@ export async function buildInterface(): Promise<{
     const attachment = new AttachmentBuilder(buffer, { name: 'interface.png' });
 
     // Build the ActionRows directly from the grid mapping
-    // 19 buttons -> 4 rows: 5, 5, 5, 4
-    const rows: ActionRowBuilder<ButtonBuilder>[] = [];
-    let currentRow = new ActionRowBuilder<ButtonBuilder>();
+    const container = new ContainerBuilder()
+        .setAccentColor(Colours.FADE)
+        .addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(
+                `## ${e('voice')} Voice Interface\n` +
+                `-# Use the buttons below to manage your temporary voice channel.`
+            )
+        )
+        .addSeparatorComponents(
+            new SeparatorBuilder().setDivider(true).setSpacing(SeparatorSpacingSize.Small)
+        )
+        .addMediaGalleryComponents(
+            new MediaGalleryBuilder().addItems(
+                new MediaGalleryItemBuilder().setURL('attachment://interface.png')
+            )
+        );
+
+    let currentButtons: ButtonBuilder[] = [];
 
     for (let i = 0; i < tvcButtons.length; i++) {
         const btnDef = tvcButtons[i];
-        
-        // Let's use secondary style for everything, or mix them. 
-        // For aesthetics, pure Secondary (gray) buttons look incredibly clean below an image.
-        // We'll use Secondary for all.
-        currentRow.addComponents(makeBtn(btnDef.id, ButtonStyle.Secondary, btnDef.emojiId));
+        currentButtons.push(makeBtn(btnDef.id, ButtonStyle.Secondary, btnDef.emojiId));
 
-        if (currentRow.components.length === 5 || i === tvcButtons.length - 1) {
-            rows.push(currentRow);
-            currentRow = new ActionRowBuilder<ButtonBuilder>();
+        if (currentButtons.length === 5 || i === tvcButtons.length - 1) {
+            container.addActionRowComponents(new ActionRowBuilder<ButtonBuilder>().addComponents(...currentButtons));
+            currentButtons = [];
         }
     }
 
     return {
-        // Empty content, just attaching the beautiful image and rows
-        content: '',
-        components: rows,
+        components: [container],
         files: [attachment],
-        flags: 0,
+        flags: MessageFlags.IsComponentsV2,
     };
 }
 

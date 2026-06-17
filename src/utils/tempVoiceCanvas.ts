@@ -1,7 +1,6 @@
 // src/utils/tempVoiceCanvas.ts
 import { createCanvas, loadImage, Image, GlobalFonts } from '@napi-rs/canvas';
 
-// 1. Fetch Roboto font remotely (to ensure it works anywhere)
 let fontLoaded = false;
 async function loadFont() {
     if (fontLoaded) return;
@@ -17,12 +16,10 @@ async function loadFont() {
     }
 }
 
-// 2. Define the exact grid layout for the Canvas
-// This acts as the visual legend for what each button does
 export interface TVButtonDefinition {
-    id: string; // customId suffix (e.g. 'tvc_lock')
-    emojiId: string; // the discord emoji ID to fetch
-    label: string; // Text to draw
+    id: string;
+    emojiId: string;
+    label: string;
 }
 
 export const tvcButtons: TVButtonDefinition[] = [
@@ -51,7 +48,6 @@ export const tvcButtons: TVButtonDefinition[] = [
     { id: 'tvc_privacy', emojiId: '1516714711075262584', label: 'PRIVACY' },
 ];
 
-// 3. Cache images to prevent re-downloading on every click
 const imageCache: Map<string, Image> = new Map();
 
 async function getEmojiImage(id: string): Promise<Image | null> {
@@ -68,7 +64,7 @@ async function getEmojiImage(id: string): Promise<Image | null> {
 }
 
 // Draw a beautiful rounded rectangle
-function drawRoundedRect(ctx: any, x: number, y: number, width: number, height: number, radius: number, bgColor: string, strokeColor?: string) {
+function drawRoundedRect(ctx: any, x: number, y: number, width: number, height: number, radius: number) {
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
     ctx.lineTo(x + width - radius, y);
@@ -80,30 +76,20 @@ function drawRoundedRect(ctx: any, x: number, y: number, width: number, height: 
     ctx.lineTo(x, y + radius);
     ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
-    
-    ctx.fillStyle = bgColor;
-    ctx.fill();
-    
-    if (strokeColor) {
-        ctx.strokeStyle = strokeColor;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-    }
 }
 
 export async function generateTempVoiceCanvas(): Promise<Buffer> {
     await loadFont();
 
-    // Dimensions for a 4x5 grid layout
     const cols = 4;
-    const rows = 5; // 19 buttons fit in 4x5 (last row has 3)
+    const rows = 5; 
     
-    const padding = 20;
-    const gapX = 15;
-    const gapY = 15;
+    const padding = 30;
+    const gapX = 18;
+    const gapY = 18;
     
-    const btnWidth = 145;
-    const btnHeight = 45;
+    const btnWidth = 160;
+    const btnHeight = 55;
     
     const width = (cols * btnWidth) + ((cols - 1) * gapX) + (padding * 2);
     const height = (rows * btnHeight) + ((rows - 1) * gapY) + (padding * 2);
@@ -111,60 +97,95 @@ export async function generateTempVoiceCanvas(): Promise<Buffer> {
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
-    // Draw background (Transparent or Dark Theme)
-    // We'll use a very sleek dark modern theme
-    ctx.fillStyle = '#111214'; // Discord dark color
+    // 1. Sleek dark gradient background
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
+    bgGradient.addColorStop(0, '#111215');
+    bgGradient.addColorStop(1, '#1a1b20');
+    ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, width, height);
     
-    // Draw an inner glowing border
-    drawRoundedRect(ctx, 5, 5, width - 10, height - 10, 15, '#1e1f22', '#2b2d31');
+    // 2. Inner glow border (Container frame)
+    drawRoundedRect(ctx, 5, 5, width - 10, height - 10, 20);
+    ctx.strokeStyle = 'rgba(123, 140, 222, 0.15)'; // Fade Accent Color glow
+    ctx.lineWidth = 2;
+    ctx.stroke();
 
     ctx.font = 'bold 16px Roboto, sans-serif';
     ctx.textBaseline = 'middle';
 
-    // Draw buttons
+    // 3. Draw buttons with glassmorphism 3D effect
     for (let i = 0; i < tvcButtons.length; i++) {
         const btn = tvcButtons[i];
         
-        // Calculate grid position
         const col = i % cols;
         const row = Math.floor(i / cols);
         
-        // If it's the last row with 3 buttons, center them
         let offsetX = padding + (col * (btnWidth + gapX));
-        if (row === 4) { // Row 5
+        if (row === 4) { // Row 5 (3 items)
             const totalInRow = 3;
             const rowWidth = (totalInRow * btnWidth) + ((totalInRow - 1) * gapX);
             const startX = (width - rowWidth) / 2;
             offsetX = startX + (col * (btnWidth + gapX));
         }
-        
         const offsetY = padding + (row * (btnHeight + gapY));
 
-        // Draw pill/button shape
-        // Use a slightly lighter dark grey for the button base
-        drawRoundedRect(ctx, offsetX, offsetY, btnWidth, btnHeight, 10, '#2b2d31');
-
-        // Fetch and draw the emoji
-        const img = await getEmojiImage(btn.emojiId);
+        // Drop shadow for floating effect
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetY = 4;
         
-        const iconSize = 24;
-        const iconX = offsetX + 15;
+        // Button Gradient Base
+        const btnGradient = ctx.createLinearGradient(offsetX, offsetY, offsetX, offsetY + btnHeight);
+        btnGradient.addColorStop(0, '#2b2d35');
+        btnGradient.addColorStop(1, '#23242a');
+        
+        drawRoundedRect(ctx, offsetX, offsetY, btnWidth, btnHeight, 12);
+        ctx.fillStyle = btnGradient;
+        ctx.fill();
+
+        // Reset shadow so it doesn't apply to inner elements
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+
+        // Top edge highlight (simulates 3D lighting)
+        ctx.save();
+        ctx.clip();
+        ctx.beginPath();
+        ctx.moveTo(offsetX, offsetY);
+        ctx.lineTo(offsetX + btnWidth, offsetY);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.restore();
+
+        // Draw Emoji Icon
+        const img = await getEmojiImage(btn.emojiId);
+        const iconSize = 26;
+        const iconX = offsetX + 20;
         const iconY = offsetY + (btnHeight / 2) - (iconSize / 2);
         
         if (img) {
             ctx.drawImage(img, iconX, iconY, iconSize, iconSize);
         }
 
-        // Draw label text
+        // Draw Label Text
+        const textX = iconX + iconSize + 15;
+        const textY = offsetY + (btnHeight / 2) + 1;
+        
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'left';
         
-        // Text starts after the icon
-        const textX = iconX + iconSize + 12;
-        const textY = offsetY + (btnHeight / 2) + 1; // slight offset for perfect middle
-        
+        // Subtle text shadow for sharpness
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+        ctx.shadowBlur = 2;
+        ctx.shadowOffsetY = 1;
         ctx.fillText(btn.label, textX, textY);
+        
+        // Reset shadow again
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
     }
 
     return canvas.toBuffer('image/png');
