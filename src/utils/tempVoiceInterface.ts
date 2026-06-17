@@ -33,7 +33,6 @@ const makeBtn = (customId: string, style: ButtonStyle, emoji: string) => {
 // ── Interface card ────────────────────────────────────────────────────────────
 
 export async function buildInterface(): Promise<{
-    content: string;
     components: any[];
     files: AttachmentBuilder[];
     flags: number;
@@ -42,8 +41,20 @@ export async function buildInterface(): Promise<{
     const buffer = await generateTempVoiceCanvas();
     const attachment = new AttachmentBuilder(buffer, { name: 'interface.png' });
 
-    // Build ActionRows
-    const rows: ActionRowBuilder<ButtonBuilder>[] = [];
+    // Build the ActionRows directly from the grid mapping
+    const container = new ContainerBuilder()
+        .addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(
+                `## ${e('voice')} Voice Interface\n` +
+                `-# Use the buttons below to manage your temporary voice channel.`
+            )
+        )
+        .addMediaGalleryComponents(
+            new MediaGalleryBuilder().addItems(
+                new MediaGalleryItemBuilder().setURL('attachment://interface.png')
+            )
+        );
+
     let currentButtons: ButtonBuilder[] = [];
 
     for (let i = 0; i < tvcButtons.length; i++) {
@@ -57,16 +68,15 @@ export async function buildInterface(): Promise<{
         currentButtons.push(makeBtn(btnDef.id, djsStyle, btnDef.emojiId));
 
         if (currentButtons.length === 5 || i === tvcButtons.length - 1) {
-            rows.push(new ActionRowBuilder<ButtonBuilder>().addComponents(...currentButtons));
+            container.addActionRowComponents(new ActionRowBuilder<ButtonBuilder>().addComponents(...currentButtons));
             currentButtons = [];
         }
     }
 
     return {
-        content: `## ${e('voice')} Voice Interface\n-# Use the buttons below to manage your temporary voice channel.`,
-        components: rows,
+        components: [container],
         files: [attachment],
-        flags: 0,
+        flags: MessageFlags.IsComponentsV2,
     };
 }
 
