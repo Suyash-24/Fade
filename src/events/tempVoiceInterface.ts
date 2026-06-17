@@ -13,7 +13,7 @@ import {
 import {
     nameModal, limitModal, permitModal,
     rejectModal, kickModal, transferModal,
-    buildInterface,
+    banModal, unbanModal, muteModal, unmuteModal, deafenModal, undeafenModal,
 } from '../utils/tempVoiceInterface.js';
 import { FadeContainer } from '../components/builders.js';
 import { e, Colours } from '../components/emojis.js';
@@ -74,45 +74,25 @@ const buttonEvent: Event<'interactionCreate'> = {
 
         try {
             // ── Modals (no ownership check yet — modal handles it) ─────────────
-            if (id === 'tvc_name') {
-                const owned = await verifyOwner(interaction);
-                if (!owned) return;
-                await interaction.showModal(nameModal());
-                return;
-            }
+            const modals: Record<string, () => any> = {
+                tvc_name: nameModal,
+                tvc_limit: limitModal,
+                tvc_permit: permitModal,
+                tvc_reject: rejectModal,
+                tvc_kick: kickModal,
+                tvc_transfer: transferModal,
+                tvc_ban: banModal,
+                tvc_unban: unbanModal,
+                tvc_mute: muteModal,
+                tvc_unmute: unmuteModal,
+                tvc_deafen: deafenModal,
+                tvc_undeafen: undeafenModal,
+            };
 
-            if (id === 'tvc_limit') {
+            if (modals[id]) {
                 const owned = await verifyOwner(interaction);
                 if (!owned) return;
-                await interaction.showModal(limitModal());
-                return;
-            }
-
-            if (id === 'tvc_permit') {
-                const owned = await verifyOwner(interaction);
-                if (!owned) return;
-                await interaction.showModal(permitModal());
-                return;
-            }
-
-            if (id === 'tvc_reject') {
-                const owned = await verifyOwner(interaction);
-                if (!owned) return;
-                await interaction.showModal(rejectModal());
-                return;
-            }
-
-            if (id === 'tvc_kick') {
-                const owned = await verifyOwner(interaction);
-                if (!owned) return;
-                await interaction.showModal(kickModal());
-                return;
-            }
-
-            if (id === 'tvc_transfer') {
-                const owned = await verifyOwner(interaction);
-                if (!owned) return;
-                await interaction.showModal(transferModal());
+                await interaction.showModal(modals[id]());
                 return;
             }
 
@@ -122,7 +102,7 @@ const buttonEvent: Event<'interactionCreate'> = {
                 const owned = await verifyOwner(interaction);
                 if (!owned) return;
                 await owned.channel.permissionOverwrites.edit(interaction.guild.id, { Connect: false });
-                await quickReply(interaction, Colours.WARNING, `${e('lock')}  Channel **locked**`);
+                await quickReply(interaction, Colours.WARNING, `${e('success')}  Channel **locked**`);
                 return;
             }
 
@@ -130,7 +110,7 @@ const buttonEvent: Event<'interactionCreate'> = {
                 const owned = await verifyOwner(interaction);
                 if (!owned) return;
                 await owned.channel.permissionOverwrites.edit(interaction.guild.id, { Connect: null });
-                await quickReply(interaction, Colours.SUCCESS, `${e('unlock')}  Channel **unlocked**`);
+                await quickReply(interaction, Colours.SUCCESS, `${e('success')}  Channel **unlocked**`);
                 return;
             }
 
@@ -138,7 +118,7 @@ const buttonEvent: Event<'interactionCreate'> = {
                 const owned = await verifyOwner(interaction);
                 if (!owned) return;
                 await owned.channel.permissionOverwrites.edit(interaction.guild.id, { ViewChannel: false });
-                await quickReply(interaction, Colours.WARNING, `${e('offline')}  Channel **hidden**`);
+                await quickReply(interaction, Colours.WARNING, `${e('success')}  Channel **hidden**`);
                 return;
             }
 
@@ -146,11 +126,11 @@ const buttonEvent: Event<'interactionCreate'> = {
                 const owned = await verifyOwner(interaction);
                 if (!owned) return;
                 await owned.channel.permissionOverwrites.edit(interaction.guild.id, { ViewChannel: null });
-                await quickReply(interaction, Colours.SUCCESS, `${e('online')}  Channel **visible**`);
+                await quickReply(interaction, Colours.SUCCESS, `${e('success')}  Channel **visible**`);
                 return;
             }
 
-            if (id === 'tvc_info') {
+            if (id === 'tvc_info' || id === 'tvc_privacy') {
                 const voiceChannel = (interaction.member as any)?.voice?.channel;
                 if (!voiceChannel) {
                     await interaction.reply({ content: `${e('error')} You are not in a voice channel.`, flags: MessageFlags.Ephemeral });
@@ -285,6 +265,72 @@ const modalEvent: Event<'interactionCreate'> = {
                 return;
             }
 
+            if (id === 'tvc_modal_ban') {
+                const userId = interaction.fields.getTextInputValue('user_id').trim();
+                // To ban from a voice channel, we deny Connect and ViewChannel, effectively banning them
+                await voiceChannel.permissionOverwrites.edit(userId, { Connect: false, ViewChannel: false });
+                const targetMember = voiceChannel.members?.get(userId);
+                if (targetMember) await targetMember.voice.disconnect('[Fade TempVoice] Banned by owner');
+                await quickReply(interaction, Colours.WARNING, `${e('success')}  <@${userId}> banned from your channel`);
+                return;
+            }
+
+            if (id === 'tvc_modal_unban') {
+                const userId = interaction.fields.getTextInputValue('user_id').trim();
+                // To unban, we remove the specific deny overwrite
+                await voiceChannel.permissionOverwrites.delete(userId);
+                await quickReply(interaction, Colours.SUCCESS, `${e('success')}  <@${userId}> unbanned`);
+                return;
+            }
+
+            if (id === 'tvc_modal_mute') {
+                const userId = interaction.fields.getTextInputValue('user_id').trim();
+                const targetMember = voiceChannel.members?.get(userId);
+                if (!targetMember) {
+                    await interaction.reply({ content: `${e('error')} User is not in your channel.`, flags: MessageFlags.Ephemeral });
+                    return;
+                }
+                await targetMember.voice.setMute(true, '[Fade TempVoice] Muted by owner');
+                await quickReply(interaction, Colours.WARNING, `${e('success')}  <@${userId}> server muted`);
+                return;
+            }
+
+            if (id === 'tvc_modal_unmute') {
+                const userId = interaction.fields.getTextInputValue('user_id').trim();
+                const targetMember = voiceChannel.members?.get(userId);
+                if (!targetMember) {
+                    await interaction.reply({ content: `${e('error')} User is not in your channel.`, flags: MessageFlags.Ephemeral });
+                    return;
+                }
+                await targetMember.voice.setMute(false, '[Fade TempVoice] Unmuted by owner');
+                await quickReply(interaction, Colours.SUCCESS, `${e('success')}  <@${userId}> server unmuted`);
+                return;
+            }
+
+            if (id === 'tvc_modal_deafen') {
+                const userId = interaction.fields.getTextInputValue('user_id').trim();
+                const targetMember = voiceChannel.members?.get(userId);
+                if (!targetMember) {
+                    await interaction.reply({ content: `${e('error')} User is not in your channel.`, flags: MessageFlags.Ephemeral });
+                    return;
+                }
+                await targetMember.voice.setDeaf(true, '[Fade TempVoice] Deafened by owner');
+                await quickReply(interaction, Colours.WARNING, `${e('success')}  <@${userId}> server deafened`);
+                return;
+            }
+
+            if (id === 'tvc_modal_undeafen') {
+                const userId = interaction.fields.getTextInputValue('user_id').trim();
+                const targetMember = voiceChannel.members?.get(userId);
+                if (!targetMember) {
+                    await interaction.reply({ content: `${e('error')} User is not in your channel.`, flags: MessageFlags.Ephemeral });
+                    return;
+                }
+                await targetMember.voice.setDeaf(false, '[Fade TempVoice] Undeafened by owner');
+                await quickReply(interaction, Colours.SUCCESS, `${e('success')}  <@${userId}> server undeafened`);
+                return;
+            }
+
             if (id === 'tvc_modal_transfer') {
                 const userId       = interaction.fields.getTextInputValue('user_id').trim();
                 const targetMember = voiceChannel.members?.get(userId);
@@ -301,7 +347,7 @@ const modalEvent: Event<'interactionCreate'> = {
 
         } catch (err) {
             logger.error('TempVoice modal failed', err, { id, guildId: interaction.guild.id });
-            await interaction.reply({ content: `${e('error')} Something went wrong.`, flags: MessageFlags.Ephemeral }).catch(() => null);
+            await interaction.reply({ content: `${e('error')} Something went wrong. Make sure my role is higher than the user.`, flags: MessageFlags.Ephemeral }).catch(() => null);
         }
     },
 };

@@ -67,7 +67,7 @@ const event: Event<'voiceStateUpdate'> = {
 
                 // Send control interface
                 const { buildInterface } = await import('../utils/tempVoiceInterface.js');
-                const interfaceMsg = buildInterface(member.displayName);
+                const interfaceMsg = await buildInterface(member.displayName);
                 const sentMsg = await tempChannel.send(interfaceMsg as any);
                 await sentMsg.pin().catch(() => null);
 

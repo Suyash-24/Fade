@@ -1,103 +1,66 @@
 // src/utils/tempVoiceInterface.ts
-// Builds and sends the TempVoice control interface.
-// A persistent pinned message inside each temp channel with
-// a full button grid for channel management.
 import {
-    type TextChannel,
-    type VoiceChannel,
     ButtonBuilder,
     ButtonStyle,
     ActionRowBuilder,
-    ContainerBuilder,
-    TextDisplayBuilder,
-    SeparatorBuilder,
-    SeparatorSpacingSize,
     MessageFlags,
     ModalBuilder,
     TextInputBuilder,
     TextInputStyle,
+    AttachmentBuilder,
 } from 'discord.js';
 import { e, Colours } from '../components/emojis.js';
+import { generateTempVoiceCanvas, tvcButtons } from './tempVoiceCanvas.js';
 
 // ── Button definitions ────────────────────────────────────────────────────────
 
-const makeBtn = (customId: string, label: string, style: ButtonStyle, emoji?: string) => {
-    const b = new ButtonBuilder()
+const makeBtn = (customId: string, style: ButtonStyle, emoji: string) => {
+    // Determine if it's a custom emoji or unicode.
+    // Our custom emojis are strictly `<:name:ID>` but we can just use the ID if we have it.
+    // In our definition, emoji is the numeric ID.
+    return new ButtonBuilder()
         .setCustomId(customId)
-        .setLabel(label)
-        .setStyle(style);
-    if (emoji) b.setEmoji({ name: emoji });
-    return b;
+        .setStyle(style)
+        .setEmoji({ id: emoji }); // Pass ID for custom emojis
 };
-
-// Row 1 — Channel settings
-const row1 = () => new ActionRowBuilder<ButtonBuilder>().addComponents(
-    makeBtn('tvc_name',     'Name',     ButtonStyle.Secondary, '✏️'),
-    makeBtn('tvc_limit',    'Limit',    ButtonStyle.Secondary, '👥'),
-    makeBtn('tvc_lock',     'Lock',     ButtonStyle.Secondary, '🔒'),
-    makeBtn('tvc_hide',     'Hide',     ButtonStyle.Secondary, '👁️'),
-    makeBtn('tvc_info',     'Info',     ButtonStyle.Secondary, 'ℹ️'),
-);
-
-// Row 2 — User management
-const row2 = () => new ActionRowBuilder<ButtonBuilder>().addComponents(
-    makeBtn('tvc_permit',   'Permit',   ButtonStyle.Success,   '✅'),
-    makeBtn('tvc_reject',   'Reject',   ButtonStyle.Danger,    '🚫'),
-    makeBtn('tvc_kick',     'Kick',     ButtonStyle.Danger,    '👢'),
-    makeBtn('tvc_transfer', 'Transfer', ButtonStyle.Primary,   '👑'),
-    makeBtn('tvc_claim',    'Claim',    ButtonStyle.Primary,   '🎯'),
-);
-
-// Row 3 — Danger zone
-const row3 = () => new ActionRowBuilder<ButtonBuilder>().addComponents(
-    makeBtn('tvc_unlock',   'Unlock',   ButtonStyle.Success,   '🔓'),
-    makeBtn('tvc_unhide',   'Unhide',   ButtonStyle.Success,   '👀'),
-    makeBtn('tvc_delete',   'Delete',   ButtonStyle.Danger,    '🗑️'),
-);
 
 // ── Interface card ────────────────────────────────────────────────────────────
 
-export function buildInterface(ownerName: string): {
+export async function buildInterface(ownerName: string): Promise<{
+    content: string;
     components: any[];
+    files: AttachmentBuilder[];
     flags: number;
-} {
-    const container = new ContainerBuilder()
-        .setAccentColor(Colours.FADE)
-        .addTextDisplayComponents(
-            new TextDisplayBuilder().setContent(
-                `## ${e('voice')} TempVoice\n` +
-                `-# Your personal voice channel · Owned by **${ownerName}**`
-            )
-        )
-        .addSeparatorComponents(
-            new SeparatorBuilder().setDivider(true).setSpacing(SeparatorSpacingSize.Small)
-        )
-        .addTextDisplayComponents(
-            new TextDisplayBuilder().setContent(
-                [
-                    `**Channel controls**`,
-                    `\`✏️ Name\` — rename your channel`,
-                    `\`👥 Limit\` — set user limit`,
-                    `\`🔒 Lock\` — prevent new joins · \`🔓 Unlock\` — allow joins`,
-                    `\`👁️ Hide\` — make invisible · \`👀 Unhide\` — show channel`,
-                    ``,
-                    `**User controls**`,
-                    `\`✅ Permit\` — allow a user in · \`🚫 Reject\` — remove access`,
-                    `\`👢 Kick\` — remove from channel`,
-                    `\`👑 Transfer\` — give ownership · \`🎯 Claim\` — claim ownerless channel`,
-                ].join('\n')
-            )
-        )
-        .addSeparatorComponents(
-            new SeparatorBuilder().setDivider(true).setSpacing(SeparatorSpacingSize.Small)
-        )
-        .addActionRowComponents(row1())
-        .addActionRowComponents(row2())
-        .addActionRowComponents(row3());
+}> {
+    // Generate the canvas image buffer
+    const buffer = await generateTempVoiceCanvas();
+    const attachment = new AttachmentBuilder(buffer, { name: 'interface.png' });
+
+    // Build the ActionRows directly from the grid mapping
+    // 19 buttons -> 4 rows: 5, 5, 5, 4
+    const rows: ActionRowBuilder<ButtonBuilder>[] = [];
+    let currentRow = new ActionRowBuilder<ButtonBuilder>();
+
+    for (let i = 0; i < tvcButtons.length; i++) {
+        const btnDef = tvcButtons[i];
+        
+        // Let's use secondary style for everything, or mix them. 
+        // For aesthetics, pure Secondary (gray) buttons look incredibly clean below an image.
+        // We'll use Secondary for all.
+        currentRow.addComponents(makeBtn(btnDef.id, ButtonStyle.Secondary, btnDef.emojiId));
+
+        if (currentRow.components.length === 5 || i === tvcButtons.length - 1) {
+            rows.push(currentRow);
+            currentRow = new ActionRowBuilder<ButtonBuilder>();
+        }
+    }
 
     return {
-        components: [container],
-        flags:      MessageFlags.IsComponentsV2,
+        // Empty content, just attaching the beautiful image and rows
+        content: '',
+        components: rows,
+        files: [attachment],
+        flags: 0,
     };
 }
 
@@ -177,6 +140,102 @@ export function kickModal(): ModalBuilder {
                 new TextInputBuilder()
                     .setCustomId('user_id')
                     .setLabel('User ID to kick')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Right-click user → Copy User ID')
+                    .setRequired(true)
+            )
+        );
+}
+
+export function banModal(): ModalBuilder {
+    return new ModalBuilder()
+        .setCustomId('tvc_modal_ban')
+        .setTitle('Ban User from Voice')
+        .addComponents(
+            new ActionRowBuilder<TextInputBuilder>().addComponents(
+                new TextInputBuilder()
+                    .setCustomId('user_id')
+                    .setLabel('User ID to ban')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Right-click user → Copy User ID')
+                    .setRequired(true)
+            )
+        );
+}
+
+export function unbanModal(): ModalBuilder {
+    return new ModalBuilder()
+        .setCustomId('tvc_modal_unban')
+        .setTitle('Unban User from Voice')
+        .addComponents(
+            new ActionRowBuilder<TextInputBuilder>().addComponents(
+                new TextInputBuilder()
+                    .setCustomId('user_id')
+                    .setLabel('User ID to unban')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Right-click user → Copy User ID')
+                    .setRequired(true)
+            )
+        );
+}
+
+export function muteModal(): ModalBuilder {
+    return new ModalBuilder()
+        .setCustomId('tvc_modal_mute')
+        .setTitle('Mute User')
+        .addComponents(
+            new ActionRowBuilder<TextInputBuilder>().addComponents(
+                new TextInputBuilder()
+                    .setCustomId('user_id')
+                    .setLabel('User ID to mute')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Right-click user → Copy User ID')
+                    .setRequired(true)
+            )
+        );
+}
+
+export function unmuteModal(): ModalBuilder {
+    return new ModalBuilder()
+        .setCustomId('tvc_modal_unmute')
+        .setTitle('Unmute User')
+        .addComponents(
+            new ActionRowBuilder<TextInputBuilder>().addComponents(
+                new TextInputBuilder()
+                    .setCustomId('user_id')
+                    .setLabel('User ID to unmute')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Right-click user → Copy User ID')
+                    .setRequired(true)
+            )
+        );
+}
+
+export function deafenModal(): ModalBuilder {
+    return new ModalBuilder()
+        .setCustomId('tvc_modal_deafen')
+        .setTitle('Deafen User')
+        .addComponents(
+            new ActionRowBuilder<TextInputBuilder>().addComponents(
+                new TextInputBuilder()
+                    .setCustomId('user_id')
+                    .setLabel('User ID to deafen')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Right-click user → Copy User ID')
+                    .setRequired(true)
+            )
+        );
+}
+
+export function undeafenModal(): ModalBuilder {
+    return new ModalBuilder()
+        .setCustomId('tvc_modal_undeafen')
+        .setTitle('Undeafen User')
+        .addComponents(
+            new ActionRowBuilder<TextInputBuilder>().addComponents(
+                new TextInputBuilder()
+                    .setCustomId('user_id')
+                    .setLabel('User ID to undeafen')
                     .setStyle(TextInputStyle.Short)
                     .setPlaceholder('Right-click user → Copy User ID')
                     .setRequired(true)
