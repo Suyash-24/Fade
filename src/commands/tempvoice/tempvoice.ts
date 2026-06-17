@@ -21,6 +21,10 @@ export default {
             .setDescription('View current TempVoice settings')
         )
         .addSubcommand(s => s
+            .setName('interface')
+            .setDescription('Spawn the global TempVoice control panel in this channel')
+        )
+        .addSubcommand(s => s
             .setName('setup')
             .setDescription('Set the join-to-create voice channel')
             .addChannelOption(o => o
@@ -102,6 +106,48 @@ export default {
                 )
                 .build();
             await sendResponse(interaction, [card]);
+            return;
+        }
+
+        if (sub === 'interface') {
+            await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+            const config = await getTempVoiceConfig(guild.id);
+            if (!config.enabled) {
+                await interaction.editReply(`${e('error')} TempVoice is not enabled on this server.`);
+                return;
+            }
+
+            // Remove old interface if exists
+            if (config.interfaceChannelId && config.interfaceMessageId) {
+                try {
+                    const oldChannel = await guild.channels.fetch(config.interfaceChannelId).catch(() => null);
+                    if (oldChannel && oldChannel.isTextBased()) {
+                        await oldChannel.messages.delete(config.interfaceMessageId).catch(() => null);
+                    }
+                } catch (e) {
+                    // Ignore
+                }
+            }
+
+            const { buildInterface } = await import('../../utils/tempVoiceInterface.js');
+            const interfaceMsg = await buildInterface();
+            
+            // Send into current channel
+            const channel = interaction.channel;
+            if (!channel || !channel.isTextBased()) {
+                await interaction.editReply(`${e('error')} This command must be run in a text channel.`);
+                return;
+            }
+
+            const sent = await (channel as import('discord.js').TextChannel).send(interfaceMsg as any);
+            
+            // Save to DB
+            await updateTempVoiceConfig(guild.id, {
+                interfaceChannelId: channel.id,
+                interfaceMessageId: sent.id
+            });
+
+            await interaction.editReply(`${e('success')} Static TempVoice interface has been successfully created in this channel.`);
             return;
         }
 

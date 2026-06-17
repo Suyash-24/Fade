@@ -26,7 +26,7 @@ const makeBtn = (customId: string, style: ButtonStyle, emoji: string) => {
 
 // ── Interface card ────────────────────────────────────────────────────────────
 
-export async function buildInterface(ownerName: string): Promise<{
+export async function buildInterface(): Promise<{
     content: string;
     components: any[];
     files: AttachmentBuilder[];

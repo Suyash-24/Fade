@@ -721,6 +721,9 @@ export const voicemasterConfig = pgTable('voicemaster_config', {
     joinChannelId:   snowflake('join_channel_id'),
     // Category where temp channels are created
     categoryId:      snowflake('category_id'),
+    // Global static interface location
+    interfaceChannelId: snowflake('interface_channel_id'),
+    interfaceMessageId: snowflake('interface_message_id'),
     // Default settings for new temp channels
     defaultName:     text('default_name').default('{user}\'s channel'),
     defaultLimit:    integer('default_limit').default(0), // 0 = unlimited

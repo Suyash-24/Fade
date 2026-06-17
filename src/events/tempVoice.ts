@@ -65,11 +65,8 @@ const event: Event<'voiceStateUpdate'> = {
                 // Move the member into their new channel
                 await member.voice.setChannel(tempChannel).catch(() => null);
 
-                // Send control interface
-                const { buildInterface } = await import('../utils/tempVoiceInterface.js');
-                const interfaceMsg = await buildInterface(member.displayName);
-                const sentMsg = await tempChannel.send(interfaceMsg as any);
-                await sentMsg.pin().catch(() => null);
+                // Note: The interface is no longer sent to the individual channel.
+                // The server uses a static global interface channel instead.
 
                 logger.debug('TempVoice: channel created', {
                     channelId: tempChannel.id,
