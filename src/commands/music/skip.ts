@@ -11,7 +11,7 @@ export default {
 
     category:  'music',
     guildOnly: true,
-    aliases:   ['skip', 'sk', 'next'],
+    aliases:   ['skip'],
     cooldown:  2,
 
     async execute(interaction) {

@@ -72,7 +72,26 @@ const EMOJI_IDS: Record<string, string> = {
     tada: '<a:tada:1512355452048900226>',
     heartdot: '<:heardot:1512355432079818823>',
     ticketbutton: '<a:ticketbutton:1512522377051766905>',
-    protect: '<:protect:1514293016867901543>'
+    protect: '<:protect:1514293016867901543>',
+    vcunmute: '<:vcunmute:1516715017104527461>',
+    vcmute: '<:vcmute:1516714622194024478>',
+    vcban: '<:vcban:1516714296950784210>',
+    vcunban: '<:vcunban:1516714854864519261>',
+    vchide: '<:vchide:1516714416135999689>',
+    vcunhide: '<:vcunhide:1516714919041699890>',
+    vcstatus: '<:vcstatus:1516714783146250410>',
+    vckick: '<:vckick:1516714496167645234>',
+    vclock: '<:vclock:1516714571942068315>',
+    vcunlock: '<:vcunlock:1516714967259283566>',
+    vcdeafen: '<:vcdeafen:1516714376684372068>',
+    vcundeafen: '<:vcundeafen:1516714886959202365>',
+    vctransfer: '<:vctransfer:1516714816859930754>',
+    vcclaim: '<:vcclaim:1516714340336668712>',
+    vcremove: '<:vcremove:1516714742956429362>',
+    vcprivacy: '<:vcprivacy:1516714711075262584>',
+    vclimit: '<:vclimit:1516714528279236628>',
+    vcinvite: '<:vcinvite:1516714458041417858>',
+    vcpermit: '<:vcpermit:1516714675675463700>'
 };
 
 // Unicode fallbacks — aesthetic, minimal, consistent
@@ -134,7 +153,26 @@ const UNICODE = {
     heartdot: '💠',
     gift: '🎁',
     ticketbutton: '🎫',
-    protect:'🛡️'
+    protect:'🛡️',
+    vcunmute: '',
+    vcmute: '',
+    vcban: '',
+    vcunban: '',
+    vchide: '',
+    vcunhide: '',
+    vcstatus: '',
+    vckick: '',
+    vclock: '',
+    vcunlock: '',
+    vcdeafen: '',
+    vcundeafen: '',
+    vctransfer: '',
+    vcclaim: '',
+    vcremove: '',
+    vcprivacy: '',
+    vclimit: '',
+    vcinvite: '',
+    vcpermit: ''
 };
 
 type EmojiKey = keyof typeof UNICODE;

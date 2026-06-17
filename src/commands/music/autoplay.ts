@@ -8,7 +8,7 @@ import { toggleAutoplay, isAutoplay } from '../../music/manager.js';
 export default {
     data: new SlashCommandBuilder()
         .setName('autoplay')
-        .setDescription('Toggle autoplay — automatically queues similar tracks when the queue ends'),
+        .setDescription('Toggle autoplay'),
 
     category:  'music',
     guildOnly: true,

@@ -11,7 +11,7 @@ export default {
 
     category:  'music',
     guildOnly: true,
-    aliases:   ['queue', 'q'],
+    aliases:   ['queue'],
     cooldown:  3,
 
     async execute(interaction) {

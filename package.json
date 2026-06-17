@@ -16,6 +16,7 @@
     "node": ">=18.17.0"
   },
   "dependencies": {
+    "@kamipl/kick-api-lite": "^1.0.1",
     "@napi-rs/canvas": "^1.0.0",
     "discord.js": "^14.15.3",
     "dotenv": "^17.4.2",
