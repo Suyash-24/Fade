@@ -33,6 +33,7 @@ const makeBtn = (customId: string, style: ButtonStyle, emoji: string) => {
 // ── Interface card ────────────────────────────────────────────────────────────
 
 export async function buildInterface(): Promise<{
+    content: string;
     components: any[];
     files: AttachmentBuilder[];
     flags: number;
@@ -41,24 +42,8 @@ export async function buildInterface(): Promise<{
     const buffer = await generateTempVoiceCanvas();
     const attachment = new AttachmentBuilder(buffer, { name: 'interface.png' });
 
-    // Build the ActionRows directly from the grid mapping
-    const container = new ContainerBuilder()
-        .setAccentColor(0x2b2d31)
-        .addTextDisplayComponents(
-            new TextDisplayBuilder().setContent(
-                `## ${e('voice')} Voice Interface\n` +
-                `-# Use the buttons below to manage your temporary voice channel.`
-            )
-        )
-        .addSeparatorComponents(
-            new SeparatorBuilder().setDivider(true).setSpacing(SeparatorSpacingSize.Small)
-        )
-        .addMediaGalleryComponents(
-            new MediaGalleryBuilder().addItems(
-                new MediaGalleryItemBuilder().setURL('attachment://interface.png')
-            )
-        );
-
+    // Build ActionRows
+    const rows: ActionRowBuilder<ButtonBuilder>[] = [];
     let currentButtons: ButtonBuilder[] = [];
 
     for (let i = 0; i < tvcButtons.length; i++) {
@@ -72,15 +57,16 @@ export async function buildInterface(): Promise<{
         currentButtons.push(makeBtn(btnDef.id, djsStyle, btnDef.emojiId));
 
         if (currentButtons.length === 5 || i === tvcButtons.length - 1) {
-            container.addActionRowComponents(new ActionRowBuilder<ButtonBuilder>().addComponents(...currentButtons));
+            rows.push(new ActionRowBuilder<ButtonBuilder>().addComponents(...currentButtons));
             currentButtons = [];
         }
     }
 
     return {
-        components: [container],
+        content: `## ${e('voice')} Voice Interface\n-# Use the buttons below to manage your temporary voice channel.`,
+        components: rows,
         files: [attachment],
-        flags: MessageFlags.IsComponentsV2,
+        flags: 0,
     };
 }
 
