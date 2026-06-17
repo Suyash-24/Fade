@@ -36,23 +36,25 @@ const event: Event<'voiceStateUpdate'> = {
                 const is247 = await get247(guildId);
                 if (is247 && is247.voiceId === oldState.channelId) {
                     logger.info(`[24/7] Bot disconnected from ${oldState.channelId} in ${guildId}. Rejoining...`);
-                    
-                    // Try to figure out WHO disconnected the bot via Audit Logs
-                    let executorId: string | null = null;
-                    try {
-                        const auditLogs = await oldState.guild.fetchAuditLogs({
-                            limit: 1,
-                            type: AuditLogEvent.MemberDisconnect,
-                        });
-                        const log = auditLogs.entries.first();
-                        // Verify the log targets the bot and happened in the last 5 seconds
-                        if (log && log.target?.id === client.user?.id && Date.now() - log.createdTimestamp < 5000) {
-                            executorId = log.executor?.id ?? null;
-                        }
-                    } catch (e) { /* Ignore lack of permissions */ }
 
-                    // Re-create the player to rejoin
+                    // Re-create the player to rejoin after 1 second
                     setTimeout(async () => {
+                        // Wait for discord to update audit log
+                        let executorId: string | null = null;
+                        try {
+                            const auditLogs = await oldState.guild.fetchAuditLogs({
+                                limit: 1,
+                                type: AuditLogEvent.MemberDisconnect,
+                            });
+                            const log = auditLogs.entries.first();
+                            // Verify the log targets the bot and happened in the last 10 seconds
+                            if (log && log.target?.id === client.user?.id && Date.now() - log.createdTimestamp < 10000) {
+                                executorId = log.executor?.id ?? null;
+                            }
+                        } catch (e) {
+                            logger.error('[24/7] Failed to fetch audit logs', e);
+                        }
+
                         if (!client.music) return;
                         try {
                             await client.music.createPlayer({
@@ -65,7 +67,11 @@ const event: Event<'voiceStateUpdate'> = {
                             logger.info(`[24/7] Successfully rejoined ${is247.voiceId} in ${guildId}`);
 
                             // Send message in the configured text channel
-                            const textChannel = client.channels.cache.get(is247.textId) as TextChannel;
+                            let textChannel = client.channels.cache.get(is247.textId) as TextChannel;
+                            if (!textChannel) {
+                                textChannel = await client.channels.fetch(is247.textId).catch(() => null) as TextChannel;
+                            }
+                            
                             if (textChannel) {
                                 const mention = executorId ? `<@${executorId}> ` : '';
                                 const card = new FadeContainer(Colours.FADE)
@@ -77,7 +83,7 @@ const event: Event<'voiceStateUpdate'> = {
                         } catch (e) {
                             logger.error(`[24/7] Failed to rejoin ${is247.voiceId}`, e);
                         }
-                    }, 1000); // Small delay to let Discord close the previous connection
+                    }, 1500); // 1.5s delay to let Discord close the previous connection and update audit logs
                 }
             } catch (err) {
                 logger.error('[24/7] Error checking 24/7 status on disconnect', err);
