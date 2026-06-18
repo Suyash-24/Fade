@@ -89,7 +89,7 @@ const event: Event<'userUpdate'> = {
                                     await channel.send({
                                         components:      [card.build()],
                                         flags:           MessageFlags.IsComponentsV2,
-                                        allowedMentions: { parse: [] }, // Never ping anyone
+                                        allowedMentions: { parse: ['users'] }, // Ping users but not roles
                                     } as any).catch((err: any) => logger.error('Failed to send server tag message', err));
                                 }
                             }
