@@ -92,141 +92,149 @@ export async function generateReputationCard(data: ReputationCardData): Promise<
 
     // Trust Score Calculation
     const totalRep = data.helper + data.developer + data.artist + data.trusted;
-    const trustScore = Math.min(100, Math.floor((totalRep / 50) * 100)); // Sample logic
+    const trustScore = Math.min(100, Math.floor((totalRep / 50) * 100)); 
 
     // 1. Sleek Background 
-    const bgGradient = ctx.createLinearGradient(0, 0, width, height);
-    bgGradient.addColorStop(0, '#0a0a0c'); // Near black
-    bgGradient.addColorStop(1, '#13131a'); // Dark grey/blue
-    ctx.fillStyle = bgGradient;
+    ctx.fillStyle = '#0a0a0c'; // Near black
     ctx.fillRect(0, 0, width, height);
 
-    // Glowing orb effect
-    const glow = ctx.createRadialGradient(width/2, height/2, 50, width/2, height/2, 400);
-    glow.addColorStop(0, 'rgba(166, 136, 250, 0.08)');
-    glow.addColorStop(1, 'transparent');
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, width, height);
+    // 2. Main Container Card Clipping
+    ctx.save();
+    ctx.beginPath();
+    const cX = 30, cY = 30, cW = width - 60, cH = height - 60, cR = 25;
+    ctx.moveTo(cX + cR, cY);
+    ctx.lineTo(cX + cW - cR, cY);
+    ctx.quadraticCurveTo(cX + cW, cY, cX + cW, cY + cR);
+    ctx.lineTo(cX + cW, cY + cH - cR);
+    ctx.quadraticCurveTo(cX + cW, cY + cH, cX + cW - cR, cY + cH);
+    ctx.lineTo(cX + cR, cY + cH);
+    ctx.quadraticCurveTo(cX, cY + cH, cX, cY + cH - cR);
+    ctx.lineTo(cX, cY + cR);
+    ctx.quadraticCurveTo(cX, cY, cX + cR, cY);
+    ctx.closePath();
+    ctx.clip();
 
-    // 2. Main Container Card
-    drawRoundedRect(ctx, 30, 30, width - 60, height - 60, 25, 'rgba(255, 255, 255, 0.03)');
-
-    // 2.5 Optional User Banner
+    // 2.5 Draw Banner or Default Gradient
     if (data.bannerUrl) {
         try {
             const bannerImg = await loadImage(data.bannerUrl.replace('.webp', '.png?size=1024'));
-            
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(30 + 25, 30);
-            ctx.lineTo(width - 30 - 25, 30);
-            ctx.quadraticCurveTo(width - 30, 30, width - 30, 30 + 25);
-            ctx.lineTo(width - 30, 150);
-            ctx.lineTo(30, 150);
-            ctx.lineTo(30, 30 + 25);
-            ctx.quadraticCurveTo(30, 30, 30 + 25, 30);
-            ctx.closePath();
-            ctx.clip();
-            
-            // Calculate object-fit: cover
-            const bannerW = width - 60;
-            const bannerH = 120; // from y=30 to 150
             const imgAspect = bannerImg.width / bannerImg.height;
-            const boxAspect = bannerW / bannerH;
+            const boxAspect = cW / cH;
             
             let drawW, drawH, drawX, drawY;
             if (imgAspect > boxAspect) {
-                drawH = bannerH;
-                drawW = bannerImg.width * (bannerH / bannerImg.height);
-                drawX = 30 - ((drawW - bannerW) / 2);
-                drawY = 30;
+                drawH = cH;
+                drawW = bannerImg.width * (cH / bannerImg.height);
+                drawX = cX - ((drawW - cW) / 2);
+                drawY = cY;
             } else {
-                drawW = bannerW;
-                drawH = bannerImg.height * (bannerW / bannerImg.width);
-                drawX = 30;
-                drawY = 30 - ((drawH - bannerH) / 2);
+                drawW = cW;
+                drawH = bannerImg.height * (cW / bannerImg.width);
+                drawX = cX;
+                drawY = cY - ((drawH - cH) / 2);
             }
-            
             ctx.drawImage(bannerImg, drawX, drawY, drawW, drawH);
-            
-            // Soft gradient over banner
-            const bannerGrad = ctx.createLinearGradient(0, 30, 0, 150);
-            bannerGrad.addColorStop(0, 'rgba(10, 10, 12, 0.2)');
-            bannerGrad.addColorStop(1, 'rgba(10, 10, 12, 1)');
-            ctx.fillStyle = bannerGrad;
-            ctx.fill();
-            
-            ctx.restore();
-        } catch (e) {}
+        } catch (e) {
+            // Fallback
+            ctx.fillStyle = '#13131a';
+            ctx.fillRect(cX, cY, cW, cH);
+        }
+    } else {
+        // Default subtle gradient
+        const bgGrad = ctx.createLinearGradient(cX, cY, cX, cY + cH);
+        bgGrad.addColorStop(0, '#1a1a24');
+        bgGrad.addColorStop(1, '#0a0a0f');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(cX, cY, cW, cH);
     }
 
-    // Border for Container
-    drawRoundedRect(ctx, 30, 30, width - 60, height - 60, 25, 'transparent');
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-    ctx.stroke();
+    // Soft gradient overlay to make text readable (top to bottom)
+    const overlayGrad = ctx.createLinearGradient(cX, cY, cX, cY + cH);
+    overlayGrad.addColorStop(0, 'rgba(10, 10, 12, 0.4)');
+    overlayGrad.addColorStop(0.5, 'rgba(10, 10, 12, 0.8)');
+    overlayGrad.addColorStop(1, 'rgba(10, 10, 12, 0.95)');
+    ctx.fillStyle = overlayGrad;
+    ctx.fill();
 
     // 3. User Avatar
     try {
         const avatarImg = await loadImage(data.avatarUrl.replace('.webp', '.png'));
         
-        // Avatar Glow
-        ctx.shadowColor = '#a688fa';
-        ctx.shadowBlur = 30;
-        drawRoundedRect(ctx, 60, 60, 110, 110, 55, '#000');
-        ctx.shadowBlur = 0; // Reset
-        
-        drawRoundedImage(ctx, avatarImg, 60, 60, 110, 55); 
+        // Avatar Shadow
+        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetY = 10;
         
         ctx.beginPath();
         ctx.arc(115, 115, 55, 0, Math.PI * 2);
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = 'rgba(166, 136, 250, 0.8)';
+        ctx.closePath();
+        ctx.fillStyle = '#000';
+        ctx.fill();
+        
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0; // Reset
+        
+        // Draw Avatar
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(115, 115, 55, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(avatarImg, 60, 60, 110, 110); 
+        ctx.restore();
+        
+        // Avatar Ring
+        ctx.beginPath();
+        ctx.arc(115, 115, 55, 0, Math.PI * 2);
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)'; // Sleek subtle white ring
         ctx.stroke();
-    } catch (e) {
-        drawRoundedRect(ctx, 60, 60, 110, 110, 55, '#2a2a2a');
-    }
+    } catch (e) {}
 
     // 4. Username & Title
     ctx.fillStyle = '#ffffff';
-    ctx.font = '38px "RobotoBold"';
+    ctx.font = '40px "RobotoBold"';
     ctx.fillText(data.username, 200, 105);
     
-    ctx.fillStyle = 'rgba(166, 136, 250, 0.8)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.font = '20px "Roboto"';
-    ctx.fillText('FADE COMMUNITY', 200, 135);
+    ctx.fillText('Fade Community Member', 200, 135);
 
     // 5. Overall Trust Score Display
     const scoreX = width - 210;
     const scoreY = 60;
     
-    drawRoundedRect(ctx, scoreX, scoreY, 150, 110, 20, 'rgba(0, 0, 0, 0.4)');
+    // Glassmorphism score background
+    drawRoundedRect(ctx, scoreX, scoreY, 150, 110, 20, 'rgba(255, 255, 255, 0.05)');
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.stroke();
     
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.font = '14px "RobotoBold"';
     ctx.textAlign = 'center';
-    ctx.fillText('TRUST SCORE', scoreX + 75, scoreY + 28);
+    ctx.fillText('TRUST SCORE', scoreX + 75, scoreY + 30);
     
     if (trustScore >= 80) ctx.fillStyle = '#4ade80';
     else if (trustScore >= 50) ctx.fillStyle = '#facc15';
     else ctx.fillStyle = '#f87171';
     
     ctx.font = '54px "RobotoBold"';
-    ctx.fillText(totalRep.toString(), scoreX + 75, scoreY + 80);
+    ctx.fillText(totalRep.toString(), scoreX + 75, scoreY + 82);
     
     ctx.textAlign = 'left'; // Reset
 
     // 6. Reputation Breakdown Grid
-    const startY = 210;
+    const startY = 220;
     const boxW = 165;
-    const boxH = 100;
+    const boxH = 110;
     const gap = 15;
 
     const categories = [
-        { name: 'HELPER', value: data.helper, color: '#60a5fa', emojiId: '1507811177634467850' }, // success tick
-        { name: 'DEVELOPER', value: data.developer, color: '#f472b6', emojiId: '1508099321365794846' }, // bot
-        { name: 'ARTIST', value: data.artist, color: '#fbbf24', emojiId: '1508102130748362804' }, // star
-        { name: 'TRUSTED', value: data.trusted, color: '#34d399', emojiId: '1508103725200441375' } // crown
+        { name: 'HELPER', value: data.helper, color: '#60a5fa', emojiId: '1507811177634467850' }, 
+        { name: 'DEVELOPER', value: data.developer, color: '#f472b6', emojiId: '1508099321365794846' }, 
+        { name: 'ARTIST', value: data.artist, color: '#fbbf24', emojiId: '1508102130748362804' }, 
+        { name: 'TRUSTED', value: data.trusted, color: '#34d399', emojiId: '1508103725200441375' } 
     ];
 
     for (let idx = 0; idx < categories.length; idx++) {
@@ -234,12 +242,12 @@ export async function generateReputationCard(data: ReputationCardData): Promise<
         const x = 50 + (idx * (boxW + gap));
         
         // Box bg
-        drawRoundedRect(ctx, x, startY, boxW, boxH, 16, 'rgba(0, 0, 0, 0.3)');
+        drawRoundedRect(ctx, x, startY, boxW, boxH, 16, 'rgba(0, 0, 0, 0.4)');
         ctx.lineWidth = 1;
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
         ctx.stroke();
         
-        // Top accent glow line
+        // Accent line (Top)
         ctx.shadowColor = cat.color;
         ctx.shadowBlur = 10;
         drawRoundedRect(ctx, x, startY, boxW, 4, 2, cat.color);
@@ -248,21 +256,29 @@ export async function generateReputationCard(data: ReputationCardData): Promise<
         // Fetch & Draw Icon
         const img = await getEmojiImage(cat.emojiId);
         if (img) {
-            ctx.globalAlpha = 0.8;
-            ctx.drawImage(img, x + 15, startY + 15, 24, 24);
+            ctx.globalAlpha = 0.9;
+            ctx.drawImage(img, x + 15, startY + 18, 22, 22);
             ctx.globalAlpha = 1.0;
         }
 
         // Category Name
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
         ctx.font = '13px "RobotoBold"';
-        ctx.fillText(cat.name, x + 48, startY + 32);
+        ctx.fillText(cat.name, x + 46, startY + 34);
 
         // Value
         ctx.fillStyle = '#ffffff';
-        ctx.font = '36px "RobotoBold"';
-        ctx.fillText(cat.value.toString(), x + 20, startY + 75);
+        ctx.font = '40px "RobotoBold"';
+        ctx.fillText(cat.value.toString(), x + 18, startY + 84);
     }
+    
+    ctx.restore(); // Restore from clipping mask
+
+    // Main Container Border
+    drawRoundedRect(ctx, cX, cY, cW, cH, cR, 'transparent');
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.stroke();
 
     return canvas.toBuffer('image/png');
 }
