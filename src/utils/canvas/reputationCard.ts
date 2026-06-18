@@ -51,8 +51,11 @@ function drawRoundedRect(ctx: any, x: number, y: number, width: number, height: 
     ctx.lineTo(x, y + radius);
     ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
-    ctx.fillStyle = fill;
-    ctx.fill();
+    ctx.closePath();
+    if (fill !== 'transparent') {
+        ctx.fillStyle = fill;
+        ctx.fill();
+    }
 }
 
 export interface ReputationCardData {
@@ -62,6 +65,7 @@ export interface ReputationCardData {
     developer: number;
     artist: number;
     trusted: number;
+    bannerUrl?: string;
 }
 
 const imageCache: Map<string, Image> = new Map();
@@ -106,6 +110,58 @@ export async function generateReputationCard(data: ReputationCardData): Promise<
 
     // 2. Main Container Card
     drawRoundedRect(ctx, 30, 30, width - 60, height - 60, 25, 'rgba(255, 255, 255, 0.03)');
+
+    // 2.5 Optional User Banner
+    if (data.bannerUrl) {
+        try {
+            const bannerImg = await loadImage(data.bannerUrl.replace('.webp', '.png?size=1024'));
+            
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(30 + 25, 30);
+            ctx.lineTo(width - 30 - 25, 30);
+            ctx.quadraticCurveTo(width - 30, 30, width - 30, 30 + 25);
+            ctx.lineTo(width - 30, 150);
+            ctx.lineTo(30, 150);
+            ctx.lineTo(30, 30 + 25);
+            ctx.quadraticCurveTo(30, 30, 30 + 25, 30);
+            ctx.closePath();
+            ctx.clip();
+            
+            // Calculate object-fit: cover
+            const bannerW = width - 60;
+            const bannerH = 120; // from y=30 to 150
+            const imgAspect = bannerImg.width / bannerImg.height;
+            const boxAspect = bannerW / bannerH;
+            
+            let drawW, drawH, drawX, drawY;
+            if (imgAspect > boxAspect) {
+                drawH = bannerH;
+                drawW = bannerImg.width * (bannerH / bannerImg.height);
+                drawX = 30 - ((drawW - bannerW) / 2);
+                drawY = 30;
+            } else {
+                drawW = bannerW;
+                drawH = bannerImg.height * (bannerW / bannerImg.width);
+                drawX = 30;
+                drawY = 30 - ((drawH - bannerH) / 2);
+            }
+            
+            ctx.drawImage(bannerImg, drawX, drawY, drawW, drawH);
+            
+            // Soft gradient over banner
+            const bannerGrad = ctx.createLinearGradient(0, 30, 0, 150);
+            bannerGrad.addColorStop(0, 'rgba(10, 10, 12, 0.2)');
+            bannerGrad.addColorStop(1, 'rgba(10, 10, 12, 1)');
+            ctx.fillStyle = bannerGrad;
+            ctx.fill();
+            
+            ctx.restore();
+        } catch (e) {}
+    }
+
+    // Border for Container
+    drawRoundedRect(ctx, 30, 30, width - 60, height - 60, 25, 'transparent');
     ctx.lineWidth = 1;
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
     ctx.stroke();

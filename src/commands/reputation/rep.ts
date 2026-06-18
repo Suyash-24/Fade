@@ -20,11 +20,15 @@ export default {
 
         await interaction.deferReply();
 
-        const rep = await getReputation(interaction.guild!.id, user.id);
+        // Fetch user fully to ensure banner is available
+        const fullUser = await user.fetch();
+
+        const rep = await getReputation(interaction.guild!.id, fullUser.id);
 
         const buffer = await generateReputationCard({
-            username: user.username,
-            avatarUrl: user.displayAvatarURL({ extension: 'png', size: 256 }),
+            username: fullUser.username,
+            avatarUrl: fullUser.displayAvatarURL({ extension: 'png', size: 256 }),
+            bannerUrl: fullUser.bannerURL({ extension: 'png', size: 1024 }) ?? undefined,
             helper: rep.helperRep,
             developer: rep.developerRep,
             artist: rep.artistRep,
@@ -50,11 +54,15 @@ export default {
 
         const reply = await message.reply('Generating reputation profile...');
 
-        const rep = await getReputation(message.guild!.id, user.id);
+        // Fetch user fully to ensure banner is available
+        const fullUser = await user.fetch();
+
+        const rep = await getReputation(message.guild!.id, fullUser.id);
 
         const buffer = await generateReputationCard({
-            username: user.username,
-            avatarUrl: user.displayAvatarURL({ extension: 'png', size: 256 }),
+            username: fullUser.username,
+            avatarUrl: fullUser.displayAvatarURL({ extension: 'png', size: 256 }),
+            bannerUrl: fullUser.bannerURL({ extension: 'png', size: 1024 }) ?? undefined,
             helper: rep.helperRep,
             developer: rep.developerRep,
             artist: rep.artistRep,
