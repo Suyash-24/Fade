@@ -37,7 +37,7 @@ export default {
     guildOnly:       true,
     userPermissions: [PermissionFlagsBits.ModerateMembers],
     botPermissions:  [PermissionFlagsBits.ModerateMembers],
-    aliases:         ['timeout', 'to'],
+    aliases:         ['timeout'],
     cooldown:        5,
 
     async execute(interaction, client) {
