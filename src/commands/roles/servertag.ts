@@ -4,7 +4,7 @@ import type { Command } from '../../types/command.js';
 import { FadeContainer, sendResponse } from '../../components/builders.js';
 import { e, Colours } from '../../components/emojis.js';
 import { getServerTagConfig, upsertServerTagConfig } from '../../db/queries/serverTag.js';
-import { invalidateServerTagCache } from '../../events/serverTagRoles.js';
+import { invalidateServerTagCache } from '../../events/serverTag.js';
 
 export default {
     data: new SlashCommandBuilder()
