@@ -52,10 +52,6 @@ export default {
         .addSubcommand(s => s
             .setName('disable')
             .setDescription('Disable the server tag role system')
-        )
-        .addSubcommand(s => s
-            .setName('sync')
-            .setDescription('Sync the role for all members who currently have the tag equipped')
         ),
 
     category:        'roles',
@@ -71,13 +67,25 @@ export default {
             const role = interaction.options.getRole('role', true);
             await upsertServerTagConfig(guildId, { roleId: role.id, enabled: true });
             
-            // We use a try-catch for invalidating cache, as the event might not have loaded it yet
             try { invalidateServerTagCache(guildId); } catch {}
             
+            await interaction.deferReply();
+            
+            // Auto-sync
+            const members = await interaction.guild!.members.fetch();
+            let added = 0;
+            for (const [id, member] of members) {
+                if (member.user.bot) continue;
+                if (member.user.primaryGuild?.identityGuildId === guildId && !member.roles.cache.has(role.id)) {
+                    await member.roles.add(role.id, '[Fade] Auto-sync Server Tag').catch(() => null);
+                    added++;
+                }
+            }
+
             const card = new FadeContainer(Colours.SUCCESS)
-                .text(`${e('success')}  <@&${role.id}> will now be awarded to members who equip the Server Tag.`)
+                .text(`${e('success')}  <@&${role.id}> will now be awarded to members who equip the Server Tag.\n*Automatically granted the role to **${added}** existing members who already had the tag.*`)
                 .build();
-            await sendResponse(interaction, [card]);
+            await interaction.editReply({ components: [card as any] });
             return;
         }
 
@@ -155,41 +163,6 @@ export default {
                 .text(`${e('success')}  Server Tag role system disabled.`)
                 .build();
             await sendResponse(interaction, [card]);
-            return;
-        }
-
-        if (sub === 'sync') {
-            const config = await getServerTagConfig(guildId);
-            if (!config || !config.enabled || !config.roleId) {
-                await interaction.reply({ content: `${e('error')} Server Tag system is not configured or disabled.`, flags: MessageFlags.Ephemeral });
-                return;
-            }
-
-            await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-            const members = await interaction.guild!.members.fetch();
-            let added = 0;
-            let removed = 0;
-
-            for (const [id, member] of members) {
-                // Skip bots
-                if (member.user.bot) continue;
-                
-                const hasTag = member.user.primaryGuild?.identityGuildId === guildId;
-                const hasRole = member.roles.cache.has(config.roleId);
-
-                if (hasTag && !hasRole) {
-                    await member.roles.add(config.roleId, '[Fade] Server Tag sync').catch(() => null);
-                    added++;
-                } else if (!hasTag && hasRole) {
-                    await member.roles.remove(config.roleId, '[Fade] Server Tag sync').catch(() => null);
-                    removed++;
-                }
-            }
-
-            const card = new FadeContainer(Colours.SUCCESS)
-                .text(`${e('success')}  Server Tag roles synced!\n\n**Added:** ${added}\n**Removed:** ${removed}`)
-                .build();
-            await interaction.editReply({ components: [card as any] });
             return;
         }
     },
