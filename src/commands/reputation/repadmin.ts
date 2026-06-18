@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from 'discord.js';
 import { Command } from '../../types/command.js';
 import { addReputation } from '../../db/queries/reputation.js';
 import { e, Colours } from '../../components/emojis.js';
-import { FadeContainer } from '../../components/builders.js';
+import { FadeContainer, sendResponse, sendMessage } from '../../components/builders.js';
 import { hasPermission } from '../../utils/fakePerms.js';
 
 export default {
@@ -53,7 +53,7 @@ export default {
             .text(`Successfully added **${amount} ${type}** reputation to ${user}.`)
             .build();
 
-        await interaction.reply({ components: [card] });
+        await sendResponse(interaction, [card]);
     },
 
     async prefixExecute(message, args, client) {
@@ -98,6 +98,6 @@ export default {
             .text(`Successfully added **${amount} ${type}** reputation to ${user}.`)
             .build();
 
-        await message.reply({ components: [card] });
+        await sendMessage(message, [card]);
     }
 } satisfies Command;

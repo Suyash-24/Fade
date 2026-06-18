@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from 'discord.js';
 import { Command } from '../../types/command.js';
 import { getRepCooldown, setRepCooldown, addReputation } from '../../db/queries/reputation.js';
 import { e, Colours } from '../../components/emojis.js';
-import { FadeContainer } from '../../components/builders.js';
+import { FadeContainer, sendResponse, sendMessage } from '../../components/builders.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -52,7 +52,7 @@ export default {
             .text(`You thanked ${user}! They received **+1 Helper** and **+1 Trusted** Reputation.`)
             .build();
 
-        await interaction.reply({ components: [card] });
+        await sendResponse(interaction, [card]);
     },
 
     async prefixExecute(message, args, client) {
@@ -101,6 +101,6 @@ export default {
             .text(`You thanked ${user}! They received **+1 Helper** and **+1 Trusted** Reputation.`)
             .build();
 
-        await message.reply({ components: [card] });
+        await sendMessage(message, [card]);
     }
 } satisfies Command;
