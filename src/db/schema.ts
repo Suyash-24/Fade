@@ -466,6 +466,17 @@ export const vanityRoles = pgTable('vanity_roles', {
     roleId:   snowflake('role_id').notNull(),
 });
 
+// Native Discord Server Tags (Clan tags)
+export const serverTagConfig = pgTable('server_tag_config', {
+    guildId:    snowflake('guild_id').primaryKey().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    roleId:     snowflake('role_id'),               // role to grant
+    channelId:  snowflake('channel_id'),            // channel for award message
+    message:    text('message'),                    // custom award message text
+    image:      text('image'),                      // custom award message image/banner URL
+    enabled:    boolean('enabled').default(false).notNull(),
+    updatedAt:  updatedAt(),
+});
+
 export const boosterRoles = pgTable('booster_roles', {
     id:       serial('id').primaryKey(),
     guildId:  snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
