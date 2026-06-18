@@ -1,8 +1,9 @@
 // src/commands/music/stop.ts
 import { SlashCommandBuilder } from 'discord.js';
 import type { Command } from '../../types/command.js';
-import { requirePlayer, musicReply } from '../../music/utils.js';
+import { musicReply } from '../../music/utils.js';
 import { buildMusicInfoCard, buildMusicErrorCard } from '../../music/cards.js';
+import { get247 } from '../../db/queries/twentyFourSeven.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -19,17 +20,43 @@ export default {
     },
 
     async prefixExecute(message, args, client) {
-        const player = await requirePlayer(message, client);
-        if (!player) return;
+        const player = client.music?.players.get(message.guild!.id);
+        const botVoiceChannelId = message.guild!.members.me?.voice?.channelId;
 
-        if (message.member?.voice?.channelId !== player.voiceId) {
-            await musicReply(message, [buildMusicErrorCard(`Join <#${player.voiceId}> to control the player.`)]);
+        if (!player && !botVoiceChannelId) {
+            await musicReply(message, [buildMusicErrorCard('I am not connected to a voice channel.')]);
+            return;
+        }
+
+        if (botVoiceChannelId && message.member?.voice?.channelId !== botVoiceChannelId) {
+            await musicReply(message, [buildMusicErrorCard(`Join <#${botVoiceChannelId}> to control the player.`)]);
+            return;
+        }
+
+        const is247 = await get247(message.guild!.id);
+
+        if (is247) {
+            if (player) {
+                player.queue.clear();
+                if (player.queue.current) {
+                    player.skip();
+                }
+            }
+            const card = buildMusicInfoCard(
+                '⏹ Stopped',
+                'Queue cleared.\n-# 24/7 Mode is enabled, so I will stay in the voice channel. Use `f!247` to disable.'
+            );
+            await musicReply(message, [card]);
             return;
         }
 
         // Clear queue and destroy
-        player.queue.clear();
-        player.destroy();
+        if (player) {
+            player.queue.clear();
+            player.destroy();
+        } else if (botVoiceChannelId) {
+            message.guild!.members.me?.voice?.disconnect();
+        }
 
         const card = buildMusicInfoCard(
             '⏹ Stopped',
