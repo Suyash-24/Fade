@@ -940,3 +940,35 @@ export const repCooldowns = pgTable('rep_cooldowns', {
 }, (t) => [
     primaryKey({ columns: [t.guildId, t.giverId] }),
 ]);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// WEEKLY SCRAPBOOK
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+export const scrapbookConfig = pgTable('scrapbook_config', {
+    guildId:   snowflake('guild_id').primaryKey().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    channelId: snowflake('channel_id').notNull(),
+    enabled:   boolean('enabled').default(false).notNull(),
+});
+
+export const scrapbookUsers = pgTable('scrapbook_users', {
+    guildId:      snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    userId:       snowflake('user_id').notNull(),
+    messageCount: integer('message_count').default(0).notNull(),
+    voiceSeconds: integer('voice_seconds').default(0).notNull(),
+}, (t) => [
+    primaryKey({ columns: [t.guildId, t.userId] }),
+]);
+
+export const scrapbookMessages = pgTable('scrapbook_messages', {
+    id:               serial('id').primaryKey(),
+    guildId:          snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    messageId:        snowflake('message_id').notNull(),
+    authorId:         snowflake('author_id').notNull(),
+    content:          text('content').notNull(),
+    reactionCount:    integer('reaction_count').default(0).notNull(),
+    comedyCount:      integer('comedy_count').default(0).notNull(), // tracks 😂, 🤣, 💀, 😭
+    createdAt:        now(),
+}, (t) => [
+    uniqueIndex('scrapbook_msg_unique_idx').on(t.guildId, t.messageId),
+]);

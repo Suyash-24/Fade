@@ -12,6 +12,7 @@ import { getPrefix } from '../db/queries/guilds.js';
 import { getNoPrefixUser } from '../db/queries/noPrefix.js';
 import { FadeContainer, sendMessage, thumb } from '../components/builders.js';
 import { getGuildRoleAliases, getReqRole } from '../db/queries/roleAliases.js';
+import { incrementScrapbookMessageCount } from '../db/queries/scrapbook.js';
 
 // Per-guild alias cache: guildId → Map<alias, command>
 const aliasCache = new Map<string, { data: Map<string, string>; expiresAt: number }>();
@@ -247,6 +248,9 @@ const event: Event<'messageCreate'> = {
 
         await handlePrefixCommand();
         await handleStickyMessage(message);
+
+        // Track for Weekly Scrapbook
+        await incrementScrapbookMessageCount(guild.id, message.author.id).catch(() => null);
     },
 };
 

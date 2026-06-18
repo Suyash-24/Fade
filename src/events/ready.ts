@@ -14,6 +14,7 @@ import { startBirthdayTimer } from '../utils/birthdayTimer.js';
 import { startSocialTimer } from '../utils/socialTimer.js';
 import { startFortniteTimer } from '../utils/fortniteTimer.js';
 import { startGithubStatsSync } from '../utils/githubStats.js';
+import { startScrapbookTimer } from '../utils/scrapbookTimer.js';
 import { getAll247 } from '../db/queries/twentyFourSeven.js';
 
 const event: Event<'clientReady'> = {
@@ -39,6 +40,7 @@ const event: Event<'clientReady'> = {
         startSocialTimer(client);
         startFortniteTimer(client);
         startGithubStatsSync(client);
+        startScrapbookTimer(client);
 
         // Streaming status
         const updateStatus = () => {
