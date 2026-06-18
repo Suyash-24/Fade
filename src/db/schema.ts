@@ -915,3 +915,28 @@ export const twentyFourSeven = pgTable('twenty_four_seven', {
     textId:    snowflake('text_id').notNull(),
     createdAt: now(),
 });
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// REPUTATION SYSTEM
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+export const reputation = pgTable('reputation', {
+    guildId:      snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    userId:       snowflake('user_id').notNull(),
+    helperRep:    integer('helper_rep').default(0).notNull(),
+    developerRep: integer('developer_rep').default(0).notNull(),
+    artistRep:    integer('artist_rep').default(0).notNull(),
+    trustedRep:   integer('trusted_rep').default(0).notNull(),
+    createdAt:    now(),
+    updatedAt:    updatedAt(),
+}, (t) => [
+    primaryKey({ columns: [t.guildId, t.userId] }),
+]);
+
+export const repCooldowns = pgTable('rep_cooldowns', {
+    guildId:   snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    giverId:   snowflake('giver_id').notNull(),
+    lastThank: timestamp('last_thank', { withTimezone: true }).notNull(),
+}, (t) => [
+    primaryKey({ columns: [t.guildId, t.giverId] }),
+]);
