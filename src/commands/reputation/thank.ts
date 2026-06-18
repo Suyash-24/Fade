@@ -7,23 +7,35 @@ import { FadeContainer, sendResponse, sendMessage } from '../../components/build
 export default {
     data: new SlashCommandBuilder()
         .setName('thank')
-        .setDescription('Thank a user for helping out, giving them Reputation!')
+        .setDescription('Award reputation to a user')
         .addUserOption(option => 
             option.setName('user')
-                .setDescription('The user to thank')
-                .setRequired(true)),
+                .setDescription('The user to award reputation to')
+                .setRequired(true))
+        .addStringOption(option =>
+            option.setName('category')
+                .setDescription('The type of reputation to award')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'Helper', value: 'helper' },
+                    { name: 'Developer', value: 'developer' },
+                    { name: 'Artist', value: 'artist' },
+                    { name: 'Trusted', value: 'trusted' }
+                )),
     
-    aliases: ['thx', 'thanks'],
+    aliases: ['thx', 'thanks', 'award'],
     category: 'Reputation',
     
     async execute(interaction, client) {
         const user = interaction.options.getUser('user', true);
+        const category = interaction.options.getString('category', true) as 'helper' | 'developer' | 'artist' | 'trusted';
+
         if (user.bot) {
-            await interaction.reply({ content: 'You cannot thank bots!', flags: 'Ephemeral' });
+            await interaction.reply({ content: 'You cannot give reputation to bots!', flags: 'Ephemeral' });
             return;
         }
         if (user.id === interaction.user.id) {
-            await interaction.reply({ content: 'You cannot thank yourself!', flags: 'Ephemeral' });
+            await interaction.reply({ content: 'You cannot give reputation to yourself!', flags: 'Ephemeral' });
             return;
         }
 
@@ -38,18 +50,18 @@ export default {
                 const timeLeft = cooldown - timePassed;
                 const hours = Math.floor(timeLeft / (1000 * 60 * 60));
                 const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                await interaction.reply({ content: `You can only thank someone once every 24 hours. Please wait **${hours}h ${minutes}m**.`, flags: 'Ephemeral' });
+                await interaction.reply({ content: `You can only award reputation once every 24 hours. Please wait **${hours}h ${minutes}m**.`, flags: 'Ephemeral' });
                 return;
             }
         }
 
-        await addReputation(guildId, user.id, 'helper', 1);
-        await addReputation(guildId, user.id, 'trusted', 1);
+        await addReputation(guildId, user.id, category, 1);
         await setRepCooldown(guildId, giverId);
 
+        const cardName = category.charAt(0).toUpperCase() + category.slice(1);
         const card = new FadeContainer(Colours.SUCCESS)
             .text(`## ${e('success')} Reputation Awarded!`)
-            .text(`You thanked ${user}! They received **+1 Helper** and **+1 Trusted** Reputation.`)
+            .text(`You gave ${user} **+1 ${cardName}** Reputation.`)
             .build();
 
         await sendResponse(interaction, [card]);
@@ -57,7 +69,7 @@ export default {
 
     async prefixExecute(message, args, client) {
         if (args.length === 0) {
-            await message.reply('Please mention a user to thank.');
+            await message.reply('Usage: `f!thank <@user> [category: helper|developer|artist|trusted]`');
             return;
         }
         const targetId = args[0].replace(/[<@!>]/g, '');
@@ -68,12 +80,23 @@ export default {
             return;
         }
         if (user.bot) {
-            await message.reply('You cannot thank bots!');
+            await message.reply('You cannot give reputation to bots!');
             return;
         }
         if (user.id === message.author.id) {
-            await message.reply('You cannot thank yourself!');
+            await message.reply('You cannot give reputation to yourself!');
             return;
+        }
+
+        let category: 'helper' | 'developer' | 'artist' | 'trusted' = 'helper';
+        if (args.length > 1) {
+            const parsed = args[1].toLowerCase();
+            if (['helper', 'developer', 'artist', 'trusted'].includes(parsed)) {
+                category = parsed as any;
+            } else {
+                await message.reply('Invalid category. Must be `helper`, `developer`, `artist`, or `trusted`.');
+                return;
+            }
         }
 
         const guildId = message.guild!.id;
@@ -87,18 +110,18 @@ export default {
                 const timeLeft = cooldown - timePassed;
                 const hours = Math.floor(timeLeft / (1000 * 60 * 60));
                 const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                await message.reply(`You can only thank someone once every 24 hours. Please wait **${hours}h ${minutes}m**.`);
+                await message.reply(`You can only award reputation once every 24 hours. Please wait **${hours}h ${minutes}m**.`);
                 return;
             }
         }
 
-        await addReputation(guildId, user.id, 'helper', 1);
-        await addReputation(guildId, user.id, 'trusted', 1);
+        await addReputation(guildId, user.id, category, 1);
         await setRepCooldown(guildId, giverId);
 
+        const cardName = category.charAt(0).toUpperCase() + category.slice(1);
         const card = new FadeContainer(Colours.SUCCESS)
             .text(`## ${e('success')} Reputation Awarded!`)
-            .text(`You thanked ${user}! They received **+1 Helper** and **+1 Trusted** Reputation.`)
+            .text(`You gave ${user} **+1 ${cardName}** Reputation.`)
             .build();
 
         await sendMessage(message, [card]);
