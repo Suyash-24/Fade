@@ -78,7 +78,7 @@ const event: Event<'userUpdate'> = {
                                             .replace(/{tag}/g,        tag)
                                         : `> ${member} just applied our guild tag **${tag}**, you have successfully received <@&${config.roleId}> Role\n\n> We now have **${roleCount}** supporters!`;
 
-                                    const card = new FadeContainer(Colours.SUCCESS)
+                                    const card = new FadeContainer()
                                         .text('**Guild Tag Added**')
                                         .section([text], thumb(newUser.displayAvatarURL({ size: 128 })));
                                         
