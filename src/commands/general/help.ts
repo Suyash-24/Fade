@@ -4,17 +4,6 @@ import type { Command } from '../../types/command.js';
 import { FadeContainer, linkBtn, sendResponse, sendMessage } from '../../components/builders.js';
 import { e, Colours } from '../../components/emojis.js';
 
-const CATEGORIES: Record<string, { emoji: string; description: string }> = {
-    general:    { emoji: e('server'),   description: 'General information commands' },
-    moderation: { emoji: e('shield'),   description: 'Server moderation tools' },
-    leveling:   { emoji: e('level'),    description: 'XP and leveling system' },
-    music:      { emoji: e('music'),    description: 'Music playback commands' },
-    fun:        { emoji: e('star'),     description: 'Fun and entertainment' },
-    utility:    { emoji: e('settings'), description: 'Utility and configuration' },
-    tickets:    { emoji: e('ticket'),   description: 'Ticket system management' },
-    antinuke:   { emoji: e('shield'),   description: 'Server protection' },
-};
-
 const buildOverview = (client: any) => {
     const grouped = new Map<string, { cmds: string[]; count: number }>();
     let totalSubcommands = 0;
@@ -164,8 +153,9 @@ export default {
                      ?? client.commands.get(client.aliases.get(cmdName.toLowerCase()) ?? '');
 
             if (!cmd) {
-                // Check if it's a category
-                if (CATEGORIES[cmdName.toLowerCase()]) {
+                // Check if it's a category dynamically
+                const isCategory = Array.from(client.commands.values()).some((c: any) => (c.category ?? 'general') === cmdName.toLowerCase());
+                if (isCategory) {
                     await sendResponse(interaction, [buildCategoryInfo(client, cmdName.toLowerCase())], true);
                     return;
                 }
@@ -193,8 +183,9 @@ export default {
                      ?? client.commands.get(client.aliases.get(cmdName) ?? '');
 
             if (!cmd) {
-                // Check if it's a category
-                if (CATEGORIES[cmdName]) {
+                // Check if it's a category dynamically
+                const isCategory = Array.from(client.commands.values()).some((c: any) => (c.category ?? 'general') === cmdName.toLowerCase());
+                if (isCategory) {
                     await sendMessage(message, [buildCategoryInfo(client, cmdName)]);
                     return;
                 }
