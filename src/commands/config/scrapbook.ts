@@ -1,8 +1,9 @@
 import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, TextChannel } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { e, Colours } from '../../components/emojis.js';
-import { FadeContainer } from '../../components/builders.js';
+import { FadeContainer, sendMessage, sendResponse } from '../../components/builders.js';
 import { setScrapbookChannel, disableScrapbook } from '../../db/queries/scrapbook.js';
+import { processWeeklyScrapbooks } from '../../utils/scrapbookTimer.js';
 
 const command: Command = {
     data: new SlashCommandBuilder()
@@ -22,6 +23,10 @@ const command: Command = {
         .addSubcommand(sub => sub
             .setName('disable')
             .setDescription('Disable the weekly scrapbook')
+        )
+        .addSubcommand(sub => sub
+            .setName('force')
+            .setDescription('Force trigger the scrapbook right now (Admin only)')
         ),
 
     category: 'config',
@@ -29,11 +34,11 @@ const command: Command = {
 
     async prefixExecute(message, args) {
         const sub = args[0]?.toLowerCase();
-        if (!sub || !['enable', 'disable'].includes(sub)) {
+        if (!sub || !['enable', 'disable', 'force'].includes(sub)) {
             const card = new FadeContainer(Colours.DANGER)
-                .text(`## ${e('error')} Invalid Usage\nUsage: \`f!scrapbook <enable|disable> [#channel]\``)
+                .text(`## ${e('error')} Invalid Usage\nUsage: \`f!scrapbook <enable|disable|force> [#channel]\``)
                 .build();
-            await message.reply({ components: [card] });
+            await sendMessage(message, [card]);
             return;
         }
 
@@ -42,7 +47,14 @@ const command: Command = {
             const card = new FadeContainer(Colours.SUCCESS)
                 .text(`${e('success')} The Weekly Scrapbook has been disabled.`)
                 .build();
-            await message.reply({ components: [card] });
+            await sendMessage(message, [card]);
+            return;
+        }
+
+        if (sub === 'force') {
+            await message.reply(`${e('success')} Forcing scrapbook generation... Check the configured channel!`);
+            // We pass the client to processWeeklyScrapbooks
+            await processWeeklyScrapbooks(message.client as any);
             return;
         }
 
@@ -65,7 +77,7 @@ const command: Command = {
         const card = new FadeContainer(Colours.SUCCESS)
             .text(`## ${e('success')} Scrapbook Enabled\nThe Weekly Server Scrapbook will now be posted every Sunday at 12:00 PM UTC in <#${channelId}>!`)
             .build();
-        await message.reply({ components: [card] });
+        await sendMessage(message, [card]);
     },
 
     async execute(interaction) {
@@ -77,7 +89,13 @@ const command: Command = {
             const card = new FadeContainer(Colours.SUCCESS)
                 .text(`${e('success')} The Weekly Scrapbook has been disabled.`)
                 .build();
-            await interaction.reply({ components: [card] });
+            await sendResponse(interaction, [card], false);
+            return;
+        }
+
+        if (sub === 'force') {
+            await interaction.reply({ content: `${e('success')} Forcing scrapbook generation... Check the configured channel!`, ephemeral: true });
+            await processWeeklyScrapbooks(interaction.client as any);
             return;
         }
 
@@ -88,7 +106,7 @@ const command: Command = {
             const card = new FadeContainer(Colours.SUCCESS)
                 .text(`## ${e('success')} Scrapbook Enabled\nThe Weekly Server Scrapbook will now be posted every Sunday at 12:00 PM UTC in <#${channel.id}>!`)
                 .build();
-            await interaction.reply({ components: [card] });
+            await sendResponse(interaction, [card], false);
             return;
         }
     }

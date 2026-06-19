@@ -203,7 +203,11 @@ export function setupMusic(client: FadeClient): void {
             const player = client.music?.players.get(newState.guild.id);
             if (player) {
                 logger.info(`[Music] Bot was disconnected from voice in guild ${newState.guild.id}, destroying player`);
-                player.destroy();
+                try {
+                    player.destroy();
+                } catch (err) {
+                    // Ignore if already destroyed
+                }
             }
         }
     });
