@@ -14,11 +14,25 @@ async function handleScrapbookReaction(reaction: MessageReaction, user: User) {
 
     const reactionCount = message.reactions.cache.reduce((acc, r) => acc + r.count, 0);
 
-    // Comedy count (😂, 🤣, 💀, 😭)
+    // Comedy count (😂, 🤣, 💀, 😭) + custom emojis with funny keywords
     const comedyEmojis = ['😂', '🤣', '💀', '😭'];
+    const comedyKeywords = ['lmao', 'lol', 'kek', 'skull', 'dead', 'haha', 'funny'];
+
     let comedyCount = 0;
     for (const r of message.reactions.cache.values()) {
-        if (r.emoji.name && comedyEmojis.includes(r.emoji.name)) {
+        if (!r.emoji.name) continue;
+        const name = r.emoji.name.toLowerCase();
+        
+        let isComedy = comedyEmojis.includes(r.emoji.name);
+        if (!isComedy) {
+            for (const kw of comedyKeywords) {
+                if (name.includes(kw)) {
+                    isComedy = true;
+                    break;
+                }
+            }
+        }
+        if (isComedy) {
             comedyCount += r.count;
         }
     }

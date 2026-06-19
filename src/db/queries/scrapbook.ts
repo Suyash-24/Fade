@@ -1,34 +1,23 @@
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { db } from '../index.js';
-import { scrapbookConfig, scrapbookUsers, scrapbookMessages } from '../schema.js';
+import { scrapbookUsers, scrapbookMessages, scrapbookArchives } from '../schema.js';
 
-export async function isScrapbookEnabled(guildId: string): Promise<boolean> {
-    const config = await db.select().from(scrapbookConfig).where(eq(scrapbookConfig.guildId, guildId)).limit(1);
-    return config[0]?.enabled ?? false;
-}
-
-export async function setScrapbookChannel(guildId: string, channelId: string): Promise<void> {
-    await db.insert(scrapbookConfig)
-        .values({ guildId, channelId, enabled: true })
+export async function saveScrapbookArchive(guildId: string, data: any): Promise<void> {
+    await db.insert(scrapbookArchives)
+        .values({ guildId, snapshotData: data })
         .onConflictDoUpdate({
-            target: scrapbookConfig.guildId,
-            set: { channelId, enabled: true }
+            target: scrapbookArchives.guildId,
+            set: { snapshotData: data, createdAt: new Date() }
         });
 }
 
-export async function disableScrapbook(guildId: string): Promise<void> {
-    await db.update(scrapbookConfig).set({ enabled: false }).where(eq(scrapbookConfig.guildId, guildId));
+export async function getLatestScrapbookArchive(guildId: string) {
+    const archive = await db.select().from(scrapbookArchives).where(eq(scrapbookArchives.guildId, guildId)).limit(1);
+    return archive[0]?.snapshotData ?? null;
 }
 
-export async function getEnabledScrapbookGuilds() {
-    return await db.select().from(scrapbookConfig).where(eq(scrapbookConfig.enabled, true));
-}
-
-// Stats tracking
+// Stats tracking (always on, no enable/disable checks)
 export async function incrementScrapbookMessageCount(guildId: string, userId: string): Promise<void> {
-    const isEnabled = await isScrapbookEnabled(guildId);
-    if (!isEnabled) return;
-
     await db.insert(scrapbookUsers)
         .values({ guildId, userId, messageCount: 1, voiceSeconds: 0 })
         .onConflictDoUpdate({
@@ -38,9 +27,6 @@ export async function incrementScrapbookMessageCount(guildId: string, userId: st
 }
 
 export async function addScrapbookVoiceSeconds(guildId: string, userId: string, seconds: number): Promise<void> {
-    const isEnabled = await isScrapbookEnabled(guildId);
-    if (!isEnabled) return;
-
     await db.insert(scrapbookUsers)
         .values({ guildId, userId, messageCount: 0, voiceSeconds: seconds })
         .onConflictDoUpdate({
@@ -57,9 +43,6 @@ export async function upsertScrapbookMessage(
     reactionCount: number, 
     comedyCount: number
 ): Promise<void> {
-    const isEnabled = await isScrapbookEnabled(guildId);
-    if (!isEnabled) return;
-
     await db.insert(scrapbookMessages)
         .values({ guildId, messageId, authorId, content, reactionCount, comedyCount })
         .onConflictDoUpdate({
@@ -86,7 +69,6 @@ export async function getScrapbookWinners(guildId: string) {
         .from(scrapbookMessages)
         .where(and(
             eq(scrapbookMessages.guildId, guildId),
-            // ensure it's not totally blank
             sql`length(content) > 1`
         ))
         .orderBy(desc(scrapbookMessages.reactionCount))
@@ -109,7 +91,8 @@ export async function getScrapbookWinners(guildId: string) {
     };
 }
 
-export async function wipeWeeklyScrapbookData(guildId: string): Promise<void> {
-    await db.delete(scrapbookUsers).where(eq(scrapbookUsers.guildId, guildId));
-    await db.delete(scrapbookMessages).where(eq(scrapbookMessages.guildId, guildId));
+// Global Wiping
+export async function wipeAllWeeklyScrapbookData(): Promise<void> {
+    await db.delete(scrapbookUsers);
+    await db.delete(scrapbookMessages);
 }

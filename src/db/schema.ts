@@ -945,10 +945,10 @@ export const repCooldowns = pgTable('rep_cooldowns', {
 // WEEKLY SCRAPBOOK
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-export const scrapbookConfig = pgTable('scrapbook_config', {
+export const scrapbookArchives = pgTable('scrapbook_archives', {
     guildId:   snowflake('guild_id').primaryKey().references(() => guilds.guildId, { onDelete: 'cascade' }),
-    channelId: snowflake('channel_id').notNull(),
-    enabled:   boolean('enabled').default(false).notNull(),
+    snapshotData: jsonb('snapshot_data').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 export const scrapbookUsers = pgTable('scrapbook_users', {

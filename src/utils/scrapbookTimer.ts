@@ -1,21 +1,16 @@
 import type { FadeClient } from '../client.js';
-import { getEnabledScrapbookGuilds, getScrapbookWinners, wipeWeeklyScrapbookData } from '../db/queries/scrapbook.js';
-import { generateScrapbookCard, ScrapbookData } from './canvas/scrapbookCard.js';
+import { getScrapbookWinners, wipeAllWeeklyScrapbookData, saveScrapbookArchive } from '../db/queries/scrapbook.js';
+import { ScrapbookData } from './canvas/scrapbookCard.js';
 import { logger } from './logger.js';
-import { AttachmentBuilder, TextChannel } from 'discord.js';
 
 let lastRunDate = new Date().toDateString();
 
 export async function processWeeklyScrapbooks(client: FadeClient) {
-    const guilds = await getEnabledScrapbookGuilds();
-    for (const conf of guilds) {
+    logger.info('Taking weekly Scrapbook snapshots for all guilds...');
+    
+    // Loop through all guilds Fade is in
+    for (const guild of client.guilds.cache.values()) {
         try {
-            const guild = client.guilds.cache.get(conf.guildId);
-            if (!guild) continue;
-
-            const channel = guild.channels.cache.get(conf.channelId) as TextChannel;
-            if (!channel) continue;
-
             const winners = await getScrapbookWinners(guild.id);
             
             // Map DB winners to Canvas ScrapbookData format
@@ -70,21 +65,19 @@ export async function processWeeklyScrapbooks(client: FadeClient) {
                 }
             }
 
-            const buffer = await generateScrapbookCard(data);
-            const attachment = new AttachmentBuilder(buffer, { name: 'scrapbook.png' });
-
-            await channel.send({
-                content: '📸 **Your Weekly Server Scrapbook is here!**\nHere are the top moments, most active members, and funniest quotes from this week:',
-                files: [attachment]
-            });
-
-            // Wipe data for next week
-            await wipeWeeklyScrapbookData(guild.id);
+            // Save the snapshot for this guild
+            if (Object.keys(data).length > 0) {
+                await saveScrapbookArchive(guild.id, data);
+            }
 
         } catch (err) {
-            logger.error(`Failed to process scrapbook for guild ${conf.guildId}`, err);
+            logger.error(`Failed to process scrapbook snapshot for guild ${guild.id}`, err);
         }
     }
+
+    // Wipe data for all guilds globally to start the next week fresh
+    await wipeAllWeeklyScrapbookData();
+    logger.info('Weekly Scrapbook snapshots complete. Data wiped.');
 }
 
 export function startScrapbookTimer(client: FadeClient) {
@@ -94,6 +87,7 @@ export function startScrapbookTimer(client: FadeClient) {
         const is12PM = now.getUTCHours() === 12;
         const is0Minute = now.getUTCMinutes() === 0;
 
+        // Note: For testing, you could bypass this if statement manually
         if (isSunday && is12PM && is0Minute) {
             const todayStr = now.toDateString();
             if (lastRunDate !== todayStr) {
@@ -103,5 +97,5 @@ export function startScrapbookTimer(client: FadeClient) {
         }
     }, 60 * 1000); // Check every minute
     
-    logger.info('Scrapbook timer started');
+    logger.info('Scrapbook snapshot timer started');
 }
