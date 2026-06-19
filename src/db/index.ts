@@ -13,6 +13,7 @@ if (!process.env.DATABASE_URL) {
 const client = postgres(process.env.DATABASE_URL, {
     max:             10,       // max connections (Supabase free: up to 15)
     max_lifetime:    1800,     // recycle connections every 30 min to avoid stale state
+    idle_timeout:    20,       // close idle connections before Supabase abruptly kills them
     connect_timeout: 10,       // fail fast if can't connect in 10s
     prepare:         false,    // disable prepared statements for PgBouncer/Supabase Pooler compat
 });
