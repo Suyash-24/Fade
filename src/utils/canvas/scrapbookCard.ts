@@ -78,11 +78,24 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
     const ctx = canvas.getContext('2d');
 
     // Background gradient (aesthetic dark/polaroid vibe)
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, '#1E1E24');
-    gradient.addColorStop(1, '#0B0B0E');
-    ctx.fillStyle = gradient;
+    const bgGradient = ctx.createLinearGradient(0, 0, width, height);
+    bgGradient.addColorStop(0, '#0f0f13');
+    bgGradient.addColorStop(1, '#050507');
+    ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, width, height);
+
+    // Aesthetic soft glows behind sections
+    const drawGlow = (x: number, y: number, radius: number, color: string) => {
+        const glow = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        glow.addColorStop(0, color);
+        glow.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, width, height);
+    };
+
+    drawGlow(200, 200, 500, 'rgba(65, 88, 208, 0.15)'); // Blue-ish purple top left
+    drawGlow(1000, 600, 600, 'rgba(200, 80, 192, 0.1)'); // Pinkish bottom right
+    drawGlow(600, 800, 400, 'rgba(255, 204, 112, 0.05)'); // Warm glow at bottom center
 
     // Title
     ctx.font = 'bold 50px RobotoBold, sans-serif';
@@ -126,7 +139,12 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
         ctx.font = 'italic 20px Roboto, sans-serif';
         ctx.fillStyle = '#DDDDDD';
         
-        const words = msg.content.split(' ');
+        // Sanitize raw mentions `<@123>` or `<@!123>` to `@User` for aesthetic display
+        const cleanMsg = msg.content
+            .replace(/<@!?\d+>/g, '@User')
+            .replace(/<#\d+>/g, '#channel');
+
+        const words = cleanMsg.split(' ');
         let line = '';
         let lineY = y + 160;
         for (let n = 0; n < words.length; n++) {

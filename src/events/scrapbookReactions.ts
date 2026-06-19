@@ -20,7 +20,7 @@ async function handleScrapbookReaction(reaction: MessageReaction, user: User) {
             message.guildId!,
             message.id,
             message.author.id,
-            message.content || '[Media Only]',
+            message.cleanContent || '[Media Only]',
             reactionCount,
             0
         ).catch(() => null);

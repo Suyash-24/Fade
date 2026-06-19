@@ -37,7 +37,7 @@ const command: Command = {
 
             await loadingMsg.delete().catch(() => {});
             await message.reply({
-                content: '📸 **Your Weekly Server Scrapbook!**\nHere are the top moments, most active members, and funniest quotes from last week:',
+                content: '📸 **Your Weekly Server Scrapbook!**\nHere are the top moments, most active members, and late night owls from last week:',
                 files: [attachment]
             });
         } catch (err) {
@@ -65,7 +65,7 @@ const command: Command = {
             const attachment = new AttachmentBuilder(buffer, { name: 'scrapbook.png' });
 
             await interaction.editReply({
-                content: '📸 **Your Weekly Server Scrapbook!**\nHere are the top moments, most active members, and funniest quotes from last week:',
+                content: '📸 **Your Weekly Server Scrapbook!**\nHere are the top moments, most active members, and late night owls from last week:',
                 components: [],
                 files: [attachment]
             });
