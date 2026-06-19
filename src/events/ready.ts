@@ -15,6 +15,7 @@ import { startSocialTimer } from '../utils/socialTimer.js';
 import { startFortniteTimer } from '../utils/fortniteTimer.js';
 import { startGithubStatsSync } from '../utils/githubStats.js';
 import { startScrapbookTimer } from '../utils/scrapbookTimer.js';
+import { initializeVoiceSessions } from './voiceScrapbook.js';
 import { getAll247 } from '../db/queries/twentyFourSeven.js';
 
 const event: Event<'clientReady'> = {
@@ -41,7 +42,9 @@ const event: Event<'clientReady'> = {
         startFortniteTimer(client);
         startGithubStatsSync(client);
         startScrapbookTimer(client);
+        initializeVoiceSessions(client);
 
+        // Resume 24/7 Voice connections
         // Streaming status
         const updateStatus = () => {
             const userCount = client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);

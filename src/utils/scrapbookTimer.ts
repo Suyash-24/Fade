@@ -2,12 +2,16 @@ import type { FadeClient } from '../client.js';
 import { getScrapbookWinners, wipeAllWeeklyScrapbookData, saveScrapbookArchive } from '../db/queries/scrapbook.js';
 import { ScrapbookData } from './canvas/scrapbookCard.js';
 import { logger } from './logger.js';
+import { flushVoiceSessions } from '../events/voiceScrapbook.js';
 
 let lastRunDate = new Date().toDateString();
 
 export async function processWeeklyScrapbooks(client: FadeClient) {
     logger.info('Taking weekly Scrapbook snapshots for all guilds...');
     
+    // Ensure all ongoing voice sessions are synced to the database before compiling winners
+    await flushVoiceSessions();
+
     // Loop through all guilds Fade is in
     for (const guild of client.guilds.cache.values()) {
         try {
