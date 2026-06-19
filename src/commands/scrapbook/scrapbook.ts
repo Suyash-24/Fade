@@ -35,13 +35,14 @@ const command: Command = {
             const buffer = await generateScrapbookCard(archive as ScrapbookData);
             const attachment = new AttachmentBuilder(buffer, { name: 'scrapbook.png' });
 
-            await loadingMsg.edit({
+            await loadingMsg.delete().catch(() => {});
+            await message.reply({
                 content: '📸 **Your Weekly Server Scrapbook!**\nHere are the top moments, most active members, and funniest quotes from last week:',
-                components: [],
                 files: [attachment]
             });
         } catch (err) {
-            await loadingMsg.edit({ content: `Failed to generate scrapbook image.`, components: [] });
+            await loadingMsg.delete().catch(() => {});
+            await message.reply('Failed to generate scrapbook image.');
         }
     },
 
