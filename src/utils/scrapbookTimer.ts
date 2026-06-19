@@ -53,14 +53,13 @@ export async function processWeeklyScrapbooks(client: FadeClient) {
                 }
             }
 
-            if (winners.funniestMessage) {
-                const member = await guild.members.fetch(winners.funniestMessage.authorId).catch(() => null);
+            if (winners.topNightOwl && winners.topNightOwl.nightOwlCount > 0) {
+                const member = await guild.members.fetch(winners.topNightOwl.userId).catch(() => null);
                 if (member) {
-                    data.funniestMessage = {
+                    data.topNightOwl = {
                         username: member.user.username,
                         avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256 }),
-                        content: winners.funniestMessage.content,
-                        reactions: winners.funniestMessage.comedyCount
+                        messages: winners.topNightOwl.nightOwlCount
                     };
                 }
             }

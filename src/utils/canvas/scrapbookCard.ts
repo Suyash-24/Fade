@@ -66,7 +66,7 @@ export interface ScrapbookData {
     topChatter?: { username: string; avatarUrl: string; messages: number } | null;
     topVoiceDuo?: { username: string; avatarUrl: string; voiceSeconds: number }[] | null;
     topMessage?: { username: string; avatarUrl: string; content: string; reactions: number } | null;
-    funniestMessage?: { username: string; avatarUrl: string; content: string; reactions: number } | null;
+    topNightOwl?: { username: string; avatarUrl: string; messages: number } | null;
 }
 
 export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer> {
@@ -88,7 +88,7 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
     ctx.font = 'bold 50px RobotoBold, sans-serif';
     ctx.fillStyle = '#FFFFFF';
     ctx.textAlign = 'center';
-    ctx.fillText('📸 WEEKLY SCRAPBOOK', width / 2, 70);
+    ctx.fillText('WEEKLY SCRAPBOOK', width / 2, 70);
 
     // Grid layout: 2 columns, 2 rows
     // Col 1: Top Message (Top left), Funniest Quote (Bottom left)
@@ -104,7 +104,7 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
         ctx.font = 'bold 24px RobotoBold, sans-serif';
         ctx.fillStyle = '#A3A3A3';
         ctx.textAlign = 'left';
-        ctx.fillText(`${icon} ${title}`, x + 30, y + 45);
+        ctx.fillText(title, x + 30, y + 45);
 
         if (!msg) {
             ctx.font = '20px Roboto, sans-serif';
@@ -149,7 +149,7 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
         ctx.font = 'bold 20px RobotoBold, sans-serif';
         ctx.fillStyle = '#FFD700'; // Gold
         ctx.textAlign = 'right';
-        ctx.fillText(`${icon.includes('⭐') ? '⭐' : '😂'} ${msg.reactions}`, x + 490, y + 45);
+        ctx.fillText(`${msg.reactions} reactions`, x + 490, y + 45);
     }
 
     // --- Render Polaroid Helper ---
@@ -188,10 +188,42 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
     }
 
     // Top Message (Left Top)
-    await drawMessageBubble(50, 120, 'Top Message', data.topMessage, '⭐');
+    await drawMessageBubble(50, 120, 'Top Message', data.topMessage, '');
     
-    // Funniest Quote (Left Bottom)
-    await drawMessageBubble(50, 440, 'Funniest Quote', data.funniestMessage, '😂');
+    // The Night Owl (Left Bottom)
+    // We will draw it as a horizontal banner card instead of a text bubble
+    drawRoundedRect(ctx, 50, 440, 520, 280, 20, 'rgba(255, 255, 255, 0.05)');
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.font = 'bold 24px RobotoBold, sans-serif';
+    ctx.fillStyle = '#A3A3A3';
+    ctx.textAlign = 'left';
+    ctx.fillText('The Night Owl', 80, 485);
+
+    ctx.font = 'italic 18px Roboto, sans-serif';
+    ctx.fillStyle = '#777777';
+    ctx.fillText('Most messages between 12 AM and 6 AM', 80, 515);
+
+    if (data.topNightOwl) {
+        try {
+            const avatar = await loadImage(data.topNightOwl.avatarUrl);
+            drawRoundedImage(ctx, avatar, 80, 550, 100, 50); // Circle avatar
+        } catch { }
+
+        ctx.font = 'bold 32px RobotoBold, sans-serif';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(data.topNightOwl.username, 210, 595);
+
+        ctx.font = '22px Roboto, sans-serif';
+        ctx.fillStyle = '#AAAAAA';
+        ctx.fillText(`${data.topNightOwl.messages} late night msgs`, 210, 630);
+    } else {
+        ctx.font = '20px Roboto, sans-serif';
+        ctx.fillStyle = '#555555';
+        ctx.fillText('No night owls this week.', 80, 600);
+    }
 
     // Top Chatter Polaroid (Right Top)
     await drawPolaroid(750, 150, 'TOP CHATTER', data.topChatter, data.topChatter ? `${data.topChatter.messages} msgs` : '');

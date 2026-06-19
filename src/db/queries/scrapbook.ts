@@ -18,17 +18,23 @@ export async function getLatestScrapbookArchive(guildId: string) {
 
 // Stats tracking (always on, no enable/disable checks)
 export async function incrementScrapbookMessageCount(guildId: string, userId: string): Promise<void> {
+    const isNightOwl = new Date().getUTCHours() >= 0 && new Date().getUTCHours() < 6;
+    const nightOwlIncr = isNightOwl ? 1 : 0;
+
     await db.insert(scrapbookUsers)
-        .values({ guildId, userId, messageCount: 1, voiceSeconds: 0 })
+        .values({ guildId, userId, messageCount: 1, nightOwlCount: nightOwlIncr, voiceSeconds: 0 })
         .onConflictDoUpdate({
             target: [scrapbookUsers.guildId, scrapbookUsers.userId],
-            set: { messageCount: sql`scrapbook_users.message_count + 1` }
+            set: { 
+                messageCount: sql`scrapbook_users.message_count + 1`,
+                nightOwlCount: sql`scrapbook_users.night_owl_count + ${nightOwlIncr}`
+            }
         });
 }
 
 export async function addScrapbookVoiceSeconds(guildId: string, userId: string, seconds: number): Promise<void> {
     await db.insert(scrapbookUsers)
-        .values({ guildId, userId, messageCount: 0, voiceSeconds: seconds })
+        .values({ guildId, userId, messageCount: 0, nightOwlCount: 0, voiceSeconds: seconds })
         .onConflictDoUpdate({
             target: [scrapbookUsers.guildId, scrapbookUsers.userId],
             set: { voiceSeconds: sql`scrapbook_users.voice_seconds + ${seconds}` }
@@ -74,20 +80,17 @@ export async function getScrapbookWinners(guildId: string) {
         .orderBy(desc(scrapbookMessages.reactionCount))
         .limit(1);
 
-    const funniestMessage = await db.select()
-        .from(scrapbookMessages)
-        .where(and(
-            eq(scrapbookMessages.guildId, guildId),
-            sql`length(content) > 1`
-        ))
-        .orderBy(desc(scrapbookMessages.comedyCount))
+    const topNightOwl = await db.select()
+        .from(scrapbookUsers)
+        .where(eq(scrapbookUsers.guildId, guildId))
+        .orderBy(desc(scrapbookUsers.nightOwlCount))
         .limit(1);
 
     return {
         topChatter: topChatter[0] ?? null,
         topVoiceDuo: topVoiceDuo.length > 0 ? topVoiceDuo : null,
         topMessage: topMessage[0] ?? null,
-        funniestMessage: funniestMessage[0] ?? null,
+        topNightOwl: topNightOwl[0] ?? null,
     };
 }
 

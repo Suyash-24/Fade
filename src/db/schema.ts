@@ -955,6 +955,7 @@ export const scrapbookUsers = pgTable('scrapbook_users', {
     guildId:      snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
     userId:       snowflake('user_id').notNull(),
     messageCount: integer('message_count').default(0).notNull(),
+    nightOwlCount: integer('night_owl_count').default(0).notNull(),
     voiceSeconds: integer('voice_seconds').default(0).notNull(),
 }, (t) => [
     primaryKey({ columns: [t.guildId, t.userId] }),

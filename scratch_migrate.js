@@ -30,6 +30,12 @@ async function run() {
         `;
         console.log('Created vanity_roles');
 
+        await sql`
+            ALTER TABLE scrapbook_users 
+            ADD COLUMN IF NOT EXISTS night_owl_count INTEGER NOT NULL DEFAULT 0;
+        `;
+        console.log('Added night_owl_count to scrapbook_users');
+
         console.log('Done!');
     } catch (e) {
         console.error(e);
