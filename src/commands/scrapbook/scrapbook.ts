@@ -10,7 +10,7 @@ const command: Command = {
         .setName('scrapbook')
         .setDescription('View the Weekly Server Scrapbook (updates every Sunday)'),
 
-    category: 'community',
+    category: 'scrapbook',
     cooldown: 10,
 
     async prefixExecute(message) {
