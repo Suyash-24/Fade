@@ -40,6 +40,11 @@ export default {
     },
 
     async prefixExecute(message, args, client) {
+        if (!message.guild?.members.me?.permissionsIn(message.channel as any).has('AttachFiles')) {
+            await message.reply('I need the **Attach Files** permission in this channel to send reputation cards!').catch(() => null);
+            return;
+        }
+
         let user = message.author;
         if (args.length > 0) {
             const targetId = args[0].replace(/[<@!>]/g, '');
@@ -48,7 +53,7 @@ export default {
         }
 
         if (user.bot) {
-            await message.reply('Bots do not have reputation profiles.');
+            await message.reply('Bots do not have reputation profiles.').catch(() => null);
             return;
         }
 
