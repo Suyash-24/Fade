@@ -116,20 +116,56 @@ export function setupMusic(client: FadeClient): void {
                 const lastTrack = previous?.[0] ?? null;
 
                 if (lastTrack && client.music) {
-                    const query  = `${lastTrack.author ?? ''} ${lastTrack.title} mix`.trim();
-                    const result = await client.music.search(query, {
-                        requester: null as any,
-                        engine:    'youtube' as any,
-                    });
+                    let result: any = null;
+                    const isSpotify = lastTrack.sourceName === 'spotify' || lastTrack.uri?.includes('spotify');
+                    
+                    // 1. If it's a Spotify track, try LavaSrc's Spotify Recommendations first
+                    if (isSpotify && lastTrack.identifier) {
+                        try {
+                            const spQuery = `sprec:seed_tracks=${lastTrack.identifier}`;
+                            const spResult = await client.music.search(spQuery, { requester: null as any });
+                            if (spResult && spResult.tracks && spResult.tracks.length > 0) {
+                                result = spResult;
+                            }
+                        } catch {
+                            // Silently ignore if LavaSrc isn't installed or fails, we will fallback
+                        }
+                    }
+
+                    // 2. Fallback to YouTube Mix (works for both YouTube tracks natively, or Spotify tracks by text search fallback)
+                    if (!result || !result.tracks || result.tracks.length === 0) {
+                        let ytQuery = '';
+                        if (!isSpotify && lastTrack.identifier) {
+                            // It's a YouTube track, so we can use its ID for a native mix
+                            ytQuery = `https://www.youtube.com/watch?v=${lastTrack.identifier}&list=RD${lastTrack.identifier}`;
+                        } else {
+                            // Fallback for Spotify track without LavaSrc: search youtube for the title and author, get top result, and build a mix from it
+                            const fbSearch = await client.music.search(`ytsearch:${lastTrack.author} ${lastTrack.title}`, { requester: null as any });
+                            if (fbSearch && fbSearch.tracks && fbSearch.tracks.length > 0) {
+                                const fbId = fbSearch.tracks[0].identifier;
+                                ytQuery = `https://www.youtube.com/watch?v=${fbId}&list=RD${fbId}`;
+                            }
+                        }
+
+                        if (ytQuery) {
+                            result = await client.music.search(ytQuery, { requester: null as any });
+                        }
+                    }
 
                     if (result?.tracks?.length) {
-                        // Pick a random track that isn't the same as the last one
-                        const candidates = result.tracks.filter(
-                            (t: KazagumoTrack) => t.identifier !== lastTrack.identifier,
-                        );
-                        const pick = candidates.length
-                            ? candidates[Math.floor(Math.random() * candidates.length)]
-                            : result.tracks[0];
+                        // Filter out tracks we have already played recently
+                        const playedIds = new Set(previous?.map(t => t.identifier) || []);
+                        playedIds.add(lastTrack.identifier); // Always exclude the exact last track
+                        
+                        let candidates = result.tracks.filter((t: KazagumoTrack) => !playedIds.has(t.identifier));
+                        
+                        // If everything was filtered out, just pick a random one to prevent playback stopping
+                        if (candidates.length === 0) {
+                            candidates = result.tracks;
+                        }
+
+                        // Pick one of the top 5 candidates to keep relevance high but add slight variety
+                        const pick = candidates[Math.floor(Math.random() * Math.min(candidates.length, 5))];
 
                         player.queue.add(pick);
                         if (!player.playing && !player.paused) {
