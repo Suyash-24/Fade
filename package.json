@@ -16,11 +16,13 @@
     "node": ">=18.17.0"
   },
   "dependencies": {
+    "@huggingface/transformers": "^3.5.2",
     "@kamipl/kick-api-lite": "^1.0.1",
     "@napi-rs/canvas": "^1.0.0",
     "discord.js": "^14.15.3",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
+    "groq-sdk": "^0.15.0",
     "kazagumo": "^3.4.3",
     "postgres": "^3.4.9",
     "shoukaku": "^4.3.0"

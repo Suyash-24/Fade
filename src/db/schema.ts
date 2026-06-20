@@ -973,3 +973,26 @@ export const scrapbookMessages = pgTable('scrapbook_messages', {
 }, (t) => [
     uniqueIndex('scrapbook_msg_unique_idx').on(t.guildId, t.messageId),
 ]);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SERVER MEMORY AI
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Stores guild "memories" — facts taught by admins or scraped from channels.
+// The embedding column is stored as TEXT (JSON array) since Drizzle doesn't have
+// a built-in pgvector type. Raw SQL is used for cosine similarity searches.
+export const serverMemories = pgTable('server_memories', {
+    id:        serial('id').primaryKey(),
+    guildId:   snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    content:   text('content').notNull(),               // The raw fact/text
+    addedBy:   snowflake('added_by').notNull(),          // Discord user ID of who added it
+    embedding: text('embedding').notNull(),              // JSON stringified number[] vector
+    createdAt: now(),
+});
+
+// Per-guild AI config
+export const aiConfig = pgTable('ai_config', {
+    guildId:   snowflake('guild_id').primaryKey().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    enabled:   boolean('enabled').default(true).notNull(),
+    updatedAt: updatedAt(),
+});

@@ -13,6 +13,10 @@ import { getNoPrefixUser } from '../db/queries/noPrefix.js';
 import { FadeContainer, sendMessage, thumb } from '../components/builders.js';
 import { getGuildRoleAliases, getReqRole } from '../db/queries/roleAliases.js';
 import { incrementScrapbookMessageCount } from '../db/queries/scrapbook.js';
+import { askBrain, isAiEnabled } from '../utils/aiMemory.js';
+
+// Per-user AI cooldown (10 seconds)
+const aiCooldowns = new Map<string, number>();
 
 // Per-guild alias cache: guildId → Map<alias, command>
 const aliasCache = new Map<string, { data: Map<string, string>; expiresAt: number }>();
@@ -72,6 +76,49 @@ const event: Event<'messageCreate'> = {
                 
             await sendMessage(message, [card]);
             return;
+        }
+
+        // ── AI Brain Handler (mention with a question) ─────────────────────
+        const mentionRegex = new RegExp(`^<@!?${client.user?.id}>\\s+`);
+        if (client.user?.id && mentionRegex.test(message.content)) {
+            const question = message.content.replace(mentionRegex, '').trim();
+
+            if (question.length > 3 && await isAiEnabled(guild.id)) {
+                const cooldownKey = `${guild.id}:${message.author.id}`;
+                const now = Date.now();
+                const lastUsed = aiCooldowns.get(cooldownKey) ?? 0;
+
+                if (now - lastUsed < 10_000) {
+                    await message.react('⏳').catch(() => {});
+                    return;
+                }
+                aiCooldowns.set(cooldownKey, now);
+
+                // Show typing while we compute
+                await message.channel.sendTyping().catch(() => {});
+
+                try {
+                    const result = await askBrain(guild.id, question);
+
+                    if (!result) {
+                        // No relevant memory found
+                        const card = new FadeContainer()
+                            .text(`🧠 I don't have any information about that yet. Ask an admin to use \`f!memory add\` to teach me!`)
+                            .build();
+                        await sendMessage(message, [card]);
+                        return;
+                    }
+
+                    const card = new FadeContainer()
+                        .text(`${result.answer}\n\n-# 🧠 Fade remembers · Powered by ${result.provider}`)
+                        .build();
+                    await sendMessage(message, [card]);
+                } catch (err) {
+                    logger.error('[AI] Brain error', err);
+                    await message.reply('❌ Something went wrong searching my memory.').catch(() => {});
+                }
+                return;
+            }
         }
 
         // Resolve which prefix was used — custom prefix OR always-on default
