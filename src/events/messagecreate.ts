@@ -110,7 +110,7 @@ const event: Event<'messageCreate'> = {
                     }
 
                     const card = new FadeContainer()
-                        .text(`${result.answer}\n\n-# 🧠 Fade remembers · Powered by ${result.provider}`)
+                        .text(`${result.answer}\n\n*🧠 Fade remembers · ${result.provider}*`)
                         .build();
                     await sendMessage(message, [card]);
                 } catch (err) {
