@@ -16,15 +16,15 @@ let embedder: any = null;
 async function getEmbedder() {
     if (embedder) return embedder;
     logger.info('[AI] Loading local embedding model (first-time, ~30MB)...');
-    // Dynamic import used so TS doesn't fail if types aren't installed locally
-    // The package is in package.json and installs on Railway
     const { pipeline } = await import('@huggingface/transformers' as any);
-    embedder = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
-        // Run on CPU — no GPU needed
-        dtype: 'fp32',
-    });
+    embedder = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', { dtype: 'fp32' });
     logger.info('[AI] Embedding model ready.');
     return embedder;
+}
+
+// Pre-warm so first user question is instant — called non-blocking at startup
+export async function warmEmbedder(): Promise<void> {
+    try { await getEmbedder(); } catch { /* retry on first use */ }
 }
 
 // ── Embedding generation ────────────────────────────────────────────────────
@@ -96,7 +96,7 @@ export async function searchMemory(
     return scored
         .sort((a, b) => b.similarity - a.similarity)
         .slice(0, topK)
-        .filter(r => r.similarity > 0.25); // Ignore anything below 25% relevance
+        .filter(r => r.similarity > 0.15); // 15% threshold to handle paraphrase variants
 }
 
 // ── Full pipeline: search + generate ─────────────────────────────────────────

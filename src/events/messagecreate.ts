@@ -79,7 +79,7 @@ const event: Event<'messageCreate'> = {
         }
 
         // ── AI Brain Handler (mention with a question) ─────────────────────
-        const mentionRegex = new RegExp(`^<@!?${client.user?.id}>\\s+`);
+        const mentionRegex = new RegExp(`^<@!?${client.user?.id}>\\s*`);
         if (client.user?.id && mentionRegex.test(message.content)) {
             const question = message.content.replace(mentionRegex, '').trim();
 
