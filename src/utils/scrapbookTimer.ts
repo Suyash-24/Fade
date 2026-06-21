@@ -25,7 +25,7 @@ export async function processWeeklyScrapbooks(client: FadeClient) {
                 if (member) {
                     data.topChatter = {
                         username: member.user.username,
-                        avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256 }),
+                        avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256, forceStatic: true }),
                         messages: winners.topChatter.messageCount
                     };
                 }
@@ -38,7 +38,7 @@ export async function processWeeklyScrapbooks(client: FadeClient) {
                     if (member) {
                         data.topVoiceDuo.push({
                             username: member.user.username,
-                            avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256 }),
+                            avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256, forceStatic: true }),
                             voiceSeconds: u.voiceSeconds
                         });
                     }
@@ -50,7 +50,7 @@ export async function processWeeklyScrapbooks(client: FadeClient) {
                 if (member) {
                     data.topMessage = {
                         username: member.user.username,
-                        avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256 }),
+                        avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256, forceStatic: true }),
                         content: winners.topMessage.content,
                         reactions: winners.topMessage.reactionCount
                     };
@@ -62,7 +62,7 @@ export async function processWeeklyScrapbooks(client: FadeClient) {
                 if (member) {
                     data.topNightOwl = {
                         username: member.user.username,
-                        avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256 }),
+                        avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256, forceStatic: true }),
                         messages: winners.topNightOwl.nightOwlCount
                     };
                 }

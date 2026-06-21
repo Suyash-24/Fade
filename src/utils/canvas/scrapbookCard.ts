@@ -77,6 +77,32 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
+    // Safely load an avatar — if the URL fails or the image is a broken GIF,
+    // falls back to drawing a coloured circle with the user's initial.
+    async function loadAvatarSafe(
+        avatarUrl: string,
+        x: number, y: number,
+        size: number, radius: number,
+        username: string,
+        bgColor = '#5865F2'
+    ) {
+        try {
+            // Force static PNG by replacing .gif extension and appending format param
+            const staticUrl = avatarUrl
+                .replace(/\.gif(\?|$)/, '.png$1')
+                .replace(/\?(.*)$/, (_, q) => `?${q.replace(/format=gif/, 'format=png')}`);
+            const avatar = await loadImage(staticUrl);
+            drawRoundedImage(ctx, avatar, x, y, size, radius);
+        } catch {
+            // Fallback: coloured square with user's initial
+            drawRoundedRect(ctx, x, y, size, size, radius, bgColor);
+            ctx.font = `bold ${Math.floor(size * 0.45)}px RobotoBold, sans-serif`;
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textAlign = 'center';
+            ctx.fillText(username.charAt(0).toUpperCase(), x + size / 2, y + size / 2 + size * 0.15);
+        }
+    }
+
     // Background gradient (aesthetic dark/polaroid vibe)
     const bgGradient = ctx.createLinearGradient(0, 0, width, height);
     bgGradient.addColorStop(0, '#0f0f13');
@@ -129,7 +155,9 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
         try {
             const avatar = await loadImage(msg.avatarUrl);
             drawRoundedImage(ctx, avatar, x + 30, y + 70, 50, 25);
-        } catch { }
+        } catch {
+            await loadAvatarSafe(msg.avatarUrl, x + 30, y + 70, 50, 25, msg.username);
+        }
 
         ctx.font = 'bold 22px RobotoBold, sans-serif';
         ctx.fillStyle = '#FFFFFF';
@@ -181,7 +209,9 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
             try {
                 const avatar = await loadImage(user.avatarUrl);
                 drawRoundedImage(ctx, avatar, x + 15, y + 15, 220, 5);
-            } catch { }
+            } catch {
+                await loadAvatarSafe(user.avatarUrl, x + 15, y + 15, 220, 5, user.username);
+            }
             
             ctx.font = 'bold 24px RobotoBold, sans-serif';
             ctx.fillStyle = '#000000';
@@ -227,8 +257,10 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
     if (data.topNightOwl) {
         try {
             const avatar = await loadImage(data.topNightOwl.avatarUrl);
-            drawRoundedImage(ctx, avatar, 80, 550, 100, 50); // Circle avatar
-        } catch { }
+            drawRoundedImage(ctx, avatar, 80, 550, 100, 50);
+        } catch {
+            await loadAvatarSafe(data.topNightOwl.avatarUrl, 80, 550, 100, 50, data.topNightOwl.username);
+        }
 
         ctx.font = 'bold 32px RobotoBold, sans-serif';
         ctx.fillStyle = '#FFFFFF';
