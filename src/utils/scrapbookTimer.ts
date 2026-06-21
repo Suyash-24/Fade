@@ -4,7 +4,10 @@ import { ScrapbookData } from './canvas/scrapbookCard.js';
 import { logger } from './logger.js';
 import { flushVoiceSessions } from '../events/voiceScrapbook.js';
 
-let lastRunDate = new Date().toDateString();
+// Initialize to '' so the first Sunday 12 PM UTC check always fires correctly.
+// Previously was new Date().toDateString() which caused the run to be skipped
+// if the bot started on the same day as the scheduled run.
+let lastRunDate = '';
 
 export async function processWeeklyScrapbooks(client: FadeClient) {
     logger.info('Taking weekly Scrapbook snapshots for all guilds...');
@@ -84,13 +87,26 @@ export async function processWeeklyScrapbooks(client: FadeClient) {
 }
 
 export function startScrapbookTimer(client: FadeClient) {
+    // Catch-up check: if the bot starts on a Sunday after 12:00 PM UTC and
+    // hasn't run yet today, run immediately (handles restarts mid-day).
+    const bootCheck = new Date();
+    const bootIsSunday = bootCheck.getUTCDay() === 0;
+    const bootPast12PM = bootCheck.getUTCHours() >= 12;
+    if (bootIsSunday && bootPast12PM) {
+        const todayStr = bootCheck.toDateString();
+        if (lastRunDate !== todayStr) {
+            lastRunDate = todayStr;
+            logger.info('[Scrapbook] Bot started after scheduled window — running catch-up now.');
+            processWeeklyScrapbooks(client);
+        }
+    }
+
     setInterval(() => {
         const now = new Date();
         const isSunday = now.getUTCDay() === 0;
         const is12PM = now.getUTCHours() === 12;
         const is0Minute = now.getUTCMinutes() === 0;
 
-        // Note: For testing, you could bypass this if statement manually
         if (isSunday && is12PM && is0Minute) {
             const todayStr = now.toDateString();
             if (lastRunDate !== todayStr) {
