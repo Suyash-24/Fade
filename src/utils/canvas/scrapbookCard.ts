@@ -152,12 +152,8 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
             return;
         }
 
-        try {
-            const avatar = await loadImage(msg.avatarUrl);
-            drawRoundedImage(ctx, avatar, x + 30, y + 70, 50, 25);
-        } catch {
-            await loadAvatarSafe(msg.avatarUrl, x + 30, y + 70, 50, 25, msg.username);
-        }
+        // Always use loadAvatarSafe — loadImage succeeds on GIF but renders transparent
+        await loadAvatarSafe(msg.avatarUrl, x + 30, y + 70, 50, 25, msg.username);
 
         ctx.font = 'bold 22px RobotoBold, sans-serif';
         ctx.fillStyle = '#FFFFFF';
@@ -206,12 +202,8 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
         drawRoundedRect(ctx, x + 15, y + 15, 220, 220, 5, '#E0E0E0');
 
         if (user) {
-            try {
-                const avatar = await loadImage(user.avatarUrl);
-                drawRoundedImage(ctx, avatar, x + 15, y + 15, 220, 5);
-            } catch {
-                await loadAvatarSafe(user.avatarUrl, x + 15, y + 15, 220, 5, user.username);
-            }
+            // Always use loadAvatarSafe — loadImage succeeds on GIF but renders transparent
+            await loadAvatarSafe(user.avatarUrl, x + 15, y + 15, 220, 5, user.username);
             
             ctx.font = 'bold 24px RobotoBold, sans-serif';
             ctx.fillStyle = '#000000';
@@ -255,12 +247,8 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
     ctx.fillText('Most messages between 12 AM and 6 AM', 80, 515);
 
     if (data.topNightOwl) {
-        try {
-            const avatar = await loadImage(data.topNightOwl.avatarUrl);
-            drawRoundedImage(ctx, avatar, 80, 550, 100, 50);
-        } catch {
-            await loadAvatarSafe(data.topNightOwl.avatarUrl, 80, 550, 100, 50, data.topNightOwl.username);
-        }
+        // Always use loadAvatarSafe — loadImage succeeds on GIF but renders transparent
+        await loadAvatarSafe(data.topNightOwl.avatarUrl, 80, 550, 100, 50, data.topNightOwl.username);
 
         ctx.font = 'bold 32px RobotoBold, sans-serif';
         ctx.fillStyle = '#FFFFFF';
@@ -298,10 +286,9 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
             drawRoundedRect(ctx, x, y, 170, 210, 8, '#FFFFFF');
             
             if (user) {
-                try {
-                    const avatar = await loadImage(user.avatarUrl);
-                    drawRoundedImage(ctx, avatar, x + 10, y + 10, 150, 5);
-                } catch {}
+                // Always use loadAvatarSafe — loadImage succeeds on GIF but renders transparent
+                await loadAvatarSafe(user.avatarUrl, x + 10, y + 10, 150, 5, user.username);
+
                 ctx.font = 'bold 16px RobotoBold, sans-serif';
                 ctx.fillStyle = '#000000';
                 ctx.textAlign = 'center';
