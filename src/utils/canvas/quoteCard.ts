@@ -1,27 +1,22 @@
 // src/utils/canvas/quoteCard.ts
-// Generates a cinematic dark quote card image.
-// Layout: Avatar on the LEFT, large quote text on the RIGHT, author attribution below.
+// Cinematic dark quote card — clean, no colored accents, just premium typography.
 
 import { createCanvas, loadImage, GlobalFonts } from '@napi-rs/canvas';
 
 let fontLoaded = false;
-
 async function loadFonts() {
     if (fontLoaded) return;
     try {
-        const [boldRes, regRes, italicRes] = await Promise.all([
+        const [boldRes, regRes] = await Promise.all([
             fetch('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Bold.ttf'),
             fetch('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Regular.ttf'),
-            fetch('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Italic.ttf'),
         ]);
-        if (boldRes.ok)   GlobalFonts.register(Buffer.from(await boldRes.arrayBuffer()),   'RobotoBold');
-        if (regRes.ok)    GlobalFonts.register(Buffer.from(await regRes.arrayBuffer()),    'Roboto');
-        if (italicRes.ok) GlobalFonts.register(Buffer.from(await italicRes.arrayBuffer()), 'RobotoItalic');
+        if (boldRes.ok) GlobalFonts.register(Buffer.from(await boldRes.arrayBuffer()), 'RobotoBold');
+        if (regRes.ok)  GlobalFonts.register(Buffer.from(await regRes.arrayBuffer()),  'Roboto');
         fontLoaded = true;
-    } catch { /* fonts fall back to system */ }
+    } catch { }
 }
 
-// Draw a perfect circle avatar
 function drawCircleAvatar(ctx: any, img: any, cx: number, cy: number, r: number) {
     ctx.save();
     ctx.beginPath();
@@ -32,12 +27,10 @@ function drawCircleAvatar(ctx: any, img: any, cx: number, cy: number, r: number)
     ctx.restore();
 }
 
-// Word-wrap text and return lines
 function wrapText(ctx: any, text: string, maxWidth: number): string[] {
     const words = text.split(' ');
     const lines: string[] = [];
     let current = '';
-
     for (const word of words) {
         const test = current ? `${current} ${word}` : word;
         if (ctx.measureText(test).width > maxWidth && current) {
@@ -52,129 +45,113 @@ function wrapText(ctx: any, text: string, maxWidth: number): string[] {
 }
 
 export interface QuoteCardOptions {
-    content: string;       // The message text
-    authorName: string;    // Display name of the original author
-    authorHandle: string;  // Username (e.g. snowversefx)
-    avatarUrl: string;     // Author's avatar URL
-    quotedBy?: string;     // Who quoted it (optional, shown as watermark)
+    content:      string;
+    authorName:   string;
+    authorHandle: string;
+    avatarUrl:    string;
+    quotedBy?:    string;
 }
 
 export async function generateQuoteCard(opts: QuoteCardOptions): Promise<Buffer> {
     await loadFonts();
 
     const W = 960;
-    const H = 420;
+    const H = 400;
     const canvas = createCanvas(W, H);
-    const ctx = canvas.getContext('2d');
+    const ctx    = canvas.getContext('2d');
 
-    // ── Background ────────────────────────────────────────────────────────────
-    const bg = ctx.createLinearGradient(0, 0, W, H);
-    bg.addColorStop(0,   '#0d0d10');
-    bg.addColorStop(0.5, '#111115');
-    bg.addColorStop(1,   '#0a0a0d');
-    ctx.fillStyle = bg;
+    // ── Pure dark background ──────────────────────────────────────────────────
+    ctx.fillStyle = '#0e0e0e';
     ctx.fillRect(0, 0, W, H);
 
-    // Subtle radial glow behind avatar area
-    const glow = ctx.createRadialGradient(180, H / 2, 0, 180, H / 2, 260);
-    glow.addColorStop(0,   'rgba(88, 101, 242, 0.12)');
-    glow.addColorStop(1,   'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = glow;
+    // Soft vignette (dark edges, slightly lighter center) — cinematic feel
+    const vignette = ctx.createRadialGradient(W / 2, H / 2, 80, W / 2, H / 2, W * 0.75);
+    vignette.addColorStop(0, 'rgba(30, 30, 30, 0.4)');
+    vignette.addColorStop(1, 'rgba(0, 0, 0, 0.7)');
+    ctx.fillStyle = vignette;
     ctx.fillRect(0, 0, W, H);
 
-    // Thin left accent bar
-    ctx.fillStyle = '#5865F2';
-    ctx.fillRect(0, 0, 4, H);
-
-    // ── Avatar ────────────────────────────────────────────────────────────────
-    const avatarR  = 95;
-    const avatarCX = 175;
+    // ── Avatar — clean circle, no ring, no color ──────────────────────────────
+    const avatarR  = 88;
+    const avatarCX = 160;
     const avatarCY = H / 2;
 
     try {
-        // Force static PNG for GIF avatars
         const staticUrl = opts.avatarUrl.replace(/\.gif(\?|$)/, '.png$1');
         const img = await loadImage(staticUrl);
-        
-        // Outer ring
-        ctx.beginPath();
-        ctx.arc(avatarCX, avatarCY, avatarR + 4, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(88, 101, 242, 0.35)';
-        ctx.fill();
-
         drawCircleAvatar(ctx, img, avatarCX, avatarCY, avatarR);
     } catch {
-        // Fallback: initial circle
+        // Fallback: dark grey circle with initial
         ctx.beginPath();
         ctx.arc(avatarCX, avatarCY, avatarR, 0, Math.PI * 2);
-        ctx.fillStyle = '#5865F2';
+        ctx.fillStyle = '#2a2a2a';
         ctx.fill();
-
-        ctx.font = `bold ${avatarR}px RobotoBold, sans-serif`;
-        ctx.fillStyle = '#FFFFFF';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+        ctx.font          = `bold ${avatarR}px RobotoBold, sans-serif`;
+        ctx.fillStyle     = '#888888';
+        ctx.textAlign     = 'center';
+        ctx.textBaseline  = 'middle';
         ctx.fillText(opts.authorName.charAt(0).toUpperCase(), avatarCX, avatarCY);
-        ctx.textBaseline = 'alphabetic';
+        ctx.textBaseline  = 'alphabetic';
     }
 
-    // ── Large opening quote mark ──────────────────────────────────────────────
-    const textStartX = 320;
-    const textEndX   = W - 50;
-    const textMaxW   = textEndX - textStartX;
+    // ── Subtle vertical divider between avatar and text ───────────────────────
+    ctx.fillStyle = 'rgba(255,255,255,0.07)';
+    ctx.fillRect(285, 50, 1, H - 100);
 
-    ctx.font      = '130px RobotoBold, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    // ── Text area ─────────────────────────────────────────────────────────────
+    const textX   = 320;
+    const textMaxW = W - textX - 50;
+
+    // Decorative large open-quote mark (very subtle)
+    ctx.font      = '120px RobotoBold, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
     ctx.textAlign = 'left';
-    ctx.fillText('\u201C', textStartX - 30, 145);
+    ctx.fillText('\u201C', textX - 8, 130);
 
-    // ── Quote text ────────────────────────────────────────────────────────────
-    // Dynamically scale font size to fit the content
-    let fontSize = 38;
+    // Auto-size the quote text
+    let fontSize = 40;
     ctx.font = `${fontSize}px Roboto, sans-serif`;
     let lines = wrapText(ctx, opts.content, textMaxW);
-
-    // Reduce font size if too many lines
     while (lines.length > 5 && fontSize > 22) {
         fontSize -= 2;
         ctx.font = `${fontSize}px Roboto, sans-serif`;
-        lines = wrapText(ctx, opts.content, textMaxW);
+        lines    = wrapText(ctx, opts.content, textMaxW);
     }
 
-    const lineH      = fontSize * 1.45;
-    const blockH     = lines.length * lineH;
-    let   textStartY = (H - blockH - 60) / 2 + lineH; // vertically centered
+    const lineH  = fontSize * 1.5;
+    const blockH = lines.length * lineH;
+    // Push text block up a bit to leave room for author line below
+    let textY = (H - blockH) / 2 - 18;
 
-    ctx.fillStyle = '#F0F0F0';
+    ctx.fillStyle = '#ECECEC';
     ctx.textAlign = 'left';
     for (const line of lines) {
-        ctx.fillText(line, textStartX, textStartY);
-        textStartY += lineH;
+        ctx.fillText(line, textX, textY);
+        textY += lineH;
     }
 
-    const afterTextY = textStartY + 10;
+    // ── Author line ───────────────────────────────────────────────────────────
+    const authorY = textY + 24;
 
-    // ── Divider ───────────────────────────────────────────────────────────────
-    ctx.fillStyle = 'rgba(255,255,255,0.15)';
-    ctx.fillRect(textStartX, afterTextY, 200, 1);
+    // Thin separator
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.fillRect(textX, textY + 8, 180, 1);
 
-    // ── Author attribution ────────────────────────────────────────────────────
-    ctx.font      = `italic ${Math.max(20, fontSize - 6)}px RobotoItalic, Roboto, sans-serif`;
-    ctx.fillStyle = '#AAAAAA';
+    ctx.font      = `italic ${Math.max(18, fontSize - 10)}px Roboto, sans-serif`;
+    ctx.fillStyle = '#888888';
     ctx.textAlign = 'left';
-    ctx.fillText(`— ${opts.authorName}`, textStartX, afterTextY + 32);
+    ctx.fillText(`— ${opts.authorName}`, textX, authorY + 14);
 
-    // Handle (smaller, muted)
-    ctx.font      = '16px Roboto, sans-serif';
-    ctx.fillStyle = '#555555';
-    ctx.fillText(`@${opts.authorHandle}`, textStartX, afterTextY + 56);
+    ctx.font      = '14px Roboto, sans-serif';
+    ctx.fillStyle = '#444444';
+    ctx.fillText(`@${opts.authorHandle}`, textX, authorY + 36);
 
-    // ── Watermark (bottom right) ───────────────────────────────────────────────
+    // ── Tiny watermark ────────────────────────────────────────────────────────
     if (opts.quotedBy) {
-        ctx.font      = '14px Roboto, sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.12)';
+        ctx.font      = '12px Roboto, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
         ctx.textAlign = 'right';
-        ctx.fillText(`quoted by ${opts.quotedBy}`, W - 20, H - 14);
+        ctx.fillText(`quoted by ${opts.quotedBy}`, W - 18, H - 14);
     }
 
     return canvas.toBuffer('image/png');
