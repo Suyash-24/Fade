@@ -21,19 +21,26 @@ async function loadFonts() {
 }
 
 function wrapText(ctx: any, text: string, maxWidth: number): string[] {
-    const words = text.split(' ');
+    const paragraphs = text.split('\n');
     const lines: string[] = [];
-    let current = '';
-    for (const word of words) {
-        const test = current ? `${current} ${word}` : word;
-        if (ctx.measureText(test).width > maxWidth && current) {
-            lines.push(current);
-            current = word;
-        } else {
-            current = test;
+    for (const paragraph of paragraphs) {
+        if (!paragraph.trim()) {
+            lines.push('');
+            continue;
         }
+        const words = paragraph.split(/\s+/);
+        let current = '';
+        for (const word of words) {
+            const test = current ? `${current} ${word}` : word;
+            if (ctx.measureText(test).width > maxWidth && current) {
+                lines.push(current);
+                current = word;
+            } else {
+                current = test;
+            }
+        }
+        if (current) lines.push(current);
     }
-    if (current) lines.push(current);
     return lines;
 }
 
@@ -135,19 +142,44 @@ export async function generateQuoteCard(opts: QuoteCardOptions): Promise<Buffer>
     ctx.textAlign = 'left';
     ctx.fillText('\u201C', textX - 35, 250);
 
-    // Auto-scale quote font
-    let fontSize = 44;
-    ctx.font = `${fontSize}px Roboto, sans-serif`;
-    let lines = wrapText(ctx, opts.content, textMaxW);
-    while (lines.length > 5 && fontSize > 24) {
-        fontSize -= 2;
+    // Auto-scale quote font to fit both width and height
+    let fontSize = 48;
+    let lines: string[] = [];
+    let lineH = 0;
+    let blockH = 0;
+    const maxBlockH = 240; // Max allowed height for the text block
+
+    while (fontSize >= 16) {
         ctx.font = `${fontSize}px Roboto, sans-serif`;
         lines = wrapText(ctx, opts.content, textMaxW);
+        lineH = fontSize * 1.35;
+        blockH = lines.length * lineH;
+
+        // Ensure no single line/word overflows horizontally
+        let tooWide = false;
+        for (const line of lines) {
+            if (ctx.measureText(line).width > textMaxW) {
+                tooWide = true;
+                break;
+            }
+        }
+
+        if (blockH <= maxBlockH && !tooWide) {
+            break; // It fits perfectly
+        }
+        fontSize -= 2;
     }
 
-    const lineH = fontSize * 1.35;
-    const blockH = lines.length * lineH;
-    
+    // Truncate if it's still too long even at minimum font size
+    if (blockH > maxBlockH || fontSize < 16) {
+        const maxLines = Math.floor(maxBlockH / lineH);
+        lines = lines.slice(0, maxLines);
+        if (lines.length > 0) {
+            lines[lines.length - 1] = lines[lines.length - 1].replace(/\s+\S*$/, '') + '...';
+        }
+        blockH = lines.length * lineH;
+    }
+
     // Vertically center the text block
     let textY = Math.max(90, (H - blockH) / 2 - 25);
 
