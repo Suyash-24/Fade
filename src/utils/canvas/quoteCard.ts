@@ -48,38 +48,30 @@ export interface QuoteCardOptions {
 export async function generateQuoteCard(opts: QuoteCardOptions): Promise<Buffer> {
     await loadFonts();
 
-    const W = 1100;
-    const H = 460;
+    const W = 1060;
+    const H = 420;
     const canvas = createCanvas(W, H);
     const ctx    = canvas.getContext('2d');
 
     let avatarImg: any = null;
     try {
-        // Force static PNG, and request high resolution (512x512) for crispness
         const staticUrl = opts.avatarUrl.replace(/\.gif(\?|$)/, '.png$1');
         const hqUrl = staticUrl.includes('size=') 
             ? staticUrl.replace(/size=\d+/, 'size=512') 
             : staticUrl + (staticUrl.includes('?') ? '&size=512' : '?size=512');
             
         avatarImg = await loadImage(hqUrl);
-    } catch {
-        // Fallback handled below
-    }
+    } catch { }
 
     // ── 1. Background: Ambient Blurred Avatar ─────────────────────────────────
     if (avatarImg) {
         ctx.save();
-        // Heavy blur to create a smooth, ambient color bleed
         ctx.filter = 'blur(45px)';
-        
-        // Scale image to cover the entire canvas
         const scale = Math.max(W / avatarImg.width, H / avatarImg.height);
         const w = avatarImg.width * scale;
         const h = avatarImg.height * scale;
         const x = (W - w) / 2;
         const y = (H - h) / 2;
-        
-        // Draw larger than canvas to hide the unblurred edges
         ctx.drawImage(avatarImg, x - 100, y - 100, w + 200, h + 200);
         ctx.restore();
 
@@ -87,62 +79,64 @@ export async function generateQuoteCard(opts: QuoteCardOptions): Promise<Buffer>
         ctx.fillStyle = 'rgba(12, 12, 16, 0.75)';
         ctx.fillRect(0, 0, W, H);
 
-        // Add a secondary gradient to make the left side darker, anchoring the square image
+        // Add a secondary gradient to make the right side darker for text
         const bgGrad = ctx.createLinearGradient(0, 0, W, 0);
-        bgGrad.addColorStop(0, 'rgba(0,0,0,0.6)');
-        bgGrad.addColorStop(1, 'rgba(0,0,0,0.1)');
+        bgGrad.addColorStop(0, 'rgba(0,0,0,0.2)');
+        bgGrad.addColorStop(1, 'rgba(0,0,0,0.7)');
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, W, H);
     } else {
-        // Pure fallback background
         ctx.fillStyle = '#0a0a0d';
         ctx.fillRect(0, 0, W, H);
     }
 
-    // ── 2. Left Side: Raw, Unshaped Square Avatar ─────────────────────────────
-    const sqSize = 300;
-    const sqX = 80;
-    const sqY = (H - sqSize) / 2;
+    // ── 2. Left Side: Full-Height Avatar with Opacity Fade ────────────────────
+    const imgSize = H; // 420x420, spans full height
 
     if (avatarImg) {
-        ctx.save();
-        // Gorgeous deep drop shadow for 3D depth
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
-        ctx.shadowBlur = 30;
-        ctx.shadowOffsetY = 15;
-        
-        // Draw exactly as is - no clipping, no borders
-        ctx.drawImage(avatarImg, sqX, sqY, sqSize, sqSize);
-        ctx.restore();
+        // Create a temporary canvas to apply the gradient mask (fade effect)
+        const tempCanvas = createCanvas(imgSize, imgSize);
+        const tempCtx = tempCanvas.getContext('2d');
 
-        // Extremely subtle 1px white inner border just to separate dark images from dark bg
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(sqX, sqY, sqSize, sqSize);
+        // Draw the raw avatar
+        tempCtx.drawImage(avatarImg, 0, 0, imgSize, imgSize);
+
+        // Apply a gradient mask to fade out the right edge seamlessly
+        tempCtx.globalCompositeOperation = 'destination-out';
+        const maskGrad = tempCtx.createLinearGradient(0, 0, imgSize, 0);
+        maskGrad.addColorStop(0, 'rgba(0,0,0,0)');      // Solid left
+        maskGrad.addColorStop(0.6, 'rgba(0,0,0,0)');    // Solid middle
+        maskGrad.addColorStop(1, 'rgba(0,0,0,1)');      // Transparent right edge
+        tempCtx.fillStyle = maskGrad;
+        tempCtx.fillRect(0, 0, imgSize, imgSize);
+
+        // Optional: reduce overall opacity slightly for a cinematic feel
+        ctx.globalAlpha = 0.9;
+        ctx.drawImage(tempCanvas, 0, 0);
+        ctx.globalAlpha = 1.0;
     } else {
-        // Fallback
         ctx.fillStyle = '#1a1a1a';
-        ctx.fillRect(sqX, sqY, sqSize, sqSize);
-        ctx.font = `bold 120px RobotoBold, sans-serif`;
+        ctx.fillRect(0, 0, imgSize, imgSize);
+        ctx.font = `bold 160px RobotoBold, sans-serif`;
         ctx.fillStyle = '#444';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(opts.authorName.charAt(0).toUpperCase(), sqX + sqSize / 2, sqY + sqSize / 2);
+        ctx.fillText(opts.authorName.charAt(0).toUpperCase(), imgSize / 2, imgSize / 2);
         ctx.textBaseline = 'alphabetic';
     }
 
     // ── 3. Right Side: Typography ─────────────────────────────────────────────
-    const textX = sqX + sqSize + 70;
-    const textMaxW = W - textX - 60;
+    const textX = imgSize + 30; // Starts right after the fade
+    const textMaxW = W - textX - 50;
 
-    // Giant subtle quote watermark overlapping the text area
+    // Giant subtle quote watermark
     ctx.font = '300px RobotoBold, sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
     ctx.textAlign = 'left';
     ctx.fillText('\u201C', textX - 35, 250);
 
     // Auto-scale quote font
-    let fontSize = 46;
+    let fontSize = 44;
     ctx.font = `${fontSize}px Roboto, sans-serif`;
     let lines = wrapText(ctx, opts.content, textMaxW);
     while (lines.length > 5 && fontSize > 24) {
@@ -154,13 +148,12 @@ export async function generateQuoteCard(opts: QuoteCardOptions): Promise<Buffer>
     const lineH = fontSize * 1.35;
     const blockH = lines.length * lineH;
     
-    // Vertically center the text block, slightly biased upward
+    // Vertically center the text block
     let textY = Math.max(90, (H - blockH) / 2 - 25);
 
     ctx.fillStyle = '#FFFFFF';
     ctx.textAlign = 'left';
     
-    // Add text shadow for maximum legibility over the blurred background
     ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
     ctx.shadowBlur = 12;
     ctx.shadowOffsetY = 2;
@@ -173,7 +166,6 @@ export async function generateQuoteCard(opts: QuoteCardOptions): Promise<Buffer>
     // ── 4. Author Details ─────────────────────────────────────────────────────
     const authorTop = textY + 30;
 
-    // A crisp white accent line instead of a colored one
     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
     ctx.fillRect(textX, authorTop - 8, 40, 2);
 
