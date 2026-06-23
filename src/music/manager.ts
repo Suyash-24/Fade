@@ -237,12 +237,13 @@ export function setupMusic(client: FadeClient): void {
         // If the bot itself gets disconnected (channel deleted, kicked by admin, etc)
         if (newState.id === client.user?.id && !newState.channelId && oldState.channelId) {
             const player = client.music?.players.get(newState.guild.id);
-            if (player) {
+            // Guard: if player is already destroyed (playerDestroy event fired first), skip
+            if (player && (player as any).state !== 'destroyed') {
                 logger.info(`[Music] Bot was disconnected from voice in guild ${newState.guild.id}, destroying player`);
                 try {
                     player.destroy();
-                } catch (err) {
-                    // Ignore if already destroyed
+                } catch {
+                    // Already destroyed — safe to ignore
                 }
             }
         }

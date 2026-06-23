@@ -1,7 +1,7 @@
 // src/commands/roles/servertag.ts
 import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, MessageFlags } from 'discord.js';
 import type { Command } from '../../types/command.js';
-import { FadeContainer, sendResponse } from '../../components/builders.js';
+import { FadeContainer, sendResponse, fadeReply } from '../../components/builders.js';
 import { e, Colours } from '../../components/emojis.js';
 import { getServerTagConfig, upsertServerTagConfig } from '../../db/queries/serverTag.js';
 import { invalidateServerTagCache } from '../../events/serverTag.js';
@@ -71,21 +71,27 @@ export default {
             
             await interaction.deferReply();
             
-            // Auto-sync
-            const members = await interaction.guild!.members.fetch();
+            // Auto-sync: use REST list (safe) rather than gateway chunk fetch (rate-limited)
             let added = 0;
-            for (const [id, member] of members) {
-                if (member.user.bot) continue;
-                if (member.user.primaryGuild?.identityGuildId === guildId && !member.roles.cache.has(role.id)) {
-                    await member.roles.add(role.id, '[Fade] Auto-sync Server Tag').catch(() => null);
-                    added++;
+            let after: string | undefined;
+            while (true) {
+                const batch = await interaction.guild!.members.list({ limit: 1000, after }).catch(() => null);
+                if (!batch || batch.size === 0) break;
+                for (const [, member] of batch) {
+                    if (member.user.bot) continue;
+                    if (member.user.primaryGuild?.identityGuildId === guildId && !member.roles.cache.has(role.id)) {
+                        await member.roles.add(role.id, '[Fade] Auto-sync Server Tag').catch(() => null);
+                        added++;
+                    }
                 }
+                after = batch.lastKey();
+                if (batch.size < 1000) break;
             }
 
             const card = new FadeContainer(Colours.SUCCESS)
                 .text(`${e('success')}  <@&${role.id}> will now be awarded to members who equip the Server Tag.\n*Automatically granted the role to **${added}** existing members who already had the tag.*`)
                 .build();
-            await interaction.editReply({ components: [card as any] });
+            await interaction.editReply(fadeReply([card]) as any);
             return;
         }
 
