@@ -46,7 +46,7 @@ function buildWelcomeBackCard(avatarUrl: string | undefined, elapsed: string, re
     const phrase = randomWelcomePhrase();
     const thumb = avatarUrl ? new ThumbnailBuilder().setURL(avatarUrl) : undefined;
 
-    const card = new FadeContainer(Colours.SUCCESS);
+    const card = new FadeContainer(Colours.NONE);
 
     if (thumb) {
         card.section(
@@ -77,10 +77,10 @@ function buildAfkNotifyCard(
     afkReason: string,
     elapsed: string,
 ) {
-    const avatarUrl = user.displayAvatarURL({ size: 128, extension: 'png' }) ?? undefined;
+    const avatarUrl = user.displayAvatarURL({ size: 128, forceStatic: false }) ?? undefined;
     const thumb = avatarUrl ? new ThumbnailBuilder().setURL(avatarUrl) : undefined;
 
-    return new FadeContainer(Colours.WARNING)
+    return new FadeContainer(Colours.NONE)
         .section(
             [
                 `## ${e('idle')}  <@${user.id}> is AFK`,
@@ -127,7 +127,7 @@ const event: Event<'messageCreate'> = {
                 await clearAfk(guildId, message.author.id);
 
                 const elapsed    = formatElapsed(senderAfk.createdAt);
-                const avatarUrl: string | undefined  = message.author.displayAvatarURL({ size: 128, extension: 'png' }) || undefined;
+                const avatarUrl: string | undefined  = message.author.displayAvatarURL({ size: 128, forceStatic: false }) || undefined;
                 const card       = buildWelcomeBackCard(avatarUrl, elapsed, senderAfk.reason || 'AFK');
 
                 await message.reply({
@@ -147,7 +147,7 @@ const event: Event<'messageCreate'> = {
                 if (!afkEntry) continue;
 
                 const elapsed = formatElapsed(afkEntry.createdAt);
-                const card    = buildAfkNotifyCard(user as any, afkEntry.reason || 'AFK', elapsed) as any;
+                const card    = buildAfkNotifyCard(user as any, afkEntry.reason || 'AFK', elapsed);
 
                 await message.reply({
                     components:      [card],

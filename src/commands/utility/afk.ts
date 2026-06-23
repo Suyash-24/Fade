@@ -30,7 +30,7 @@ function buildAfkSetCard(avatarUrl: string | null, username: string, reason: str
 
     const thumb = avatarUrl ? new ThumbnailBuilder().setURL(avatarUrl) : null;
 
-    const card = new FadeContainer(Colours.WARNING);
+    const card = new FadeContainer(Colours.NONE);
 
     if (thumb) {
         card.section(
@@ -86,7 +86,7 @@ export default {
 
         await setAfk(guildId, userId, reason);
 
-        const avatarUrl = interaction.user.displayAvatarURL({ size: 128, extension: 'png' });
+        const avatarUrl = interaction.user.displayAvatarURL({ size: 128, forceStatic: false });
         const card = buildAfkSetCard(avatarUrl, interaction.user.username, reason);
         await sendResponse(interaction, [card]);
     },
@@ -104,7 +104,7 @@ export default {
 
         await setAfk(guildId, userId, reason);
 
-        const avatarUrl = message.author.displayAvatarURL({ size: 128, extension: 'png' });
+        const avatarUrl = message.author.displayAvatarURL({ size: 128, forceStatic: false });
         const card = buildAfkSetCard(avatarUrl, message.author.username, reason);
         await sendMessage(message, [card]);
     },
