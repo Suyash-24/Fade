@@ -111,10 +111,10 @@ function buildAfkNotifyCard(
                 `## ${e('isafk')}  <@${user.id}> is AFK`,
                 `-# They went offline ${elapsed} ago`,
                 `*${filler}*`,
-                `${e('warn')}  **Reason** · ${afkReason}`,
             ],
             thumb,
         )
+        .text(`${e('warn')}  **Reason** · ${afkReason}`)
         .build();
 }
 
