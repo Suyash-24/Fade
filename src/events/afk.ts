@@ -78,15 +78,15 @@ function buildWelcomeBackCard(avatarUrl: string | undefined, elapsed: string, re
             [
                 `## ${e('welcomeback')}  Welcome back!`,
                 `-# ${subline}`,
+                `*${filler}*`,
             ],
             thumb,
         );
     } else {
-        card.text(`## ${e('welcomeback')}  Welcome back!\n-# ${subline}`);
+        card.text(`## ${e('welcomeback')}  Welcome back!\n-# ${subline}\n*${filler}*`);
     }
 
     card
-        .text(`*${filler}*`)
         .separator()
         .text(
             `${e('uptime')}  **Away for** · \`${elapsed}\`\n` +
@@ -112,10 +112,10 @@ function buildAfkNotifyCard(
             [
                 `## ${e('isafk')}  <@${user.id}> is AFK`,
                 `-# They went offline ${elapsed} ago`,
+                `*${filler}*`,
             ],
             thumb,
         )
-        .text(`*${filler}*`)
         .separator()
         .text(
             `${e('warn')}  **Reason** · ${afkReason}\n` +

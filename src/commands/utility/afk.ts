@@ -49,10 +49,10 @@ function buildAfkSetCard(avatarUrl: string, reason: string) {
             [
                 `## ${e('afkset')}  You're now AFK`,
                 `-# ${subline}`,
+                `*${filler}*`,
             ],
             thumb,
         )
-        .text(`*${filler}*`)
         .separator()
         .text(
             `**Reason**\n` +
