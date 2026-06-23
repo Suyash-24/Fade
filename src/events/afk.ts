@@ -9,8 +9,9 @@ import { FadeContainer } from '../components/builders.js';
 import { e, Colours } from '../components/emojis.js';
 import { logger } from '../utils/logger.js';
 
-// ── Welcome back phrases ──────────────────────────────────────────────────────
-const WELCOME_BACK_PHRASES = [
+// ── Phrase pools ──────────────────────────────────────────────────────────────
+
+const WELCOME_SUBLINES = [
     'Good to have you back!',
     'Welcome back to the land of the living.',
     'You\'re back! The chat missed you.',
@@ -21,11 +22,34 @@ const WELCOME_BACK_PHRASES = [
     'Welcome back!',
 ];
 
-function randomWelcomePhrase(): string {
-    return WELCOME_BACK_PHRASES[Math.floor(Math.random() * WELCOME_BACK_PHRASES.length)];
+const WELCOME_FILLERS = [
+    'Your messages are waiting patiently.',
+    'The void has released you.',
+    'You can pretend you were never gone.',
+    'Rejoining civilization, one message at a time.',
+    'The chat is pleased to report your return.',
+    'Someone noticed. Maybe.',
+    'Ghost mode: off.',
+    'Back to being perceived. Congrats.',
+];
+
+const ISAFK_FILLERS = [
+    'They left before you could even ask.',
+    'Some people just disappear like that.',
+    'Patience is a virtue. You\'ll need it.',
+    'The void claimed them. Temporarily.',
+    'Left without warning. Classic.',
+    'Currently unreachable by all known means.',
+    'No ETA. Just vibes.',
+    'They\'re on their own adventure right now.',
+];
+
+function pickRandom(arr: string[]): string {
+    return arr[Math.floor(Math.random() * arr.length)];
 }
 
 // ── Time formatting ───────────────────────────────────────────────────────────
+
 function formatElapsed(since: Date): string {
     const ms      = Date.now() - new Date(since).getTime();
     const seconds = Math.floor(ms / 1_000);
@@ -43,28 +67,30 @@ function formatElapsed(since: Date): string {
 // ── Card builders ─────────────────────────────────────────────────────────────
 
 function buildWelcomeBackCard(avatarUrl: string | undefined, elapsed: string, reason: string) {
-    const phrase = randomWelcomePhrase();
-    const thumb = avatarUrl ? new ThumbnailBuilder().setURL(avatarUrl) : undefined;
+    const subline = pickRandom(WELCOME_SUBLINES);
+    const filler  = pickRandom(WELCOME_FILLERS);
+    const thumb   = avatarUrl ? new ThumbnailBuilder().setURL(avatarUrl) : undefined;
 
     const card = new FadeContainer(Colours.NONE);
 
     if (thumb) {
         card.section(
             [
-                `## ${e('online')}  Welcome back!`,
-                `-# ${phrase}`,
+                `## ${e('welcomeback')}  Welcome back!`,
+                `-# ${subline}`,
             ],
             thumb,
         );
     } else {
-        card.text(`## ${e('online')}  Welcome back!\n-# ${phrase}`);
+        card.text(`## ${e('welcomeback')}  Welcome back!\n-# ${subline}`);
     }
 
     card
+        .text(`*${filler}*`)
         .separator()
         .text(
             `${e('uptime')}  **Away for** · \`${elapsed}\`\n` +
-            `${e('idle')}  **Reason was** · ${reason}`
+            `${e('isafk')}  **Reason was** · ${reason}`
         )
         .separator()
         .text(`-# AFK status cleared · You're back online`);
@@ -77,37 +103,25 @@ function buildAfkNotifyCard(
     afkReason: string,
     elapsed: string,
 ) {
-    const avatarUrl = user.displayAvatarURL({ size: 128, forceStatic: false }) ?? undefined;
-    const thumb = avatarUrl ? new ThumbnailBuilder().setURL(avatarUrl) : undefined;
+    const filler    = pickRandom(ISAFK_FILLERS);
+    const avatarUrl = user.displayAvatarURL({ size: 128, forceStatic: false }) || undefined;
+    const thumb     = avatarUrl ? new ThumbnailBuilder().setURL(avatarUrl) : undefined;
 
     return new FadeContainer(Colours.NONE)
         .section(
             [
-                `## ${e('idle')}  <@${user.id}> is AFK`,
+                `## ${e('isafk')}  <@${user.id}> is AFK`,
                 `-# They went offline ${elapsed} ago`,
             ],
             thumb,
         )
+        .text(`*${filler}*`)
         .separator()
         .text(
             `${e('warn')}  **Reason** · ${afkReason}\n` +
             `-# They'll be notified when they're back`
         )
         .build();
-}
-
-// helper: rough parse of elapsed string back to approximate ms for timestamp
-function parseElapsedToMs(elapsed: string): number {
-    let ms = 0;
-    const dayMatch = elapsed.match(/(\d+)d/);
-    const hourMatch = elapsed.match(/(\d+)h/);
-    const minMatch = elapsed.match(/(\d+)m/);
-    const secMatch = elapsed.match(/(\d+)s/);
-    if (dayMatch)  ms += parseInt(dayMatch[1])  * 86_400_000;
-    if (hourMatch) ms += parseInt(hourMatch[1]) * 3_600_000;
-    if (minMatch)  ms += parseInt(minMatch[1])  * 60_000;
-    if (secMatch)  ms += parseInt(secMatch[1])  * 1_000;
-    return ms;
 }
 
 // ── Event ─────────────────────────────────────────────────────────────────────
@@ -126,9 +140,9 @@ const event: Event<'messageCreate'> = {
             if (senderAfk) {
                 await clearAfk(guildId, message.author.id);
 
-                const elapsed    = formatElapsed(senderAfk.createdAt);
-                const avatarUrl: string | undefined  = message.author.displayAvatarURL({ size: 128, forceStatic: false }) || undefined;
-                const card       = buildWelcomeBackCard(avatarUrl, elapsed, senderAfk.reason || 'AFK');
+                const elapsed   = formatElapsed(senderAfk.createdAt);
+                const avatarUrl = message.author.displayAvatarURL({ size: 128, forceStatic: false }) || undefined;
+                const card      = buildWelcomeBackCard(avatarUrl, elapsed, senderAfk.reason || 'AFK');
 
                 await message.reply({
                     components:      [card],

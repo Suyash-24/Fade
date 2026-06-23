@@ -1,13 +1,12 @@
 // src/commands/utility/afk.ts
-import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+import { SlashCommandBuilder, MessageFlags, ThumbnailBuilder } from 'discord.js';
 import type { Command } from '../../types/command.js';
-import { sendResponse, sendMessage, FadeContainer, FadeReplyOptions, fadeReply } from '../../components/builders.js';
+import { sendResponse, sendMessage, FadeContainer } from '../../components/builders.js';
 import { e, Colours } from '../../components/emojis.js';
 import { getAfk, setAfk } from '../../db/queries/afk.js';
-import { ThumbnailBuilder } from 'discord.js';
 
-// A pool of flavour phrases to keep it fresh
-const AFK_PHRASES = [
+// A pool of subtle subline phrases
+const AFK_SUBLINES = [
     'Gone quiet for a bit.',
     'Stepped away from the screen.',
     'Offline in spirit, online in bot.',
@@ -20,39 +19,47 @@ const AFK_PHRASES = [
     'Unavailable until further notice.',
 ];
 
-function randomPhrase(): string {
-    return AFK_PHRASES[Math.floor(Math.random() * AFK_PHRASES.length)];
+// Filler lines that sit between title and separator — sassy & contextual
+const AFK_FILLERS = [
+    'Notifications? Silenced. Obligations? Ignored.',
+    'Catching some air. Or maybe just vibes.',
+    'The keyboard has been abandoned.',
+    'Gone offline but the ghost stays.',
+    'Every legend needs a intermission.',
+    'Even the best players go AFK sometimes.',
+    'Currently avoiding responsibilities.',
+    'Recharging. Do not disturb.',
+    'Be back when I feel like it.',
+    'Away. Mentally, physically, spiritually.',
+];
+
+function pickRandom(arr: string[]): string {
+    return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function buildAfkSetCard(avatarUrl: string | null, username: string, reason: string) {
-    const phrase = randomPhrase();
+function buildAfkSetCard(avatarUrl: string, reason: string) {
+    const subline = pickRandom(AFK_SUBLINES);
+    const filler  = pickRandom(AFK_FILLERS);
     const timestamp = `<t:${Math.floor(Date.now() / 1000)}:t>`;
 
-    const thumb = avatarUrl ? new ThumbnailBuilder().setURL(avatarUrl) : null;
+    const thumb = new ThumbnailBuilder().setURL(avatarUrl);
 
-    const card = new FadeContainer(Colours.NONE);
-
-    if (thumb) {
-        card.section(
+    return new FadeContainer(Colours.NONE)
+        .section(
             [
-                `## ${e('idle')}  You're now AFK`,
-                `-# ${phrase}`,
+                `## ${e('afkset')}  You're now AFK`,
+                `-# ${subline}`,
             ],
             thumb,
-        );
-    } else {
-        card.text(`## ${e('idle')}  You're now AFK\n-# ${phrase}`);
-    }
-
-    card
+        )
+        .text(`*${filler}*`)
         .separator()
         .text(
             `**Reason**\n` +
             `\`\`\`\n${reason}\n\`\`\`` +
             `\n-# AFK since ${timestamp} · Mention me to check status`
-        );
-
-    return card.build();
+        )
+        .build();
 }
 
 export default {
@@ -87,7 +94,7 @@ export default {
         await setAfk(guildId, userId, reason);
 
         const avatarUrl = interaction.user.displayAvatarURL({ size: 128, forceStatic: false });
-        const card = buildAfkSetCard(avatarUrl, interaction.user.username, reason);
+        const card = buildAfkSetCard(avatarUrl, reason);
         await sendResponse(interaction, [card]);
     },
 
@@ -105,7 +112,7 @@ export default {
         await setAfk(guildId, userId, reason);
 
         const avatarUrl = message.author.displayAvatarURL({ size: 128, forceStatic: false });
-        const card = buildAfkSetCard(avatarUrl, message.author.username, reason);
+        const card = buildAfkSetCard(avatarUrl, reason);
         await sendMessage(message, [card]);
     },
 

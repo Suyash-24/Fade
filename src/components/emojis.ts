@@ -91,7 +91,10 @@ const EMOJI_IDS: Record<string, string> = {
     vcprivacy: '<:vcprivacy:1516714711075262584>',
     vclimit: '<:vclimit:1516714528279236628>',
     vcinvite: '<:vcinvite:1516714458041417858>',
-    vcpermit: '<:vcpermit:1516714675675463700>'
+    vcpermit: '<:vcpermit:1516714675675463700>',
+    afkset: '<:afkset:1518968712257081516>',
+    isafk: '<a:isafk:1518968827369488527>',
+    welcomeback: '<:wave:1518968774001168395>'
 };
 
 // Unicode fallbacks — aesthetic, minimal, consistent
@@ -172,7 +175,10 @@ const UNICODE = {
     vcprivacy: '',
     vclimit: '',
     vcinvite: '',
-    vcpermit: ''
+    vcpermit: '',
+    afkset: '',
+    isafk: '',
+    welcomeback: '',
 };
 
 type EmojiKey = keyof typeof UNICODE;
