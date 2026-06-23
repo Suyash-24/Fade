@@ -71,7 +71,7 @@ function buildWelcomeBackCard(avatarUrl: string | undefined, elapsed: string, re
     const filler  = pickRandom(WELCOME_FILLERS);
     const thumb   = avatarUrl ? new ThumbnailBuilder().setURL(avatarUrl) : undefined;
 
-    const card = new FadeContainer(Colours.NONE);
+    const card = new FadeContainer(Colours.SUCCESS);
 
     if (thumb) {
         card.section(
@@ -107,7 +107,7 @@ function buildAfkNotifyCard(
     const avatarUrl = user.displayAvatarURL({ size: 128, forceStatic: false }) || undefined;
     const thumb     = avatarUrl ? new ThumbnailBuilder().setURL(avatarUrl) : undefined;
 
-    return new FadeContainer(Colours.NONE)
+    return new FadeContainer(Colours.WARNING)
         .section(
             [
                 `## ${e('isafk')}  <@${user.id}> is AFK`,

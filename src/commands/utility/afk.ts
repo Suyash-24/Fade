@@ -44,7 +44,7 @@ function buildAfkSetCard(avatarUrl: string, reason: string) {
 
     const thumb = new ThumbnailBuilder().setURL(avatarUrl);
 
-    return new FadeContainer(Colours.NONE)
+    return new FadeContainer(Colours.WARNING)
         .section(
             [
                 `## ${e('afkset')}  You're now AFK`,
