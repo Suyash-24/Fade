@@ -91,9 +91,7 @@ function buildWelcomeBackCard(avatarUrl: string | undefined, elapsed: string, re
         .text(
             `${e('uptime')}  **Away for** · \`${elapsed}\`\n` +
             `${e('isafk')}  **Reason was** · ${reason}`
-        )
-        .separator()
-        .text(`-# AFK status cleared · You're back online`);
+        );
 
     return card.build();
 }
@@ -113,13 +111,9 @@ function buildAfkNotifyCard(
                 `## ${e('isafk')}  <@${user.id}> is AFK`,
                 `-# They went offline ${elapsed} ago`,
                 `*${filler}*`,
+                `${e('warn')}  **Reason** · ${afkReason}`,
             ],
             thumb,
-        )
-        .separator()
-        .text(
-            `${e('warn')}  **Reason** · ${afkReason}\n` +
-            `-# They'll be notified when they're back`
         )
         .build();
 }
