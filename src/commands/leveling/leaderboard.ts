@@ -72,7 +72,7 @@ export default {
 
     category: 'leveling',
     guildOnly: true,
-    aliases:   ['lb', 'top'],
+    aliases:   ['lb'],
     cooldown:  10,
 
     async execute(interaction, client) {
