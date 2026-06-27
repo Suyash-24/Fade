@@ -204,9 +204,9 @@ export function setupMusic(client: FadeClient): void {
                 try {
                     const { get247 } = await import('../db/queries/twentyFourSeven.js');
                     const is247 = await get247(guildId);
-                    if (!is247) player.destroy();
+                    if (!is247) player.destroy().catch(() => null);
                 } catch {
-                    player.destroy();
+                    player.destroy().catch(() => null);
                 }
             }
         }, 3 * 60 * 1000);

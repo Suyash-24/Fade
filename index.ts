@@ -24,7 +24,10 @@ if (missing.length) {
 const client = new FadeClient();
 
 process.on('uncaughtException',    err  => logger.error('Uncaught exception', err));
-process.on('unhandledRejection',   err  => logger.error('Unhandled rejection', err));
+process.on('unhandledRejection', (err: any) => {
+    if (err?.name === 'AbortError' || err?.message === 'This operation was aborted') return;
+    logger.error('Unhandled rejection', err);
+});
 process.on('SIGINT', () => {
     logger.info('Shutting down Fade...');
     client.destroy();

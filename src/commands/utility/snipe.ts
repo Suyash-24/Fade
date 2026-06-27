@@ -68,7 +68,7 @@ export const snipeCommand: Command = {
         const entry     = getSnipe(channelId);
 
         if (!entry) {
-            await message.reply(`${e('search')} No recently deleted messages in <#${channelId}>.`);
+            await message.reply(`${e('search')} No recently deleted messages in <#${channelId}>.`).catch(() => (message.channel as any).send(`${e('search')} No recently deleted messages in <#${channelId}>.`).catch(() => null));
             return;
         }
 

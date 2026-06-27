@@ -273,7 +273,7 @@ const event: Event<'interactionCreate'> = {
 
             // Swap Claim → Unclaim in the pinned opening message via raw REST
             try {
-                const pins   = await (interaction.channel as any)?.messages.fetchPinned();
+                const pins   = await (interaction.channel as any)?.messages.fetchPins();
                 const pinned = pins?.first();
                 if (pinned && pinned.author.id === interaction.client.user?.id) {
                     await swapPinnedButton(
@@ -355,7 +355,7 @@ const event: Event<'interactionCreate'> = {
             if (ticket.claimedBy) {
                 await unclaimTicket(interaction.channelId!);
                 try {
-                    const pins   = await (interaction.channel as any)?.messages.fetchPinned();
+                    const pins   = await (interaction.channel as any)?.messages.fetchPins();
                     const pinned = pins?.first();
                     if (pinned && pinned.author.id === interaction.client.user?.id) {
                         await swapPinnedButton(
@@ -435,7 +435,7 @@ const event: Event<'interactionCreate'> = {
 
             // Swap Unclaim → Claim back in the pinned opening message via raw REST
             try {
-                const pins   = await (interaction.channel as any)?.messages.fetchPinned();
+                const pins   = await (interaction.channel as any)?.messages.fetchPins();
                 const pinned = pins?.first();
                 if (pinned && pinned.author.id === interaction.client.user?.id) {
                     await swapPinnedButton(
