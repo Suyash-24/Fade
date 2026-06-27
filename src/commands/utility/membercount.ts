@@ -19,11 +19,14 @@ export default {
         const bots = guild.members.cache.filter(m => m.user.bot).size;
         const humans = total - bots;
 
-        const card = new FadeContainer(Colours.FADE);
-        const content = `## ${e('members')} Server Members\n` +
-            `- ${e('roles')} **Total:** \`${total.toLocaleString()}\`\n` +
-            `- ${e('owner')} **Humans:** \`${humans.toLocaleString()}\`\n` +
-            `- ${e('bot')} **Bots:** \`${bots.toLocaleString()}\``;
+        const card = new FadeContainer(Colours.NONE)
+            .text(`## ${e('members')} Server Members`)
+            .text(`-# A quick breakdown of who's here in **${guild.name}**`)
+            .separator(true);
+
+        const content = `${e('roles')} **Total:** \`${total.toLocaleString()}\`\n` +
+            `${e('owner')} **Humans:** \`${humans.toLocaleString()}\`\n` +
+            `${e('bot')} **Bots:** \`${bots.toLocaleString()}\``;
 
         if (guild.iconURL()) {
             card.section([content], thumb(guild.iconURL({ size: 128 })!));
