@@ -21,7 +21,6 @@ export default {
 
         const card = new FadeContainer(Colours.NONE)
             .text(`## ${e('members')} Server Members`)
-            .text(`-# A quick breakdown of who's here in **${guild.name}**`)
             .separator(true);
 
         const content = `${e('roles')} **Total:** \`${total.toLocaleString()}\`\n` +
