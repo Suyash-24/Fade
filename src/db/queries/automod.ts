@@ -12,7 +12,14 @@ export async function getAutomodConfig(guildId: string) {
     if (!config) {
         [config] = await db.insert(automodConfig)
             .values({ guildId })
+            .onConflictDoNothing()
             .returning();
+            
+        if (!config) {
+            config = (await db.query.automodConfig.findFirst({
+                where: eq(automodConfig.guildId, guildId),
+            }))!;
+        }
     }
     return config;
 }

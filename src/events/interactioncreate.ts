@@ -208,12 +208,14 @@ const event: Event<'interactionCreate'> = {
                         return;
                     }
 
-                    // customId format: steal_add_<type>_<name>_<url>
-                    const withoutPrefix = id.slice('steal_add_'.length);         // "emoji_name_url" or "sticker_name_url"
-                    const typeEnd       = withoutPrefix.indexOf('_');
-                    const assetType     = withoutPrefix.slice(0, typeEnd);        // "emoji" | "sticker"
+                    // customId format: steal_add_<type>|<name>|<url>
+                    // (Falls back to _ for older broken buttons)
+                    const withoutPrefix = id.slice('steal_add_'.length);
+                    const delimiter     = withoutPrefix.includes('|') ? '|' : '_';
+                    const typeEnd       = withoutPrefix.indexOf(delimiter);
+                    const assetType     = withoutPrefix.slice(0, typeEnd);
                     const rest          = withoutPrefix.slice(typeEnd + 1);
-                    const nameEnd       = rest.indexOf('_');
+                    const nameEnd       = rest.indexOf(delimiter);
                     const assetName     = rest.slice(0, nameEnd);
                     const assetUrl      = rest.slice(nameEnd + 1);
 

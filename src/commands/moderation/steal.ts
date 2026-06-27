@@ -96,11 +96,11 @@ export default {
             // Always show both buttons for any asset type
             const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
                 new ButtonBuilder()
-                    .setCustomId(`steal_add_emoji_${asset.name}_${asset.url}`)
+                    .setCustomId(`steal_add_emoji|${asset.name}|${asset.url}`)
                     .setLabel(`Add as Emoji`)
                     .setStyle(ButtonStyle.Primary),
                 new ButtonBuilder()
-                    .setCustomId(`steal_add_sticker_${asset.name}_${asset.url}`)
+                    .setCustomId(`steal_add_sticker|${asset.name}|${asset.url}`)
                     .setLabel(`Add as Sticker`)
                     .setStyle(ButtonStyle.Secondary),
             );
