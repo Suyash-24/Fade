@@ -1,0 +1,1763 @@
+{
+  "antinuke": [
+    {
+      "name": "antinuke",
+      "desc": "Configure the antinuke protection system",
+      "subcommands": [
+        {
+          "name": "view",
+          "desc": "View current antinuke settings"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable antinuke"
+        },
+        {
+          "name": "module",
+          "desc": "Enable or disable a specific protection module"
+        },
+        {
+          "name": "punishment",
+          "desc": "Set punishment for a specific module (or global default)"
+        },
+        {
+          "name": "threshold",
+          "desc": "Set how many actions trigger protection"
+        },
+        {
+          "name": "window",
+          "desc": "Set the time window for tracking actions"
+        },
+        {
+          "name": "botprotection",
+          "desc": "Block unauthorized bot additions"
+        },
+        {
+          "name": "vanity",
+          "desc": "Protect against unauthorized vanity URL changes"
+        },
+        {
+          "name": "logging",
+          "desc": "Set the channel where antinuke alerts are sent"
+        },
+        {
+          "name": "whitelist",
+          "desc": "View trusted users (bypasses all detection)"
+        },
+        {
+          "name": "trust",
+          "desc": "Add a user to the whitelist (bypasses detection)"
+        },
+        {
+          "name": "untrust",
+          "desc": "Remove a user from the whitelist"
+        },
+        {
+          "name": "admins",
+          "desc": "View users who can configure antinuke"
+        },
+        {
+          "name": "admin",
+          "desc": "Grant a user permission to configure antinuke (owner only)"
+        },
+        {
+          "name": "unadmin",
+          "desc": "Revoke antinuke config access from a user (owner only)"
+        }
+      ],
+      "file": "antinuke.ts"
+    }
+  ],
+  "antiraid": [
+    {
+      "name": "antiraid",
+      "desc": "Configure the antiraid protection system",
+      "subcommands": [
+        {
+          "name": "view",
+          "desc": "View current antiraid settings"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable antiraid"
+        },
+        {
+          "name": "action",
+          "desc": "Set what happens to raiders"
+        },
+        {
+          "name": "threshold",
+          "desc": "Set how many joins in how many seconds triggers antiraid"
+        },
+        {
+          "name": "accountage",
+          "desc": "Kick accounts younger than a minimum age (0 = disabled)"
+        },
+        {
+          "name": "avatarrequired",
+          "desc": "Kick members who join without a profile picture"
+        },
+        {
+          "name": "lock",
+          "desc": "Lock all channels when a raid is detected"
+        },
+        {
+          "name": "whitelist",
+          "desc": "View whitelisted users (exempt from antiraid)"
+        },
+        {
+          "name": "trust",
+          "desc": "Exempt a user from antiraid checks"
+        },
+        {
+          "name": "untrust",
+          "desc": "Remove a user from the antiraid whitelist"
+        },
+        {
+          "name": "state",
+          "desc": "Manually toggle raid state (unlocks channels, re-enables events)"
+        },
+        {
+          "name": "recentban",
+          "desc": "Ban the last N accounts that joined the server"
+        },
+        {
+          "name": "raid",
+          "desc": "Ban or kick all accounts that joined in the last X time"
+        }
+      ],
+      "file": "antiraid.ts"
+    }
+  ],
+  "automod": [
+    {
+      "name": "automod",
+      "desc": "Configure the AutoMod system",
+      "subcommands": [
+        {
+          "name": "view",
+          "desc": "View current AutoMod settings"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable AutoMod entirely"
+        },
+        {
+          "name": "rule",
+          "desc": "Enable or disable a specific rule"
+        },
+        {
+          "name": "punishment",
+          "desc": "Set the punishment for a rule"
+        },
+        {
+          "name": "threshold",
+          "desc": "Set detection thresholds"
+        },
+        {
+          "name": "spammode",
+          "desc": "Track spam per-channel instead of per-server"
+        },
+        {
+          "name": "whitelist",
+          "desc": "Allow a domain through Anti-Links (e.g. youtube.com)"
+        },
+        {
+          "name": "logchannel",
+          "desc": "Set the AutoMod log channel"
+        },
+        {
+          "name": "ignorechannel",
+          "desc": "Toggle a channel being ignored by AutoMod"
+        },
+        {
+          "name": "ignorerole",
+          "desc": "Toggle a role being ignored by AutoMod"
+        },
+        {
+          "name": "blacklist",
+          "desc": "Manage the slur/word blacklist"
+        }
+      ],
+      "file": "automod.ts"
+    }
+  ],
+  "config": [
+    {
+      "name": "command",
+      "desc": "Manage command restrictions and access control",
+      "subcommands": [
+        {
+          "name": "disable",
+          "desc": "Disable a command or category globally or in a specific channel"
+        },
+        {
+          "name": "enable",
+          "desc": "Re-enable a command or category"
+        },
+        {
+          "name": "restrictrole",
+          "desc": "Restrict a command or category to a specific role"
+        },
+        {
+          "name": "restrictchannel",
+          "desc": "Restrict a command or category to a specific channel"
+        },
+        {
+          "name": "unrestrict",
+          "desc": "Remove a role or channel restriction"
+        },
+        {
+          "name": "view",
+          "desc": "View all command restrictions and disabled commands"
+        }
+      ],
+      "file": "command.ts"
+    }
+  ],
+  "economy": [
+    {
+      "name": "balance",
+      "desc": "View your economy wallet",
+      "subcommands": [],
+      "file": "balance.ts"
+    },
+    {
+      "name": "buy",
+      "desc": "Buy an item from the shop",
+      "subcommands": [],
+      "file": "buy.ts"
+    },
+    {
+      "name": "coinflip",
+      "desc": "Bet on a coin flip",
+      "subcommands": [],
+      "file": "coinflip.ts"
+    },
+    {
+      "name": "daily",
+      "desc": "Claim your daily coins",
+      "subcommands": [],
+      "file": "daily.ts"
+    },
+    {
+      "name": "deposit",
+      "desc": "Deposit coins into your bank",
+      "subcommands": [],
+      "file": "deposit.ts"
+    },
+    {
+      "name": "economy",
+      "desc": "Economy administration",
+      "subcommands": [],
+      "file": "economy.ts"
+    },
+    {
+      "name": "gamble",
+      "desc": "Gamble your coins (50/50)",
+      "subcommands": [],
+      "file": "gamble.ts"
+    },
+    {
+      "name": "inventory",
+      "desc": "View your purchased items",
+      "subcommands": [],
+      "file": "inventory.ts"
+    },
+    {
+      "name": "economyleaderboard",
+      "desc": "View the richest users in the server",
+      "subcommands": [],
+      "file": "leaderboard.ts"
+    },
+    {
+      "name": "rob",
+      "desc": "Attempt to rob another user",
+      "subcommands": [],
+      "file": "rob.ts"
+    },
+    {
+      "name": "shop",
+      "desc": "Browse the server shop",
+      "subcommands": [],
+      "file": "shop.ts"
+    },
+    {
+      "name": "slots",
+      "desc": "Spin the slot machine",
+      "subcommands": [],
+      "file": "slots.ts"
+    },
+    {
+      "name": "transfer",
+      "desc": "Send coins to another user",
+      "subcommands": [],
+      "file": "transfer.ts"
+    },
+    {
+      "name": "withdraw",
+      "desc": "Withdraw coins from your bank",
+      "subcommands": [],
+      "file": "withdraw.ts"
+    },
+    {
+      "name": "work",
+      "desc": "Work for coins",
+      "subcommands": [],
+      "file": "work.ts"
+    }
+  ],
+  "fun": [
+    {
+      "name": "blackjack",
+      "desc": "Play a game of blackjack",
+      "subcommands": [],
+      "file": "blackjack.ts"
+    },
+    {
+      "name": "coinflip",
+      "desc": "Flip a coin",
+      "subcommands": [],
+      "file": "coinflip.ts"
+    },
+    {
+      "name": "quote",
+      "desc": "Turn a replied message into a cinematic quote card",
+      "subcommands": [],
+      "file": "quote.ts"
+    },
+    {
+      "name": "ship",
+      "desc": "Calculate the romantic compatibility between two users",
+      "subcommands": [],
+      "file": "ship.ts"
+    },
+    {
+      "name": "trivia",
+      "desc": "Answer a random trivia question",
+      "subcommands": [],
+      "file": "trivia.ts"
+    }
+  ],
+  "general": [
+    {
+      "name": "avatar",
+      "desc": "Display a user\\'s avatar in full resolution",
+      "subcommands": [],
+      "file": "avatar.ts"
+    },
+    {
+      "name": "fortnite",
+      "desc": "Fortnite cosmetics, shop, and notifications",
+      "subcommands": [
+        {
+          "name": "item",
+          "desc": "Look up a Fortnite cosmetic"
+        },
+        {
+          "name": "set",
+          "desc": "Set channel for daily shop updates"
+        },
+        {
+          "name": "ping",
+          "desc": "Set role to ping on shop update"
+        },
+        {
+          "name": "voting",
+          "desc": "Toggle upvote/downvote reactions on shop message"
+        },
+        {
+          "name": "view",
+          "desc": "View today\\'s item shop right now"
+        },
+        {
+          "name": "watch",
+          "desc": "Get DM\\'d when a cosmetic appears in the shop"
+        },
+        {
+          "name": "watchlist",
+          "desc": "View your cosmetic watch list"
+        },
+        {
+          "name": "news",
+          "desc": "View current Fortnite BR news"
+        }
+      ],
+      "file": "fortnite.ts"
+    },
+    {
+      "name": "help",
+      "desc": "Browse all of Fade's commands",
+      "subcommands": [],
+      "file": "help.ts"
+    },
+    {
+      "name": "lastfm",
+      "desc": "Last.fm music stats and now playing",
+      "subcommands": [
+        {
+          "name": "login",
+          "desc": "Link your Last.fm account"
+        },
+        {
+          "name": "logout",
+          "desc": "Unlink your Last.fm account"
+        },
+        {
+          "name": "nowplaying",
+          "desc": "Show what you or someone else is listening to"
+        },
+        {
+          "name": "topartists",
+          "desc": "Show top artists"
+        },
+        {
+          "name": "topalbums",
+          "desc": "Show top albums"
+        },
+        {
+          "name": "toptracks",
+          "desc": "Show top tracks"
+        },
+        {
+          "name": "profile",
+          "desc": "Show Last.fm profile stats"
+        },
+        {
+          "name": "recent",
+          "desc": "Show recent tracks"
+        },
+        {
+          "name": "whoknows",
+          "desc": "Who in this server knows an artist the most"
+        },
+        {
+          "name": "globalwhoknows",
+          "desc": "Who across all servers knows an artist the most"
+        },
+        {
+          "name": "crowns",
+          "desc": "View artist crowns for a user in this server"
+        },
+        {
+          "name": "refresh",
+          "desc": "Refresh your cached Last.fm library"
+        },
+        {
+          "name": "mode",
+          "desc": "Customize your nowplaying card layout"
+        },
+        {
+          "name": "cr",
+          "desc": "Set custom reactions on your nowplaying message"
+        }
+      ],
+      "file": "lastfm.ts"
+    },
+    {
+      "name": "ping",
+      "desc": "Check Fade's latency and connection status",
+      "subcommands": [],
+      "file": "ping.ts"
+    },
+    {
+      "name": "serverinfo",
+      "desc": "Display detailed information about this server",
+      "subcommands": [],
+      "file": "serverinfo.ts"
+    },
+    {
+      "name": "userinfo",
+      "desc": "Display information about a user",
+      "subcommands": [],
+      "file": "userinfo.ts"
+    },
+    {
+      "name": "valorant",
+      "desc": "Valorant agents, weapons, skins, and maps",
+      "subcommands": [
+        {
+          "name": "agent",
+          "desc": "Look up a Valorant agent"
+        },
+        {
+          "name": "weapon",
+          "desc": "Look up a Valorant weapon"
+        },
+        {
+          "name": "skin",
+          "desc": "Look up a Valorant skin"
+        },
+        {
+          "name": "map",
+          "desc": "Look up a Valorant map"
+        },
+        {
+          "name": "maps",
+          "desc": "List all Valorant maps"
+        },
+        {
+          "name": "agents",
+          "desc": "List all Valorant agents"
+        }
+      ],
+      "file": "valorant.ts"
+    }
+  ],
+  "giveaways": [
+    {
+      "name": "giveaway",
+      "desc": "Manage giveaways",
+      "subcommands": [
+        {
+          "name": "start",
+          "desc": "Start a new giveaway"
+        },
+        {
+          "name": "end",
+          "desc": "End a giveaway early and pick winners"
+        },
+        {
+          "name": "reroll",
+          "desc": "Reroll winners for an ended giveaway"
+        },
+        {
+          "name": "list",
+          "desc": "List all active giveaways in this server"
+        },
+        {
+          "name": "delete",
+          "desc": "Cancel and delete a giveaway"
+        },
+        {
+          "name": "prize",
+          "desc": "Change the prize"
+        },
+        {
+          "name": "winners",
+          "desc": "Change the winner count"
+        },
+        {
+          "name": "duration",
+          "desc": "Change the end time"
+        },
+        {
+          "name": "host",
+          "desc": "Change the host"
+        },
+        {
+          "name": "description",
+          "desc": "Set a description"
+        },
+        {
+          "name": "image",
+          "desc": "Set an image URL"
+        },
+        {
+          "name": "requiredroles",
+          "desc": "Set required roles (comma-separated mentions)"
+        },
+        {
+          "name": "minlevel",
+          "desc": "Set minimum level requirement"
+        }
+      ],
+      "file": "giveaway.ts"
+    }
+  ],
+  "leveling": [
+    {
+      "name": "addxp",
+      "desc": "Add XP to a user",
+      "subcommands": [],
+      "file": "addxp.ts"
+    },
+    {
+      "name": "leaderboard",
+      "desc": "View the XP leaderboard for this server",
+      "subcommands": [],
+      "file": "leaderboard.ts"
+    },
+    {
+      "name": "levelconfig",
+      "desc": "Configure the leveling system",
+      "subcommands": [
+        {
+          "name": "view",
+          "desc": "View current leveling settings"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable leveling"
+        },
+        {
+          "name": "channel",
+          "desc": "Set the level-up announcement channel"
+        },
+        {
+          "name": "xprate",
+          "desc": "Set XP gain range per message"
+        },
+        {
+          "name": "cooldown",
+          "desc": "Set XP gain cooldown in seconds"
+        },
+        {
+          "name": "message",
+          "desc": "Set level-up card message. Paste a script or leave blank to open the builder"
+        },
+        {
+          "name": "messageembed",
+          "desc": "Set level-up embed message. Paste a script or leave blank to open the builder"
+        },
+        {
+          "name": "messageplain",
+          "desc": "Set a plain text level-up message"
+        }
+      ],
+      "file": "levelconfig.ts"
+    },
+    {
+      "name": "levelrewards",
+      "desc": "Manage role rewards given at certain levels",
+      "subcommands": [
+        {
+          "name": "list",
+          "desc": "List all level rewards"
+        },
+        {
+          "name": "add",
+          "desc": "Add a role reward for reaching a level"
+        },
+        {
+          "name": "remove",
+          "desc": "Remove a level reward"
+        }
+      ],
+      "file": "levelrewards.ts"
+    },
+    {
+      "name": "rank",
+      "desc": "Check a user's level and XP",
+      "subcommands": [],
+      "file": "rank.ts"
+    },
+    {
+      "name": "removexp",
+      "desc": "Remove XP from a user",
+      "subcommands": [],
+      "file": "removexp.ts"
+    },
+    {
+      "name": "setlevel",
+      "desc": "Set a user\\'s level directly",
+      "subcommands": [],
+      "file": "setlevel.ts"
+    },
+    {
+      "name": "setxp",
+      "desc": "Set a user\\'s XP to a specific amount",
+      "subcommands": [],
+      "file": "setxp.ts"
+    }
+  ],
+  "logging": [
+    {
+      "name": "logs",
+      "desc": "Configure the logging system",
+      "subcommands": [
+        {
+          "name": "view",
+          "desc": "View current logging configuration"
+        },
+        {
+          "name": "set",
+          "desc": "Set a log channel for a category"
+        },
+        {
+          "name": "setall",
+          "desc": "Send all log categories to one channel"
+        },
+        {
+          "name": "disable",
+          "desc": "Disable all logging"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable a specific log event"
+        },
+        {
+          "name": "ignore",
+          "desc": "Ignore a member or channel from being logged"
+        },
+        {
+          "name": "unignore",
+          "desc": "Remove a member or channel from the ignore list"
+        },
+        {
+          "name": "ignorelist",
+          "desc": "View all ignored members and channels"
+        }
+      ],
+      "file": "log.ts"
+    }
+  ],
+  "moderation": [
+    {
+      "name": "ban",
+      "desc": "Ban a member from the server",
+      "subcommands": [],
+      "file": "ban.ts"
+    },
+    {
+      "name": "case",
+      "desc": "Look up a specific moderation case",
+      "subcommands": [],
+      "file": "case.ts"
+    },
+    {
+      "name": "fakeban",
+      "desc": "Pretend to ban a member from the server",
+      "subcommands": [],
+      "file": "fakeban.ts"
+    },
+    {
+      "name": "fakeperms",
+      "desc": "Grant roles mod permissions through Fade only (not native Discord)",
+      "subcommands": [
+        {
+          "name": "grant",
+          "desc": "Grant a fake permission to a role"
+        },
+        {
+          "name": "revoke",
+          "desc": "Revoke a fake permission from a role"
+        },
+        {
+          "name": "clear",
+          "desc": "Remove all fake permissions from a role"
+        },
+        {
+          "name": "list",
+          "desc": "View all fake permissions in this server"
+        }
+      ],
+      "file": "fakeperms.ts"
+    },
+    {
+      "name": "invoke",
+      "desc": "Customize mod command responses and DMs",
+      "subcommands": [
+        {
+          "name": "message",
+          "desc": "Set the channel response for a mod command"
+        },
+        {
+          "name": "dm",
+          "desc": "Set the DM sent to the punished user"
+        },
+        {
+          "name": "view",
+          "desc": "View invoke messages for a command (or all)"
+        },
+        {
+          "name": "reset",
+          "desc": "Reset invoke messages for a command back to default"
+        }
+      ],
+      "file": "invoke.ts"
+    },
+    {
+      "name": "kick",
+      "desc": "Kick a member from the server",
+      "subcommands": [],
+      "file": "kick.ts"
+    },
+    {
+      "name": "modhistory",
+      "desc": "View moderation history for a user",
+      "subcommands": [],
+      "file": "modhistory.ts"
+    },
+    {
+      "name": "mute",
+      "desc": "Timeout (mute) a member",
+      "subcommands": [],
+      "file": "mute.ts"
+    },
+    {
+      "name": "nickname",
+      "desc": "Change or reset a member\\'s nickname",
+      "subcommands": [
+        {
+          "name": "set",
+          "desc": "Set a new nickname for a member"
+        },
+        {
+          "name": "reset",
+          "desc": "Reset a member\\'s nickname"
+        }
+      ],
+      "file": "nickname.ts"
+    },
+    {
+      "name": "reason",
+      "desc": "Update the reason for a moderation case",
+      "subcommands": [],
+      "file": "reason.ts"
+    },
+    {
+      "name": "unban",
+      "desc": "Unban a user from the server",
+      "subcommands": [],
+      "file": "unban.ts"
+    },
+    {
+      "name": "unmute",
+      "desc": "Remove a timeout from a member",
+      "subcommands": [],
+      "file": "unmute.ts"
+    },
+    {
+      "name": "warn",
+      "desc": "Warn a member",
+      "subcommands": [],
+      "file": "warn.ts"
+    },
+    {
+      "name": "warnings",
+      "desc": "View or clear warnings for a user",
+      "subcommands": [],
+      "file": "warnings.ts"
+    }
+  ],
+  "music": [
+    {
+      "name": "autoplay",
+      "desc": "Toggle autoplay",
+      "subcommands": [],
+      "file": "autoplay.ts"
+    },
+    {
+      "name": "djrole",
+      "desc": "View or set the DJ role for music commands",
+      "subcommands": [],
+      "file": "djrole.ts"
+    },
+    {
+      "name": "filter",
+      "desc": "Apply audio filters to the player",
+      "subcommands": [],
+      "file": "filter.ts"
+    },
+    {
+      "name": "join",
+      "desc": "Summons the bot to your voice channel",
+      "subcommands": [],
+      "file": "join.ts"
+    },
+    {
+      "name": "loop",
+      "desc": "Set loop mode: off / track / queue",
+      "subcommands": [],
+      "file": "loop.ts"
+    },
+    {
+      "name": "lyrics",
+      "desc": "Show lyrics for the current or searched song",
+      "subcommands": [],
+      "file": "lyrics.ts"
+    },
+    {
+      "name": "move",
+      "desc": "Move a track in the queue",
+      "subcommands": [],
+      "file": "move.ts"
+    },
+    {
+      "name": "nowplaying",
+      "desc": "Show the currently playing track",
+      "subcommands": [],
+      "file": "nowplaying.ts"
+    },
+    {
+      "name": "pause",
+      "desc": "Pause or resume the current track",
+      "subcommands": [],
+      "file": "pause.ts"
+    },
+    {
+      "name": "play",
+      "desc": "Play a song or playlist",
+      "subcommands": [],
+      "file": "play.ts"
+    },
+    {
+      "name": "queue",
+      "desc": "View the music queue",
+      "subcommands": [],
+      "file": "queue.ts"
+    },
+    {
+      "name": "remove",
+      "desc": "Remove a track from the queue by position",
+      "subcommands": [],
+      "file": "remove.ts"
+    },
+    {
+      "name": "seek",
+      "desc": "Seek to a position in the track",
+      "subcommands": [],
+      "file": "seek.ts"
+    },
+    {
+      "name": "shuffle",
+      "desc": "Shuffle the current queue",
+      "subcommands": [],
+      "file": "shuffle.ts"
+    },
+    {
+      "name": "skip",
+      "desc": "Skip the current track",
+      "subcommands": [],
+      "file": "skip.ts"
+    },
+    {
+      "name": "stop",
+      "desc": "Stop music and clear the queue",
+      "subcommands": [],
+      "file": "stop.ts"
+    },
+    {
+      "name": "247",
+      "desc": "Toggles 24/7 mode in the current voice channel",
+      "subcommands": [],
+      "file": "twentyfourseven.ts"
+    },
+    {
+      "name": "volume",
+      "desc": "Set the player volume (1-200)",
+      "subcommands": [],
+      "file": "volume.ts"
+    }
+  ],
+  "reputation": [
+    {
+      "name": "rep",
+      "desc": "View your or another user\\'s reputation profile",
+      "subcommands": [],
+      "file": "rep.ts"
+    },
+    {
+      "name": "repadmin",
+      "desc": "Admin tool to manually award reputation",
+      "subcommands": [],
+      "file": "repadmin.ts"
+    },
+    {
+      "name": "thank",
+      "desc": "Award reputation to a user",
+      "subcommands": [],
+      "file": "thank.ts"
+    }
+  ],
+  "roles": [
+    {
+      "name": "boosterrole",
+      "desc": "Manage your custom booster role",
+      "subcommands": [
+        {
+          "name": "set",
+          "desc": "Set the base role (booster roles are placed below this)"
+        },
+        {
+          "name": "remove",
+          "desc": "Remove the base role setting"
+        },
+        {
+          "name": "set",
+          "desc": "Set the role to award to boosters"
+        },
+        {
+          "name": "view",
+          "desc": "View the currently awarded role"
+        },
+        {
+          "name": "remove",
+          "desc": "Stop awarding a role to boosters"
+        },
+        {
+          "name": "create",
+          "desc": "Create your custom booster role"
+        },
+        {
+          "name": "rename",
+          "desc": "Rename your booster role"
+        },
+        {
+          "name": "color",
+          "desc": "Change the color of your booster role"
+        },
+        {
+          "name": "icon",
+          "desc": "Set the icon of your booster role (emoji or image URL)"
+        },
+        {
+          "name": "remove",
+          "desc": "Delete your custom booster role"
+        },
+        {
+          "name": "list",
+          "desc": "View all booster roles in this server"
+        },
+        {
+          "name": "cleanup",
+          "desc": "Remove booster roles from members who are no longer boosting"
+        }
+      ],
+      "file": "boosterrole.ts"
+    },
+    {
+      "name": "reactionrole",
+      "desc": "Click to get/remove @${guild.roles.cache.get(o.roleId)?.name ?? o.roleId}",
+      "subcommands": [
+        {
+          "name": "add",
+          "desc": "Add a role button to an existing bot message"
+        },
+        {
+          "name": "removebutton",
+          "desc": "Remove a specific role button from a message"
+        },
+        {
+          "name": "clear",
+          "desc": "Remove all buttons from a panel message"
+        },
+        {
+          "name": "list",
+          "desc": "List all button role panels in this server"
+        },
+        {
+          "name": "add",
+          "desc": "Add a role option to a select menu on an existing bot message"
+        },
+        {
+          "name": "remove",
+          "desc": "Remove a specific role from the dropdown"
+        },
+        {
+          "name": "clear",
+          "desc": "Remove the entire select menu from a message"
+        },
+        {
+          "name": "list",
+          "desc": "List all select menu role panels in this server"
+        },
+        {
+          "name": "add",
+          "desc": "Add a reaction role to a message"
+        },
+        {
+          "name": "remove",
+          "desc": "Remove a reaction role from a message"
+        },
+        {
+          "name": "list",
+          "desc": "List all reaction roles in this server"
+        }
+      ],
+      "file": "reactionrole.ts"
+    },
+    {
+      "name": "servertag",
+      "desc": "Reward members who equip your native Discord Server Tag",
+      "subcommands": [
+        {
+          "name": "role",
+          "desc": "Set the role to award when a member equips the native server tag"
+        },
+        {
+          "name": "channel",
+          "desc": "Set the channel where award messages are sent"
+        },
+        {
+          "name": "message",
+          "desc": "Set a custom message to send when a member equips the tag"
+        },
+        {
+          "name": "image",
+          "desc": "Set a banner image to include in the award message"
+        },
+        {
+          "name": "config",
+          "desc": "View current server tag configuration"
+        },
+        {
+          "name": "disable",
+          "desc": "Disable the server tag role system"
+        }
+      ],
+      "file": "servertag.ts"
+    },
+    {
+      "name": "vanity",
+      "desc": "Reward members who advertise your server in their status",
+      "subcommands": [
+        {
+          "name": "set",
+          "desc": "Set the vanity keyword to monitor in member statuses"
+        },
+        {
+          "name": "add",
+          "desc": "Add a role to award for vanity"
+        },
+        {
+          "name": "remove",
+          "desc": "Remove a vanity award role"
+        },
+        {
+          "name": "list",
+          "desc": "View all vanity award roles"
+        },
+        {
+          "name": "message",
+          "desc": "Set the message sent when a member gets the vanity role"
+        },
+        {
+          "name": "channel",
+          "desc": "Set the channel for award messages"
+        },
+        {
+          "name": "config",
+          "desc": "View current vanity configuration"
+        },
+        {
+          "name": "disable",
+          "desc": "Disable the vanity role system"
+        }
+      ],
+      "file": "vanity.ts"
+    }
+  ],
+  "scrapbook": [
+    {
+      "name": "scrapbook",
+      "desc": "View the Weekly Server Scrapbook (updates every Sunday)",
+      "subcommands": [],
+      "file": "scrapbook.ts"
+    }
+  ],
+  "starboard": [
+    {
+      "name": "starboard",
+      "desc": "Configure the starboard system",
+      "subcommands": [
+        {
+          "name": "view",
+          "desc": "View current starboard settings"
+        },
+        {
+          "name": "setup",
+          "desc": "Set the starboard channel and enable it"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable the starboard"
+        },
+        {
+          "name": "threshold",
+          "desc": "Set how many stars needed to appear on the starboard"
+        },
+        {
+          "name": "emoji",
+          "desc": "Set the reaction emoji to use (default ⭐)"
+        },
+        {
+          "name": "ignorensfw",
+          "desc": "Toggle whether NSFW channels are ignored"
+        },
+        {
+          "name": "selfstar",
+          "desc": "Allow members to star their own messages"
+        },
+        {
+          "name": "color",
+          "desc": "Set the starboard embed accent color"
+        },
+        {
+          "name": "timestamp",
+          "desc": "Toggle timestamp in starboard posts"
+        },
+        {
+          "name": "jumpurl",
+          "desc": "Toggle jump URL in starboard posts"
+        },
+        {
+          "name": "attachments",
+          "desc": "Toggle attachments in starboard posts"
+        },
+        {
+          "name": "setup",
+          "desc": "Set the clownboard channel"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable clownboard"
+        },
+        {
+          "name": "threshold",
+          "desc": "Set clownboard reaction threshold"
+        },
+        {
+          "name": "emoji",
+          "desc": "Set clownboard emoji (default 🤡)"
+        }
+      ],
+      "file": "starboard.ts"
+    }
+  ],
+  "tempvoice": [
+    {
+      "name": "tempvoice",
+      "desc": "Configure the TempVoice system",
+      "subcommands": [
+        {
+          "name": "view",
+          "desc": "View current TempVoice settings"
+        },
+        {
+          "name": "interface",
+          "desc": "Spawn the global TempVoice control panel in this channel"
+        },
+        {
+          "name": "setup",
+          "desc": "Set the join-to-create voice channel"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable TempVoice"
+        },
+        {
+          "name": "defaultname",
+          "desc": "Set the default name for new channels. Use {user} for the owner\\'s name"
+        },
+        {
+          "name": "defaultlimit",
+          "desc": "Set the default user limit for new channels (0 = unlimited)"
+        }
+      ],
+      "file": "tempvoice.ts"
+    },
+    {
+      "name": "vc",
+      "desc": "Control your TempVoice channel",
+      "subcommands": [
+        {
+          "name": "name",
+          "desc": "Rename your voice channel"
+        },
+        {
+          "name": "limit",
+          "desc": "Set the user limit for your channel (0 = unlimited)"
+        },
+        {
+          "name": "lock",
+          "desc": "Lock your channel — no one new can join"
+        },
+        {
+          "name": "unlock",
+          "desc": "Unlock your channel"
+        },
+        {
+          "name": "hide",
+          "desc": "Hide your channel from everyone"
+        },
+        {
+          "name": "unhide",
+          "desc": "Make your channel visible again"
+        },
+        {
+          "name": "permit",
+          "desc": "Allow a specific user to join your locked channel"
+        },
+        {
+          "name": "reject",
+          "desc": "Remove a user\\'s permission to join your channel"
+        },
+        {
+          "name": "kick",
+          "desc": "Kick a user from your voice channel"
+        },
+        {
+          "name": "transfer",
+          "desc": "Transfer ownership of your channel to another user"
+        },
+        {
+          "name": "claim",
+          "desc": "Claim an ownerless temp voice channel you are in"
+        },
+        {
+          "name": "info",
+          "desc": "View info about your current temp voice channel"
+        }
+      ],
+      "file": "vc.ts"
+    }
+  ],
+  "tickets": [
+    {
+      "name": "ticket",
+      "desc": "Manage the ticket system",
+      "subcommands": [
+        {
+          "name": "create",
+          "desc": "Create a new ticket panel"
+        },
+        {
+          "name": "addtype",
+          "desc": "Add a ticket type (button) to a panel"
+        },
+        {
+          "name": "post",
+          "desc": "Post (or repost) a ticket panel to its channel"
+        },
+        {
+          "name": "list",
+          "desc": "List all ticket panels in this server"
+        },
+        {
+          "name": "delete",
+          "desc": "Delete a ticket panel"
+        },
+        {
+          "name": "add",
+          "desc": "Add a form field to a ticket type"
+        },
+        {
+          "name": "remove",
+          "desc": "Remove a form field by number"
+        },
+        {
+          "name": "list",
+          "desc": "View form fields for a ticket type"
+        }
+      ],
+      "file": "ticket.ts"
+    }
+  ],
+  "utility": [
+    {
+      "name": "afk",
+      "desc": "Set your AFK status — bot will reply when you are mentioned",
+      "subcommands": [],
+      "file": "afk.ts"
+    },
+    {
+      "name": "alias",
+      "desc": "Create custom command shortcuts for this server",
+      "subcommands": [
+        {
+          "name": "add",
+          "desc": "Create a new alias"
+        },
+        {
+          "name": "remove",
+          "desc": "Delete an alias"
+        },
+        {
+          "name": "list",
+          "desc": "View all aliases in this server"
+        }
+      ],
+      "file": "alias.ts"
+    },
+    {
+      "name": "birthday",
+      "desc": "Birthday system",
+      "subcommands": [
+        {
+          "name": "set",
+          "desc": "Set your birthday"
+        },
+        {
+          "name": "remove",
+          "desc": "Remove your birthday"
+        },
+        {
+          "name": "view",
+          "desc": "View your or someone else\\'s birthday"
+        },
+        {
+          "name": "list",
+          "desc": "View all birthdays in this server"
+        },
+        {
+          "name": "channel",
+          "desc": "Set the announcement channel"
+        },
+        {
+          "name": "role",
+          "desc": "Role to give on someone\\'s birthday"
+        },
+        {
+          "name": "message",
+          "desc": "Custom announcement message. Supports plain text, {embed}$v... or {card}$v... scripts"
+        },
+        {
+          "name": "style",
+          "desc": "Set the message style"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable birthday announcements"
+        },
+        {
+          "name": "view",
+          "desc": "View current birthday config"
+        }
+      ],
+      "file": "birthday.ts"
+    },
+    {
+      "name": "bumpreminder",
+      "desc": "Configure the Disboard bump reminder",
+      "subcommands": [
+        {
+          "name": "view",
+          "desc": "View current bump reminder settings"
+        },
+        {
+          "name": "setup",
+          "desc": "Set up the bump reminder"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable bump reminders"
+        },
+        {
+          "name": "message",
+          "desc": "Set a custom reminder message"
+        }
+      ],
+      "file": "bumpreminder.ts"
+    },
+    {
+      "name": "ce",
+      "desc": "Custom embed builder (prefix only — use f!ce)",
+      "subcommands": [],
+      "file": "ce.ts"
+    },
+    {
+      "name": "counter",
+      "desc": "Manage stat counter channels",
+      "subcommands": [
+        {
+          "name": "create",
+          "desc": "Create a counter channel"
+        },
+        {
+          "name": "list",
+          "desc": "List all counter channels"
+        },
+        {
+          "name": "delete",
+          "desc": "Delete a counter"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable a counter"
+        },
+        {
+          "name": "update",
+          "desc": "Force update all counters now"
+        }
+      ],
+      "file": "counter.ts"
+    },
+    {
+      "name": "memory",
+      "desc": "Manage Fade\\'s server memory AI brain",
+      "subcommands": [
+        {
+          "name": "add",
+          "desc": "Teach Fade a new fact about this server"
+        },
+        {
+          "name": "list",
+          "desc": "Show all stored memories for this server"
+        },
+        {
+          "name": "delete",
+          "desc": "Forget a specific memory by ID"
+        },
+        {
+          "name": "scrape",
+          "desc": "Auto-learn from messages in a channel"
+        },
+        {
+          "name": "clear",
+          "desc": "⚠️ Wipe ALL memories from this server"
+        },
+        {
+          "name": "status",
+          "desc": "See how many memories Fade has stored"
+        }
+      ],
+      "file": "memory.ts"
+    },
+    {
+      "name": "reactiontrigger",
+      "desc": "Manage auto reaction triggers",
+      "subcommands": [
+        {
+          "name": "add",
+          "desc": "Add a reaction trigger"
+        },
+        {
+          "name": "list",
+          "desc": "List all reaction triggers"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable a trigger"
+        },
+        {
+          "name": "delete",
+          "desc": "Delete a reaction trigger"
+        }
+      ],
+      "file": "reactiontrigger.ts"
+    },
+    {
+      "name": "remind",
+      "desc": "Set a reminder — bot will ping you when time is up",
+      "subcommands": [
+        {
+          "name": "set",
+          "desc": "Create a reminder"
+        },
+        {
+          "name": "list",
+          "desc": "View your active reminders"
+        },
+        {
+          "name": "cancel",
+          "desc": "Cancel a reminder by ID"
+        }
+      ],
+      "file": "remind.ts"
+    },
+    {
+      "name": "responder",
+      "desc": "Manage auto responders",
+      "subcommands": [
+        {
+          "name": "add",
+          "desc": "Add a new auto responder"
+        },
+        {
+          "name": "list",
+          "desc": "List all auto responders"
+        },
+        {
+          "name": "view",
+          "desc": "View a specific responder"
+        },
+        {
+          "name": "edit",
+          "desc": "Edit an existing responder"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable a responder"
+        },
+        {
+          "name": "delete",
+          "desc": "Delete a responder"
+        }
+      ],
+      "file": "responder.ts"
+    },
+    {
+      "name": "snipe",
+      "desc": "Show the last deleted message in this channel",
+      "subcommands": [],
+      "file": "snipe.ts"
+    },
+    {
+      "name": "social",
+      "desc": "Manage social media notifications",
+      "subcommands": [
+        {
+          "name": "add",
+          "desc": "Add a social notification"
+        },
+        {
+          "name": "remove",
+          "desc": "Remove a social notification by ID"
+        },
+        {
+          "name": "list",
+          "desc": "List all social notifications"
+        },
+        {
+          "name": "message",
+          "desc": "Set a custom notification message for an entry"
+        }
+      ],
+      "file": "social.ts"
+    },
+    {
+      "name": "sticky",
+      "desc": "Manage sticky messages in channels",
+      "subcommands": [
+        {
+          "name": "set",
+          "desc": "Set or update a sticky message"
+        },
+        {
+          "name": "remove",
+          "desc": "Remove a sticky message from a channel"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable a sticky message"
+        },
+        {
+          "name": "view",
+          "desc": "View the sticky message for a channel"
+        },
+        {
+          "name": "list",
+          "desc": "List all sticky messages in this server"
+        }
+      ],
+      "file": "sticky.ts"
+    },
+    {
+      "name": "timer",
+      "desc": "Schedule a recurring message in a channel",
+      "subcommands": [
+        {
+          "name": "add",
+          "desc": "Create an auto message for a channel"
+        },
+        {
+          "name": "remove",
+          "desc": "Remove the auto message from a channel"
+        },
+        {
+          "name": "view",
+          "desc": "View the auto message for a channel"
+        },
+        {
+          "name": "list",
+          "desc": "List all auto messages in this server"
+        }
+      ],
+      "file": "timer.ts"
+    },
+    {
+      "name": "webhook",
+      "desc": "Webhook relay (prefix only — use f!webhook)",
+      "subcommands": [],
+      "file": "webhook.ts"
+    }
+  ],
+  "welcome": [
+    {
+      "name": "goodbye",
+      "desc": "Configure the goodbye system",
+      "subcommands": [
+        {
+          "name": "view",
+          "desc": "View current goodbye settings"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable goodbye messages"
+        },
+        {
+          "name": "channel",
+          "desc": "Set the goodbye channel"
+        },
+        {
+          "name": "style",
+          "desc": "Set the message style"
+        },
+        {
+          "name": "message",
+          "desc": "Set the plain-text goodbye message (text style only)"
+        },
+        {
+          "name": "script",
+          "desc": "Paste a raw embed/card script. Syntax: {key: value}$v{key: value}"
+        },
+        {
+          "name": "build",
+          "desc": "Open the interactive wizard to build your goodbye message"
+        },
+        {
+          "name": "destruct",
+          "desc": "Auto-delete the goodbye message after a set time (0 to disable)"
+        },
+        {
+          "name": "test",
+          "desc": "Preview the goodbye message"
+        }
+      ],
+      "file": "goodbye.ts"
+    },
+    {
+      "name": "welcome",
+      "desc": "Configure the welcome system",
+      "subcommands": [
+        {
+          "name": "view",
+          "desc": "View current welcome settings"
+        },
+        {
+          "name": "toggle",
+          "desc": "Enable or disable welcome messages"
+        },
+        {
+          "name": "channel",
+          "desc": "Set the welcome channel"
+        },
+        {
+          "name": "style",
+          "desc": "Set the message style"
+        },
+        {
+          "name": "message",
+          "desc": "Set the plain-text welcome message (text style only)"
+        },
+        {
+          "name": "script",
+          "desc": "Paste a raw embed/card script. Syntax: {key: value}$v{key: value}"
+        },
+        {
+          "name": "build",
+          "desc": "Open the interactive wizard to build your welcome message"
+        },
+        {
+          "name": "dm",
+          "desc": "Set a DM message sent to new members (leave empty to disable)"
+        },
+        {
+          "name": "autorole",
+          "desc": "Toggle an auto-role given on join (run again to remove)"
+        },
+        {
+          "name": "destruct",
+          "desc": "Auto-delete the welcome message after a set time (0 to disable)"
+        },
+        {
+          "name": "test",
+          "desc": "Preview the welcome message"
+        }
+      ],
+      "file": "welcome.ts"
+    }
+  ]
+}

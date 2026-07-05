@@ -23,7 +23,7 @@ export default {
                     { name: 'Trusted', value: 'trusted' }
                 )),
     
-    aliases: ['thx', 'thanks', 'award'],
+    aliases: ['award'],
     category: 'Reputation',
     
     async execute(interaction, client) {

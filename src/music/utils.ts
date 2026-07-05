@@ -36,7 +36,8 @@ export async function requireVoice(
 
     // If there's already a player in a different channel, block
     if (player && player.voiceId !== vcId) {
-        const card = buildMusicErrorCard(`I'm already playing in <#${player.voiceId}>. Join that channel or stop the player.`);
+        const channelMention = player.voiceId ? `<#${player.voiceId}>` : 'another voice channel';
+        const card = buildMusicErrorCard(`I'm already playing in ${channelMention}. Join that channel or stop the player.`);
         await musicReply(message, [card]);
         return null;
     }

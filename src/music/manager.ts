@@ -72,6 +72,21 @@ export function setupMusic(client: FadeClient): void {
     manager.shoukaku.on('disconnect',  (name) => logger.warn(`[Music] Lavalink node "${name}" disconnected`));
     manager.shoukaku.on('error',       (name, err) => logger.error(`[Music] Node "${name}" error`, err));
 
+    // When the Lavalink websocket closes (session lost), destroy all players
+    // to prevent "Session not found" unhandled rejections from stale players
+    // trying to call sendServerUpdate on a dead session.
+    manager.shoukaku.on('close', (name, code, reason) => {
+        logger.warn(`[Music] Node "${name}" closed (code=${code}, reason=${reason}). Destroying all players to prevent stale sessions.`);
+        for (const [guildId, player] of manager.players) {
+            try {
+                player.destroy();
+            } catch {
+                // Player might already be destroyed
+            }
+            autoplayGuilds.delete(guildId);
+        }
+    });
+
     // ── Kazagumo player events ────────────────────────────────────────────────
 
     manager.on('playerStart', async (player, track) => {

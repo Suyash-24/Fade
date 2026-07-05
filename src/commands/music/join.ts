@@ -35,7 +35,8 @@ export default {
                 await interaction.reply({ content: `${e('error')} I am already in your voice channel.`, flags: 64 });
                 return;
             } else {
-                await interaction.reply({ content: `${e('error')} I'm already playing in <#${player.voiceId}>.`, flags: 64 });
+                const channelMention = player.voiceId ? `<#${player.voiceId}>` : 'another voice channel';
+                await interaction.reply({ content: `${e('error')} I'm already playing in ${channelMention}.`, flags: 64 });
                 return;
             }
         }
