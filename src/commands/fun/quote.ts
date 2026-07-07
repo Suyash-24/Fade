@@ -26,7 +26,7 @@ const command: Command = {
 
     category: 'fun',
     cooldown: 5,
-    aliases: ['q'],
+    aliases: [],
 
     async prefixExecute(message, args) {
         const reference = message.reference;

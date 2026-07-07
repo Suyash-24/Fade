@@ -6,7 +6,7 @@ import { FadeContainer, sendResponse, sendMessage } from '../../components/build
 
 export default {
     data: new SlashCommandBuilder()
-        .setName('thank')
+        .setName('reputation')
         .setDescription('Award reputation to a user')
         .addUserOption(option => 
             option.setName('user')
@@ -23,7 +23,7 @@ export default {
                     { name: 'Trusted', value: 'trusted' }
                 )),
     
-    aliases: ['award'],
+    aliases: ['rep'],
     category: 'Reputation',
     
     async execute(interaction, client) {
@@ -69,7 +69,7 @@ export default {
 
     async prefixExecute(message, args, client) {
         if (args.length === 0) {
-            await message.reply('Usage: `f!thank <@user> [category: helper|developer|artist|trusted]`');
+            await message.reply('Usage: `f!reputation <@user> [category: helper|developer|artist|trusted]`');
             return;
         }
         const targetId = args[0].replace(/[<@!>]/g, '');
