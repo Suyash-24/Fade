@@ -3,7 +3,7 @@
 // Usage:
 //   f!roleicon @Role <emoji | image_url>  — set icon
 //   f!roleicon @Role reset                — remove icon
-import { Message } from 'discord.js';
+import { Message, MessageFlags } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { FadeContainer } from '../../components/builders.js';
 import { e, Colours } from '../../components/emojis.js';
@@ -72,7 +72,7 @@ export default {
                 const card = new FadeContainer(Colours.SUCCESS)
                     .text(`${e('success')} Removed icon from **${roleMention.name}**`)
                     .build();
-                await message.reply({ components: [card] as any });
+                await message.reply({ components: [card] as any, flags: MessageFlags.IsComponentsV2 });
             } catch (err: any) {
                 await message.reply(
                     `${e('error')} Failed to remove icon — ${err?.message ?? 'Unknown error'}.\n` +
@@ -85,17 +85,13 @@ export default {
         // ── Custom emoji ─────────────────────────────────────────────────────
         const emojiMatch = remaining.match(CUSTOM_EMOJI_RE);
         if (emojiMatch) {
-            const emojiId = emojiMatch[1];
-            const isAnimated = remaining.startsWith('<a:');
-            const ext = isAnimated ? 'gif' : 'png';
-            const emojiUrl = `https://cdn.discordapp.com/emojis/${emojiId}.${ext}`;
-
             try {
-                await roleMention.setIcon(emojiUrl, `Role icon set by ${message.author.tag}`);
+                // Pass the emoji string directly — Discord.js resolves it to the correct format
+                await roleMention.setIcon(remaining, `Role icon set by ${message.author.tag}`);
                 const card = new FadeContainer(Colours.SUCCESS)
                     .text(`${e('success')} Icon set for **${roleMention.name}** → ${remaining}`)
                     .build();
-                await message.reply({ components: [card] as any });
+                await message.reply({ components: [card] as any, flags: MessageFlags.IsComponentsV2 });
             } catch (err: any) {
                 await message.reply(
                     `${e('error')} Failed to set icon — ${err?.message ?? 'Unknown error'}.\n` +
@@ -114,7 +110,7 @@ export default {
                 const card = new FadeContainer(Colours.SUCCESS)
                     .text(`${e('success')} Icon set for **${roleMention.name}** → ${remaining}`)
                     .build();
-                await message.reply({ components: [card] as any });
+                await message.reply({ components: [card] as any, flags: MessageFlags.IsComponentsV2 });
             } catch (err: any) {
                 await message.reply(
                     `${e('error')} Failed to set icon — ${err?.message ?? 'Unknown error'}.\n` +
@@ -131,7 +127,7 @@ export default {
                 const card = new FadeContainer(Colours.SUCCESS)
                     .text(`${e('success')} Icon set for **${roleMention.name}** via image URL`)
                     .build();
-                await message.reply({ components: [card] as any });
+                await message.reply({ components: [card] as any, flags: MessageFlags.IsComponentsV2 });
             } catch (err: any) {
                 await message.reply(
                     `${e('error')} Failed to set icon — ${err?.message ?? 'Unknown error'}.\n` +
