@@ -14,6 +14,7 @@ import { FadeContainer, sendMessage, thumb } from '../components/builders.js';
 import { getGuildRoleAliases, getReqRole } from '../db/queries/roleAliases.js';
 import { incrementScrapbookMessageCount } from '../db/queries/scrapbook.js';
 import { askBrain, isAiEnabled } from '../utils/aiMemory.js';
+import { resolveCommandError } from '../utils/commandError.js';
 
 // Per-user AI cooldown (10 seconds)
 const aiCooldowns = new Map<string, number>();
@@ -285,11 +286,12 @@ const event: Event<'messageCreate'> = {
             try {
                 await command.prefixExecute(message, args, client);
             } catch (err) {
-                logger.error(`Prefix command failed: ${commandName}`, err, {
-                    user:  message.author.tag,
-                    guild: guild.id,
+                const msg = resolveCommandError(err, {
+                    commandName: commandName,
+                    userId:      message.author.tag,
+                    guildId:     guild.id,
                 });
-                await message.reply('❌ Something went wrong. Please try again.').catch(() => null);
+                await message.reply(msg).catch(() => null);
             }
         };
 

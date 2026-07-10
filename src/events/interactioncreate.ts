@@ -10,6 +10,7 @@ import { checkCommandRestrictions } from '../utils/commandCheck.js';
 import { logger } from '../utils/logger.js';
 import { isBotOwner } from '../utils/owner.js';
 import { e } from '../components/emojis.js';
+import { resolveCommandError } from '../utils/commandError.js';
 
 const event: Event<'interactionCreate'> = {
     name: 'interactionCreate',
@@ -125,20 +126,17 @@ const event: Event<'interactionCreate'> = {
                     client,
                 );
             } catch (err) {
-                logger.error(`Command failed: /${interaction.commandName}`, err, {
-                    user:  interaction.user.tag,
-                    guild: interaction.guildId ?? 'DM',
+                const msg = resolveCommandError(err, {
+                    commandName: interaction.commandName,
+                    userId:      interaction.user.tag,
+                    guildId:     interaction.guildId ?? 'DM',
                 });
 
-                const msg: InteractionReplyOptions = {
-                    content: '❌ Something went wrong. Please try again.',
-                    flags: MessageFlags.Ephemeral,
-                };
-
+                const reply: InteractionReplyOptions = { content: msg, flags: MessageFlags.Ephemeral };
                 if (interaction.replied || interaction.deferred) {
-                    await interaction.followUp(msg).catch(() => null);
+                    await interaction.followUp(reply).catch(() => null);
                 } else {
-                    await interaction.reply(msg).catch(() => null);
+                    await interaction.reply(reply).catch(() => null);
                 }
             }
         }
