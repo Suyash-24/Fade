@@ -1,19 +1,28 @@
 // src/commands/roles/roleicon.ts
 // Set or remove a role's icon.
 // Usage:
-//   f!roleicon @Role <emoji | image_url>  — set icon
-//   f!roleicon @Role reset                — remove icon
+//   f!roleicon @Role <custom_emoji>  — set icon from a server emoji
+//   f!roleicon @Role <image_url>     — set icon from an image URL
+//   f!roleicon @Role 🔥              — set icon from a unicode emoji
+//   f!roleicon @Role reset           — remove icon
 import { Message, MessageFlags } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { FadeContainer } from '../../components/builders.js';
 import { e, Colours } from '../../components/emojis.js';
 import { hasPermission } from '../../utils/fakePerms.js';
+import { logger } from '../../utils/logger.js';
 import type { FadeClient } from '../../client.js';
 
 // Matches <:name:id> and <a:name:id>
-const CUSTOM_EMOJI_RE = /^<a?:\w+:(\d+)>$/;
+const CUSTOM_EMOJI_RE = /^<(a?):\w+:(\d+)>$/;
 // Matches a direct image URL (png, jpg, jpeg, gif, webp)
 const IMAGE_URL_RE = /^https?:\/\/.+\.(png|jpe?g|gif|webp)(\?.*)?$/i;
+// Unicode emoji — one or two chars (handles emoji + variation selector like ❤️)
+const UNICODE_EMOJI_RE = /^\p{Emoji_Presentation}[\p{Emoji_Modifier}\uFE0F\u20E3]?$/u;
+
+async function reply(message: Message, card: any) {
+    return message.reply({ components: [card], flags: MessageFlags.IsComponentsV2 } as any);
+}
 
 export default {
     data: { name: 'roleicon', description: 'Set or remove a role icon.' },
@@ -72,8 +81,9 @@ export default {
                 const card = new FadeContainer(Colours.SUCCESS)
                     .text(`${e('success')} Removed icon from **${roleMention.name}**`)
                     .build();
-                await message.reply({ components: [card] as any, flags: MessageFlags.IsComponentsV2 });
+                await reply(message, card);
             } catch (err: any) {
+                logger.error('roleicon: failed to clear icon', err, { guildId: message.guild.id, roleId: roleMention.id });
                 await message.reply(
                     `${e('error')} Failed to remove icon — ${err?.message ?? 'Unknown error'}.\n` +
                     `-# Make sure the server is **Level 2+** boosted (required by Discord for role icons).`
@@ -82,17 +92,21 @@ export default {
             return;
         }
 
-        // ── Custom emoji ─────────────────────────────────────────────────────
+        // ── Custom emoji <:name:id> or <a:name:id> ───────────────────────────
         const emojiMatch = remaining.match(CUSTOM_EMOJI_RE);
         if (emojiMatch) {
+            const animated = emojiMatch[1] === 'a';
+            const emojiId  = emojiMatch[2];
+            // Build the CDN URL — setIcon() requires a resolvable URL/Buffer, NOT an emoji string
+            const cdnUrl = `https://cdn.discordapp.com/emojis/${emojiId}.${animated ? 'gif' : 'png'}`;
             try {
-                // Pass the emoji string directly — Discord.js resolves it to the correct format
-                await roleMention.setIcon(remaining, `Role icon set by ${message.author.tag}`);
+                await roleMention.setIcon(cdnUrl, `Role icon set by ${message.author.tag}`);
                 const card = new FadeContainer(Colours.SUCCESS)
                     .text(`${e('success')} Icon set for **${roleMention.name}** → ${remaining}`)
                     .build();
-                await message.reply({ components: [card] as any, flags: MessageFlags.IsComponentsV2 });
+                await reply(message, card);
             } catch (err: any) {
+                logger.error('roleicon: failed to set custom emoji icon', err, { guildId: message.guild.id, roleId: roleMention.id });
                 await message.reply(
                     `${e('error')} Failed to set icon — ${err?.message ?? 'Unknown error'}.\n` +
                     `-# Make sure the server is **Level 2+** boosted.`
@@ -101,17 +115,21 @@ export default {
             return;
         }
 
-        // ── Unicode emoji ─────────────────────────────────────────────────────
-        // Single Unicode emoji (e.g. 🔥 ❤️)
-        const unicodeEmojiRe = /^\p{Emoji}/u;
-        if (unicodeEmojiRe.test(remaining) && remaining.length <= 8) {
+        // ── Unicode emoji (e.g. 🔥 ❤️) ───────────────────────────────────────
+        // Discord has a separate API field for unicode emojis: unicodeEmoji
+        // setIcon() cannot handle unicode emojis — must use role.edit({ unicodeEmoji })
+        if (UNICODE_EMOJI_RE.test(remaining)) {
             try {
-                await roleMention.setIcon(remaining, `Role icon set by ${message.author.tag}`);
+                await roleMention.edit({
+                    unicodeEmoji: remaining,
+                    reason: `Role icon set by ${message.author.tag}`,
+                });
                 const card = new FadeContainer(Colours.SUCCESS)
                     .text(`${e('success')} Icon set for **${roleMention.name}** → ${remaining}`)
                     .build();
-                await message.reply({ components: [card] as any, flags: MessageFlags.IsComponentsV2 });
+                await reply(message, card);
             } catch (err: any) {
+                logger.error('roleicon: failed to set unicode emoji icon', err, { guildId: message.guild.id, roleId: roleMention.id });
                 await message.reply(
                     `${e('error')} Failed to set icon — ${err?.message ?? 'Unknown error'}.\n` +
                     `-# Make sure the server is **Level 2+** boosted.`
@@ -127,8 +145,9 @@ export default {
                 const card = new FadeContainer(Colours.SUCCESS)
                     .text(`${e('success')} Icon set for **${roleMention.name}** via image URL`)
                     .build();
-                await message.reply({ components: [card] as any, flags: MessageFlags.IsComponentsV2 });
+                await reply(message, card);
             } catch (err: any) {
+                logger.error('roleicon: failed to set image URL icon', err, { guildId: message.guild.id, roleId: roleMention.id });
                 await message.reply(
                     `${e('error')} Failed to set icon — ${err?.message ?? 'Unknown error'}.\n` +
                     `-# Make sure the server is **Level 2+** boosted and the URL is a valid image.`
