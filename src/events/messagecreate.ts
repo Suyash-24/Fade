@@ -94,6 +94,39 @@ const event: Event<'messageCreate'> = {
             const bodyArgs    = body.split(/\s+/);
             const firstWord   = bodyArgs[0].toLowerCase();
 
+            // ── Self-introduction intercept ───────────────────────────────
+            // Catch "who are you", "what are you", "tell me about yourself" etc.
+            // and reply with a proper bot introduction instead of letting the AI
+            // give a generic chatbot-memory answer.
+            const selfIntroPatterns = [
+                /^(who|what)\s+are\s+you/i,
+                /^tell\s+me\s+about\s+yourself/i,
+                /^what\s+(can|do)\s+you\s+do/i,
+                /^(introduce|describe)\s+yourself/i,
+                /^what\s+is\s+fade/i,
+                /^(hi|hello|hey|sup|yo)\s*(fade|bot)?$/i,
+            ];
+            if (selfIntroPatterns.some(p => p.test(body))) {
+                const prefix = guildPrefix;
+                const card = new FadeContainer()
+                    .section(
+                        [
+                            `**Hey! I'm Fade ✨**\n` +
+                            `An all-in-one Discord bot with **115+ commands** — everything your server needs in one place.\n\n` +
+                            `✦ Moderation, Automod & Anti-nuke\n` +
+                            `✦ Music, Leveling & Economy\n` +
+                            `✦ Welcome cards, Tickets & Giveaways\n` +
+                            `✦ Server Memory AI (ask me anything about the server!)\n\n` +
+                            `Use \`${prefix}help\` to explore, or just tag me with a command!\n` +
+                            `🌐 **[fadebot.me](https://fadebot.me/)**`
+                        ],
+                        thumb(client.user!.displayAvatarURL({ size: 256 }))
+                    )
+                    .build();
+                await sendMessage(message, [card]);
+                return;
+            }
+
             // Resolve against built-in commands and aliases
             const resolvedCmd = client.aliases.get(firstWord) ?? firstWord;
             const command     = client.commands.get(resolvedCmd);
