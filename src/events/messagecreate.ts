@@ -155,12 +155,13 @@ const event: Event<'messageCreate'> = {
                     const result = await askBrain(guild.id, body);
 
                     if (!result) {
-                        // No relevant memory — show a helpful message instead of
-                        // confusingly suggesting f!memory add to regular users
+                        // No relevant memory — show hint to admins, friendly message to regular users
+                        const isAdmin = message.member?.permissions.has(PermissionsBitField.Flags.ManageGuild) ?? false;
                         const card = new FadeContainer()
                             .text(
-                                `🧠 Hmm, I don't have an answer for that!\n` +
-                                `-# Try \`${guildPrefix}help\` to see all my commands, or ask a server question and I'll do my best!`
+                                isAdmin
+                                    ? `🧠 I don't have an answer for that yet!\n-# Use \`${guildPrefix}memory add\` to teach me, so I can answer this in the future.`
+                                    : `🧠 Hmm, I don't have an answer for that!\n-# Try \`${guildPrefix}help\` to see all my commands, or ask a server question and I'll do my best!`
                             )
                             .build();
                         await sendMessage(message, [card]);
