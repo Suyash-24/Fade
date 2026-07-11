@@ -65,6 +65,8 @@ const event: Event<'messageCreate'> = {
             }
             
             lines.push('');
+            lines.push(`✦ You can also run commands by tagging me! e.g. \`@${client.user.username} play lo-fi\``);
+            lines.push('');
             lines.push('Need help? Use the `help` command to see everything I can do!');
             lines.push('🌐 **[Website](https://fadebot.me/)**');
 
@@ -79,12 +81,64 @@ const event: Event<'messageCreate'> = {
             return;
         }
 
-        // ── AI Brain Handler (mention with a question) ─────────────────────
+        // ── Mention-as-Prefix + AI Brain Handler ──────────────────────────
+        // When someone tags the bot with text (e.g. @Fade play despacito),
+        // we first check if the first word is a known command and run it
+        // directly. Only if it's not a command do we pass it to the AI brain.
         const mentionRegex = new RegExp(`^<@!?${client.user?.id}>\\s*`);
         if (client.user?.id && mentionRegex.test(message.content)) {
-            const question = message.content.replace(mentionRegex, '').trim();
+            const body = message.content.replace(mentionRegex, '').trim();
+            if (!body) return; // bare mention — already handled above
 
-            if (question.length > 3 && await isAiEnabled(guild.id)) {
+            // Split into command word + rest of args
+            const bodyArgs    = body.split(/\s+/);
+            const firstWord   = bodyArgs[0].toLowerCase();
+
+            // Resolve against built-in commands and aliases
+            const resolvedCmd = client.aliases.get(firstWord) ?? firstWord;
+            const command     = client.commands.get(resolvedCmd);
+
+            if (command?.prefixExecute) {
+                // ── Route to the command directly ─────────────────────────
+                // Treat @Fade <cmd> [args] exactly like f!<cmd> [args]
+                const cmdArgs = bodyArgs.slice(1);
+
+                // Re-use all the same guards from the prefix handler
+                if (command.botPermissions?.length) {
+                    const botMember = guild.members.me;
+                    if (botMember) {
+                        const missing = command.botPermissions.filter(p => !botMember.permissions.has(p));
+                        if (missing.length) {
+                            const names = new PermissionsBitField(missing).toArray();
+                            await message.reply(`❌ I'm missing permissions: ${names.map(n => `\`${n}\``).join(', ')}`);
+                            return;
+                        }
+                    }
+                }
+                if (command.userPermissions?.length) {
+                    const missing = command.userPermissions.filter(p => !message.member!.permissions.has(p));
+                    if (missing.length) {
+                        const names = new PermissionsBitField(missing).toArray();
+                        await message.reply(`❌ You need: ${names.map(n => `\`${n}\``).join(', ')}`);
+                        return;
+                    }
+                }
+
+                try {
+                    await command.prefixExecute(message, cmdArgs, client);
+                } catch (err) {
+                    const msg = resolveCommandError(err, {
+                        commandName: resolvedCmd,
+                        userId:      message.author.tag,
+                        guildId:     guild.id,
+                    });
+                    await message.reply(msg).catch(() => null);
+                }
+                return;
+            }
+
+            // ── Not a command — try the AI brain ──────────────────────────
+            if (body.length > 3 && await isAiEnabled(guild.id)) {
                 const cooldownKey = `${guild.id}:${message.author.id}`;
                 const now = Date.now();
                 const lastUsed = aiCooldowns.get(cooldownKey) ?? 0;
@@ -95,16 +149,19 @@ const event: Event<'messageCreate'> = {
                 }
                 aiCooldowns.set(cooldownKey, now);
 
-                // Show typing while we compute
                 await message.channel.sendTyping().catch(() => {});
 
                 try {
-                    const result = await askBrain(guild.id, question);
+                    const result = await askBrain(guild.id, body);
 
                     if (!result) {
-                        // No relevant memory found
+                        // No relevant memory — show a helpful message instead of
+                        // confusingly suggesting f!memory add to regular users
                         const card = new FadeContainer()
-                            .text(`🧠 I don't have any information about that yet. Ask an admin to use \`f!memory add\` to teach me!`)
+                            .text(
+                                `🧠 Hmm, I don't have an answer for that!\n` +
+                                `-# Try \`${guildPrefix}help\` to see all my commands, or ask a server question and I'll do my best!`
+                            )
                             .build();
                         await sendMessage(message, [card]);
                         return;
@@ -120,6 +177,15 @@ const event: Event<'messageCreate'> = {
                 }
                 return;
             }
+
+            // AI is disabled or body too short — show mini help nudge
+            if (body.length > 0) {
+                const card = new FadeContainer()
+                    .text(`👋 Hey! Use \`${guildPrefix}help\` to see all my commands, or run them by tagging me: \`@${client.user.username} <command>\``)
+                    .build();
+                await sendMessage(message, [card]);
+            }
+            return;
         }
 
         // Resolve which prefix was used — custom prefix OR always-on default
