@@ -1,0 +1,1 @@
+ALTER TABLE "guilds" ADD COLUMN "translator" boolean DEFAULT true NOT NULL;

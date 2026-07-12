@@ -9,6 +9,7 @@ import type { Event } from '../types/event.js';
 import { FadeContainer } from '../components/builders.js';
 import { translate, flagToLang, langToName } from '../utils/translator.js';
 import { logger } from '../utils/logger.js';
+import { getGuild } from '../db/queries/guilds.js';
 
 // Per-message cooldown: prevent spam if many people react at once
 // key = `${messageId}:${userId}:${lang}`
@@ -42,6 +43,10 @@ const event: Event<'messageReactionAdd'> = {
 
         // Nothing to translate (embed-only, image-only, etc.)
         if (!text || text.length < 2) return;
+
+        // Check if the translator feature is enabled for this server
+        const guildSettings = await getGuild(reaction.message.guild.id);
+        if (!guildSettings.translator) return;
 
         // Cooldown check
         const cooldownKey = `${message.id}:${user.id}:${targetLang}`;

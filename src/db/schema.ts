@@ -32,14 +32,15 @@ const updatedAt = () => timestamp('updated_at', { withTimezone: true }).defaultN
 
 // One row per guild. Created when bot joins, kept when bot leaves (data preserved).
 export const guilds = pgTable('guilds', {
-    guildId:   snowflake('guild_id').primaryKey(),
-    prefix:    varchar('prefix', { length: 10 }).default('f!').notNull(),
-    locale:    varchar('locale', { length: 10 }).default('en').notNull(),
-    timezone:  varchar('timezone', { length: 50 }).default('UTC').notNull(),
-    isPremium: boolean('is_premium').default(false).notNull(),
-    reqrole:   snowflake('reqrole'), // Role required to use custom role aliases
-    createdAt: now(),
-    updatedAt: updatedAt(),
+    guildId:    snowflake('guild_id').primaryKey(),
+    prefix:     varchar('prefix', { length: 10 }).default('f!').notNull(),
+    locale:     varchar('locale', { length: 10 }).default('en').notNull(),
+    timezone:   varchar('timezone', { length: 50 }).default('UTC').notNull(),
+    isPremium:  boolean('is_premium').default(false).notNull(),
+    reqrole:    snowflake('reqrole'), // Role required to use custom role aliases
+    translator: boolean('translator').default(true).notNull(), // Flag to toggle translator module
+    createdAt:  now(),
+    updatedAt:  updatedAt(),
 });
 
 // Per-guild bot appearance settings (avatar is applied live; bio stored for reference)
