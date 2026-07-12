@@ -37,24 +37,30 @@ export function resolveVars(template: string, member: GuildMember, executor?: an
     const execAvatar = execUser.displayAvatarURL({ size: 256 });
 
     return template
-        .replace(/{user}/g,             member.toString())
-        .replace(/{username}/g,         user.username)
-        .replace(/{server}/g,           member.guild.name)
-        .replace(/{count}/g,            member.guild.memberCount.toString())
-        .replace(/{ordinal}/g,          ordinal(member.guild.memberCount))
-        .replace(/{id}/g,               member.id)
-        .replace(/{avatar}/g,           avatarUrl)
-        .replace(/{servericon}/g,       member.guild.iconURL({ size: 256 }) ?? '')
-        .replace(/{created}/g,          createdTs.toString())
+        .replace(/{user}/g,               member.toString())
+        .replace(/\{user\.mention\}/g,    member.toString())       // @mention ping
+        .replace(/\{user\.username\}/g,   user.username)           // plain username
+        .replace(/\{user\.name\}/g,       user.displayName)        // display/global name
+        .replace(/\{user\.avatar\}/g,     avatarUrl)               // avatar URL
+        .replace(/\{user\.icon\}/g,       avatarUrl)               // alias for avatar
+        .replace(/{usericon}/g,           avatarUrl)               // legacy alias
+        .replace(/{username}/g,           user.username)
+        .replace(/{server}/g,             member.guild.name)
+        .replace(/{count}/g,              member.guild.memberCount.toString())
+        .replace(/{ordinal}/g,            ordinal(member.guild.memberCount))
+        .replace(/{id}/g,                 member.id)
+        .replace(/{avatar}/g,             avatarUrl)
+        .replace(/{servericon}/g,         member.guild.iconURL({ size: 256 }) ?? '')
+        .replace(/{created}/g,            createdTs.toString())
         
         // Command User (Executor/Author) Variables
-        .replace(/{author}/g,           execMention)
+        .replace(/{author}/g,             execMention)
         .replace(/\{author\.mention\}/g,  execMention)
         .replace(/\{author\.username\}/g, execName)
         .replace(/\{author\.name\}/g,     execName)
         .replace(/\{author\.avatar\}/g,   execAvatar)
         .replace(/\{author\.icon\}/g,     execAvatar)
-        .replace(/{authoricon}/g,       execAvatar);
+        .replace(/{authoricon}/g,         execAvatar);
 }
 
 // ── Script style detector ───────────────────────────────────────────────────────
