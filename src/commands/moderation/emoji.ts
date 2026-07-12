@@ -74,11 +74,20 @@ export default {
             }
 
             // Sanitize name (Discord only allows alphanumeric + underscores, 2-32 chars)
-            name = name.replace(/[^a-zA-Z0-9_]/g, '_').slice(0, 32);
+            name = name!.replace(/[^a-zA-Z0-9_]/g, '_').slice(0, 32);
             if (name.length < 2) name = name.padEnd(2, '_');
 
             try {
-                const created = await message.guild.emojis.create({ attachment: imageUrl, name });
+                // Fetch the image as a Buffer — Discord's API cannot use raw CDN URLs directly
+                let attachment: Buffer | string = imageUrl!;
+                if (imageUrl!.startsWith('http')) {
+                    const res = await fetch(imageUrl!, { signal: AbortSignal.timeout(10_000) });
+                    if (!res.ok) throw new Error(`Failed to fetch image (${res.status})`);
+                    const arrayBuf = await res.arrayBuffer();
+                    attachment = Buffer.from(arrayBuf);
+                }
+
+                const created = await message.guild.emojis.create({ attachment, name: name! });
                 const card = new FadeContainer()
                     .text(`${e('success')}  **Emoji added!**\n\`${created.name}\` ${created.toString()} has been added to the server.`)
                     .build();
