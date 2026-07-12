@@ -8,8 +8,8 @@ import type { FadeClient } from '../../client.js';
 
 // Custom emoji regex: <:name:id> or <a:name:id>
 const CUSTOM_EMOJI_REGEX = /<a?:(\w+):(\d+)>/;
-// Image URL regex — direct image links only
-const URL_REGEX = /https?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)(?:\?\S*)?/i;
+// Image URL regex — direct image links OR Discord CDN emoji URLs (no extension)
+const URL_REGEX = /https?:\/\/\S+(?:\.(?:png|jpg|jpeg|gif|webp)(?:\?\S*)?|cdn\.discordapp\.com\/emojis\/\d+(?:\?\S*)?)/i;
 
 export default {
     data: { name: 'emoji', description: 'Manage server emojis.' },
@@ -36,31 +36,41 @@ export default {
             let name: string | undefined;
             let imageUrl: string | undefined;
 
-            const emojiMatch = CUSTOM_EMOJI_REGEX.exec(args.slice(1).join(' '));
-            const urlMatch   = URL_REGEX.exec(args.slice(1).join(' '));
-
-            if (emojiMatch) {
-                // They passed a custom emoji — use its name and CDN url
-                const [, emojiName, emojiId] = emojiMatch;
-                const ext = args.slice(1).join(' ').startsWith('<a:') ? 'gif' : 'png';
-                name     = args[1] === emojiName ? args[1] : (args[1] ?? emojiName);
-                // If user provided explicit name as first arg, respect it
-                if (!/^\d+$/.test(args[1]) && args[1] !== `<` && args.length > 2) {
-                    name = args[1];
-                } else {
-                    name = emojiName;
-                }
-                imageUrl = `https://cdn.discordapp.com/emojis/${emojiId}.${ext}`;
-            } else if (urlMatch) {
-                name     = args[1]; // name is required before the URL
-                imageUrl = urlMatch[0];
-                if (!name || URL_REGEX.test(name)) {
-                    await message.reply(`${e('error')} Usage: \`${process.env.DEFAULT_PREFIX ?? 'f!'}emoji add <name> <url>\``);
+            // 0. Check for an image attachment first
+            const attachment = message.attachments.first();
+            if (attachment && attachment.contentType?.startsWith('image/')) {
+                const attachName = args[1];
+                if (!attachName) {
+                    await message.reply(`${e('error')} Provide a name: \`f!emoji add <name>\` then attach the image.`);
                     return;
                 }
+                name     = attachName.replace(/[^a-zA-Z0-9_]/g, '_').slice(0, 32).padEnd(2, '_');
+                imageUrl = attachment.url;
             } else {
-                await message.reply(`${e('error')} Provide a custom emoji or an image URL.\nUsage: \`f!emoji add <name> <emoji|url>\``);
-                return;
+                const emojiMatch = CUSTOM_EMOJI_REGEX.exec(args.slice(1).join(' '));
+                const urlMatch   = URL_REGEX.exec(args.slice(1).join(' '));
+
+                if (emojiMatch) {
+                    // They passed a custom emoji — use its name and CDN url
+                    const [, emojiName, emojiId] = emojiMatch;
+                    const ext = args.slice(1).join(' ').startsWith('<a:') ? 'gif' : 'png';
+                    if (!/^\d+$/.test(args[1]) && args[1] !== `<` && args.length > 2) {
+                        name = args[1];
+                    } else {
+                        name = emojiName;
+                    }
+                    imageUrl = `https://cdn.discordapp.com/emojis/${emojiId}.${ext}`;
+                } else if (urlMatch) {
+                    name     = args[1]; // name is required before the URL
+                    imageUrl = urlMatch[0];
+                    if (!name || URL_REGEX.test(name)) {
+                        await message.reply(`${e('error')} Usage: \`${process.env.DEFAULT_PREFIX ?? 'f!'}emoji add <name> <url>\``);
+                        return;
+                    }
+                } else {
+                    await message.reply(`${e('error')} Provide a custom emoji, an image URL, or attach an image.\nUsage: \`f!emoji add <name> <emoji|url>\``);
+                    return;
+                }
             }
 
             // Sanitize name (Discord only allows alphanumeric + underscores, 2-32 chars)
