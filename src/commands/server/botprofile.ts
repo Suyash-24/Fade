@@ -50,7 +50,10 @@ function buildCard(title: string, body: string) {
 }
 
 function resolveImageUrl(message: Message, args: string[]): string | null {
-    if (message.attachments.size > 0) return message.attachments.first()!.url;
+    if (message.attachments.size > 0) {
+        const a = message.attachments.first()!;
+        return a.proxyURL || a.url; // proxyURL is stable; url expires
+    }
     const url = args.find(a => /^https?:\/\//i.test(a));
     return url ?? null;
 }
@@ -104,7 +107,7 @@ export default {
                     );
                 }
 
-                const res = await fetch(imageUrl);
+                const res = await fetch(imageUrl, { headers: { 'User-Agent': 'FadeBot/1.0 (Discord Bot)' } });
                 if (!res.ok) throw new Error(`Failed to fetch image: ${res.statusText}`);
                 const buffer = Buffer.from(await res.arrayBuffer());
 
@@ -141,7 +144,7 @@ export default {
                     );
                 }
 
-                const res = await fetch(imageUrl);
+                const res = await fetch(imageUrl, { headers: { 'User-Agent': 'FadeBot/1.0 (Discord Bot)' } });
                 if (!res.ok) throw new Error(`Failed to fetch image: ${res.statusText}`);
                 const buffer = Buffer.from(await res.arrayBuffer());
 
