@@ -45,7 +45,8 @@ export default {
                     return;
                 }
                 name     = attachName.replace(/[^a-zA-Z0-9_]/g, '_').slice(0, 32).padEnd(2, '_');
-                imageUrl = attachment.url;
+                // proxyURL is more stable and doesn't expire like the direct CDN URL
+                imageUrl = attachment.proxyURL || attachment.url;
             } else {
                 const emojiMatch = CUSTOM_EMOJI_REGEX.exec(args.slice(1).join(' '));
                 const urlMatch   = URL_REGEX.exec(args.slice(1).join(' '));
@@ -78,12 +79,17 @@ export default {
             if (name.length < 2) name = name.padEnd(2, '_');
 
             try {
-                // Fetch the image as a Buffer — Discord's API cannot use raw CDN URLs directly
+                // Fetch the image as a Buffer so Discord API can process it
                 let attachment: Buffer | string = imageUrl!;
                 if (imageUrl!.startsWith('http')) {
-                    const res = await fetch(imageUrl!, { signal: AbortSignal.timeout(10_000) });
-                    if (!res.ok) throw new Error(`Failed to fetch image (${res.status})`);
+                    const res = await fetch(imageUrl!, {
+                        headers: { 'User-Agent': 'FadeBot/1.0 (Discord Bot)' },
+                        signal: AbortSignal.timeout(10_000),
+                    });
+                    if (!res.ok) throw new Error(`Failed to fetch image (HTTP ${res.status})`);
                     const arrayBuf = await res.arrayBuffer();
+                    if (arrayBuf.byteLength === 0) throw new Error('Image returned empty response');
+                    if (arrayBuf.byteLength > 256 * 1024) throw new Error('Image is too large (max 256KB for emojis)');
                     attachment = Buffer.from(arrayBuf);
                 }
 
