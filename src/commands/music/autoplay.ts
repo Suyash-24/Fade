@@ -12,7 +12,7 @@ export default {
 
     category:  'music',
     guildOnly: true,
-    aliases:   ['autoplay', 'ap'],
+    aliases:   ['autoplay'],
     cooldown:  3,
 
     async execute(interaction) {
