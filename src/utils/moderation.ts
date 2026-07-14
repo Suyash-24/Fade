@@ -95,6 +95,7 @@ const ACTION_LABELS: Record<CaseType, string> = {
     unban:   'Unbanned',
     timeout: 'Timed out',
     softban: 'Softbanned',
+    strip:   'Roles stripped',
 };
 
 export async function dmUser(

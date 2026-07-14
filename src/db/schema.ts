@@ -997,3 +997,19 @@ export const aiConfig = pgTable('ai_config', {
     enabled:   boolean('enabled').default(true).notNull(),
     updatedAt: updatedAt(),
 });
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// AUTOROLE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Roles assigned automatically when a member or bot joins.
+// type: 'human' | 'bot' | 'all'
+export const autoroles = pgTable('autoroles', {
+    id:        serial('id').primaryKey(),
+    guildId:   snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    roleId:    snowflake('role_id').notNull(),
+    type:      varchar('type', { length: 10 }).default('human').notNull(), // 'human' | 'bot' | 'all'
+    createdAt: now(),
+}, (t) => [
+    index('autoroles_guild_idx').on(t.guildId),
+]);

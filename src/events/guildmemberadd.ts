@@ -2,6 +2,7 @@
 import type { FadeClient } from '../client.js';
 import type { Event } from '../types/event.js';
 import { getWelcomeConfig } from '../db/queries/welcome.js';
+import { getAutoroles } from '../db/queries/autoroles.js';
 import { sendWelcome, sendDmWelcome, type WelcomeStyle } from '../utils/welcomecard.js';
 import { logger } from '../utils/logger.js';
 
@@ -12,6 +13,26 @@ const event: Event<'guildMemberAdd'> = {
         const guildId = member.guild.id;
 
         try {
+            // ── Autoroles (standalone system, supports human/bot/all) ─────────────
+            const autoroles = await getAutoroles(guildId);
+            if (autoroles.length) {
+                const targetType = member.user.bot ? 'bot' : 'human';
+                const roleIds = autoroles
+                    .filter(r => r.type === targetType || r.type === 'all')
+                    .map(r => r.roleId)
+                    .filter(id => member.guild.roles.cache.has(id));
+
+                if (roleIds.length) {
+                    await member.roles.add(roleIds, 'Fade autorole on join').catch(err =>
+                        logger.warn('Autorole assignment failed', { guildId, userId: member.id, error: String(err) })
+                    );
+                }
+            }
+
+            // Don't send welcome messages for bots
+            if (member.user.bot) return;
+
+            // ── Welcome config ────────────────────────────────────────────────────
             const config = await getWelcomeConfig(guildId);
             if (!config.enabled) return;
 
@@ -38,20 +59,6 @@ const event: Event<'guildMemberAdd'> = {
                     config.dmMessage,
                     (config.style as WelcomeStyle) ?? 'card',
                 );
-            }
-
-            // ── Auto-roles ────────────────────────────────────────────────────
-            const autoRoles = config.autoRoles as string[] ?? [];
-            if (autoRoles.length) {
-                const roles = autoRoles
-                    .map(id => member.guild.roles.cache.get(id))
-                    .filter(Boolean) as any[];
-
-                if (roles.length) {
-                    await member.roles.add(roles, 'Fade auto-role on join').catch(err =>
-                        logger.warn('Auto-role failed', { guildId, userId: member.id, error: String(err) })
-                    );
-                }
             }
 
         } catch (err) {
