@@ -12,7 +12,7 @@ export default {
 
     category: 'economy',
     guildOnly: true,
-    aliases:   ['pay', 'send', 'transfer', 'give'],
+    aliases:   ['pay', 'transfer'],
     cooldown:  5,
 
     async execute(interaction) {
