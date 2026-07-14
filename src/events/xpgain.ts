@@ -173,9 +173,29 @@ async function handleLevelUp(
 // Default level-up card — always safe, used when no script or script fails
 async function sendDefaultCard(channel: any, userId: string, newLevel: number): Promise<void> {
     try {
+        const { FadeContainer } = await import('../components/builders.js');
+        const { Colours, e } = await import('../components/emojis.js');
+        const { ThumbnailBuilder, MessageFlags } = await import('discord.js');
+
+        // Try to fetch avatar for thumbnail
+        let avatarUrl = '';
+        try {
+            const member = channel.guild.members.cache.get(userId) || await channel.guild.members.fetch(userId).catch(() => null);
+            if (member) avatarUrl = member.user.displayAvatarURL({ size: 128, extension: 'png' });
+        } catch { }
+
+        const thumb = avatarUrl ? new ThumbnailBuilder().setURL(avatarUrl) : undefined;
+        
         const card = new FadeContainer(Colours.FADE)
-            .text(`## ${e('level')} Level Up!\n<@${userId}> reached **Level ${newLevel}** ${newLevel >= 10 ? '🎉' : '⬆️'}`)
+            .section(
+                [
+                    `## ${e('level')} Level Up! 🎉`,
+                    `- <@${userId}> just reached **Level ${newLevel}**! Keep chatting to climb the leaderboard.`
+                ],
+                thumb
+            )
             .build();
+
         await channel.send({
             components: [card],
             flags: MessageFlags.IsComponentsV2,
