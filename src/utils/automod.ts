@@ -16,6 +16,7 @@ import { createCase, getWarningCount } from '../db/queries/moderation.js';
 import { FadeContainer } from '../components/builders.js';
 import { e, Colours } from '../components/emojis.js';
 import { logger } from './logger.js';
+import { checkPhishingDomain } from './phishingScanner.js';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -163,6 +164,28 @@ function checkSlurs(message: Message, config: any): Violation | null {
             reason:     'Message contains a blacklisted word',
             baseAction: (config.slursPunishment ?? 'ban') as AutomodPunishment,
         };
+    }
+    return null;
+}
+
+async function checkPhishing(message: Message, config: any): Promise<Violation | null> {
+    // We always want anti-phishing enabled if automod is enabled, or we can tie it to anti-links
+    // For safety, let's run it on all URLs posted.
+    const matches = [...message.content.matchAll(URL_REGEX)];
+    if (!matches.length) return null;
+
+    for (const match of matches) {
+        const domain = match[1]?.toLowerCase();
+        if (!domain) continue;
+
+        const isPhishing = await checkPhishingDomain(domain);
+        if (isPhishing) {
+            return {
+                rule:       'Anti-Phishing',
+                reason:     `Posted a known scam/phishing link (${domain})`,
+                baseAction: 'ban', // Phishing is severe, default to ban (can be configurable later)
+            };
+        }
     }
     return null;
 }
@@ -318,6 +341,7 @@ export async function runAutomod(message: Message): Promise<void> {
         if (isExempt(message, config)) return;
 
         const rules = [
+            { key: 'phishing', fn: checkPhishing }, // Highest priority, checks API
             { key: 'spam', fn: checkSpam },
             { key: 'invites', fn: checkInvites },
             { key: 'links', fn: checkLinks },
@@ -330,7 +354,7 @@ export async function runAutomod(message: Message): Promise<void> {
             // Check per-rule exemptions
             if (isExempt(message, config, rule.key)) continue;
 
-            const violation = rule.fn(message, config);
+            const violation = await rule.fn(message, config);
             if (violation) {
                 await punish(message, violation, config);
                 return;
