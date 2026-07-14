@@ -119,7 +119,8 @@ export default {
 
         if (sub === 'set') {
             const channel = interaction.options.getChannel('channel') ?? fallbackChannel;
-            const message = interaction.options.getString('message', true);
+            let message = interaction.options.getString('message', true);
+            message = message.replace(/\\n/g, '\n');
             const cooldown = interaction.options.getInteger('cooldown') ?? 30;
 
             if (!channel || channel.type !== ChannelType.GuildText) {
