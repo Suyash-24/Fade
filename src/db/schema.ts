@@ -631,7 +631,7 @@ export const birthdays = pgTable('birthdays', {
     birthday:   text('birthday').notNull(),   // MM-DD
     timezone:   text('timezone').default('UTC').notNull(),
 }, (t) => [
-    index('birthdays_guild_user_idx').on(t.guildId, t.userId),
+    uniqueIndex('birthdays_guild_user_idx').on(t.guildId, t.userId),
 ]);
 
 export const birthdayConfig = pgTable('birthday_config', {
