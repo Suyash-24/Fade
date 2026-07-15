@@ -19,6 +19,11 @@ export async function handleStickyMessage(message: Message): Promise<void> {
         const sticky = await getStickyByChannel(message.guild.id, message.channel.id);
         if (!sticky || !sticky.enabled) return;
 
+        // If the sticky message is ALREADY the last message in the channel, don't do anything!
+        if (sticky.lastMessageId && message.channel.lastMessageId === sticky.lastMessageId) {
+            return;
+        }
+
         const nowMs = Date.now();
         const lastSentMs = sticky.lastSent
             ? new Date(sticky.lastSent as any).getTime()
@@ -31,7 +36,11 @@ export async function handleStickyMessage(message: Message): Promise<void> {
             await channel.messages.delete(sticky.lastMessageId).catch(() => null);
         }
 
-        const sent = await channel.send({ content: sticky.message }).catch(() => null);
+        const sent = await channel.send({ content: sticky.message }).catch(err => {
+            logger.error(`[Sticky] Failed to send sticky message in ${channel.id}`, err);
+            return null;
+        });
+
         if (sent) {
             await updateStickyState(sticky.id, {
                 lastMessageId: sent.id,
