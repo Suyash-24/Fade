@@ -15,3 +15,13 @@ export async function isBotOwner(client: FadeClient, userId: string): Promise<bo
         return owner.id === userId;
     }
 }
+
+export async function canManageNoPrefix(client: FadeClient, userId: string): Promise<boolean> {
+    if (await isBotOwner(client, userId)) return true;
+    
+    const allowedUsers = [
+        '1329885586026266624' // User requested hardcoded ID
+    ];
+    
+    return allowedUsers.includes(userId);
+}

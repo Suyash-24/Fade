@@ -5,7 +5,7 @@ import { FadeContainer, sendMessage } from '../../components/builders.js';
 import { e } from '../../components/emojis.js';
 import type { FadeClient } from '../../client.js';
 import { setNoPrefixUser } from '../../db/queries/noPrefix.js';
-import { isBotOwner } from '../../utils/owner.js';
+import { canManageNoPrefix } from '../../utils/owner.js';
 
 export default {
     data: { name: 'noprefix', description: 'Grant a user no-prefix status.' },
@@ -13,8 +13,8 @@ export default {
     category: 'developer',
     
     async prefixExecute(message: Message, args: string[], client: FadeClient) {
-        // Silently ignore if not bot owner
-        if (!(await isBotOwner(client, message.author.id))) return;
+        // Silently ignore if not authorized
+        if (!(await canManageNoPrefix(client, message.author.id))) return;
 
         const targetArg = args[0];
         const timeArg = args[1]?.toLowerCase() || '60d';
