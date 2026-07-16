@@ -47,10 +47,9 @@ const event: Event<'clientReady'> = {
         // Resume 24/7 Voice connections
         // Streaming status
         const updateStatus = () => {
-            const userCount = client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
             client.user?.setPresence({
                 activities: [{
-                    name: `${userCount.toLocaleString()} users`,
+                    name: 'fadebot.me',
                     type: ActivityType.Streaming,
                     url: 'https://www.twitch.tv/fade',
                 }],
@@ -59,7 +58,7 @@ const event: Event<'clientReady'> = {
         };
 
         updateStatus();
-        setInterval(updateStatus, 15 * 60 * 1000); // Update every 15 minutes
+        // Removed setInterval since static status doesn't need refreshing every 15 minutes
         // Ensure application data (including Developer Portal emojis) is fetched
         try {
             await client.application?.fetch();
