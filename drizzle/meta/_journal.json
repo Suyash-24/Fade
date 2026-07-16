@@ -127,6 +127,13 @@
       "when": 1783880433054,
       "tag": "0017_translator_toggle",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1784225423009,
+      "tag": "0018_hardbans",
+      "breakpoints": true
     }
   ]
 }

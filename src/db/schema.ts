@@ -114,6 +114,16 @@ export const fakePermissions = pgTable('fake_permissions', {
     permission: text('permission').notNull(), // e.g. "ban_members"
 });
 
+export const hardbans = pgTable('hardbans', {
+    guildId:     snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    userId:      snowflake('user_id').notNull(),
+    moderatorId: snowflake('moderator_id').notNull(),
+    reason:      text('reason').default('No reason provided'),
+    createdAt:   now(),
+}, (t) => [
+    primaryKey({ columns: [t.guildId, t.userId] }),
+]);
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // LOGGING
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

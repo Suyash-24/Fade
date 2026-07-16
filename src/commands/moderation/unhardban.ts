@@ -1,23 +1,23 @@
-// src/commands/moderation/unban.ts
+// src/commands/moderation/unhardban.ts
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { fadeReply, sendMessage, FadeContainer } from '../../components/builders.js';
 import { createCase } from '../../db/queries/moderation.js';
+import { removeHardban, isHardbanned } from '../../db/queries/hardbans.js';
 import { e, Colours } from '../../components/emojis.js';
 import { sendLog, LogColour } from '../../utils/logsender.js';
 import { hasPermission } from '../../utils/fakePerms.js';
-import { isHardbanned } from '../../db/queries/hardbans.js';
 
 export default {
     data: new SlashCommandBuilder()
-        .setName('unban')
-        .setDescription('Unban a user from the server')
-        .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
-        .addStringOption(o => o.setName('user_id').setDescription('The user ID to unban').setRequired(true))
+        .setName('unhardban')
+        .setDescription('Remove a user from the hardban blacklist and unban them')
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+        .addStringOption(o => o.setName('user_id').setDescription('The user ID to unhardban').setRequired(true))
         .addStringOption(o => o.setName('reason').setDescription('Reason').setRequired(false)),
 
     category: 'moderation', guildOnly: true,
-    userPermissions: [PermissionFlagsBits.BanMembers],
+    userPermissions: [PermissionFlagsBits.Administrator, PermissionFlagsBits.BanMembers],
     botPermissions:  [PermissionFlagsBits.BanMembers],
     cooldown: 5,
 
@@ -26,25 +26,25 @@ export default {
         const reason = interaction.options.getString('reason') ?? 'No reason provided';
         const guild  = interaction.guild!;
 
-        if (await isHardbanned(guild.id, userId)) {
-            await interaction.reply({ content: `${e('error')} This user is hardbanned. You must use \`f!unhardban\` to unban them.`, flags: MessageFlags.Ephemeral });
+        if (!(await isHardbanned(guild.id, userId))) {
+            await interaction.reply({ content: `${e('error')} This user is not on the hardban list.`, flags: MessageFlags.Ephemeral });
             return;
         }
 
-        // Verify they're actually banned
+        // Remove from blacklist
+        await removeHardban(guild.id, userId);
+
+        // Try to unban them from discord
         const ban = await guild.bans.fetch(userId).catch(() => null);
-        if (!ban) {
-            await interaction.reply({ content: `${e('error')} That user is not banned.`, flags: MessageFlags.Ephemeral });
-            return;
+        if (ban) {
+            await guild.bans.remove(userId, `[Fade Unhardban] ${reason} | Moderator: ${interaction.user.tag}`);
         }
-
-        await guild.bans.remove(userId, `[Fade] ${reason} | Moderator: ${interaction.user.tag}`);
 
         const newCase = await createCase({
             guildId: guild.id, type: 'unban',
-            userId, userTag: ban.user.tag,
+            userId, userTag: ban ? ban.user.tag : 'Unknown User',
             moderatorId: interaction.user.id, moderatorTag: interaction.user.tag,
-            reason,
+            reason: `[Unhardban] ${reason}`,
         });
 
         await sendLog({
@@ -52,19 +52,19 @@ export default {
             category: 'mod',
             event:    'memberUnban',
             color:    LogColour.CREATE,
-            title:    `${e('unlock')} Member Unbanned`,
+            title:    `${e('unlock')} Member Unhardbanned`,
             fields: [
-                { name: 'User',      value: `<@${ban.user.id}> (${ban.user.tag})` },
+                { name: 'User',      value: `<@${userId}>` },
                 { name: 'Moderator', value: `<@${interaction.user.id}>` },
                 { name: 'Reason',    value: reason },
                 { name: 'Case',      value: `\`#${newCase.caseNumber}\`` },
             ],
-            footer: `ID: ${ban.user.id}`,
+            footer: `ID: ${userId}`,
         });
 
         const card = new FadeContainer(Colours.SUCCESS)
             .text(
-                `${e('unlock')}  Unbanned ${ban.user.tag}` +
+                `${e('unlock')}  Unhardbanned <@${userId}>` +
                 `\n-# Case \`#${newCase.caseNumber}\``
             )
             .build();
@@ -78,23 +78,26 @@ export default {
     async prefixExecute(message, args, client) {
         const userId = args[0];
         if (!userId) { await message.reply(`${e('error')} Please provide a user ID.`); return; }
-        if (await isHardbanned(message.guild!.id, userId)) {
-            await message.reply(`${e('error')} This user is hardbanned. You must use \`f!unhardban\` to unban them.`); return;
-        }
-        if (!await hasPermission(message.member!, 'ban_members')) {
-            await message.reply(`${e('error')} You don't have permission to unban members.`); return;
+        if (!await hasPermission(message.member!, 'administrator')) {
+            await message.reply(`${e('error')} You don't have permission to unhardban members.`); return;
         }
 
-        const ban = await message.guild!.bans.fetch(userId).catch(() => null);
-        if (!ban) { await message.reply(`${e('error')} That user is not banned.`); return; }
+        if (!(await isHardbanned(message.guild!.id, userId))) {
+            await message.reply(`${e('error')} This user is not on the hardban list.`); return;
+        }
 
         const reason = args.slice(1).join(' ') || 'No reason provided';
-        await message.guild!.bans.remove(userId, `[Fade] ${reason}`);
+        
+        await removeHardban(message.guild!.id, userId);
+        const ban = await message.guild!.bans.fetch(userId).catch(() => null);
+        if (ban) {
+            await message.guild!.bans.remove(userId, `[Fade Unhardban] ${reason}`);
+        }
 
         const newCase = await createCase({
             guildId: message.guild!.id, type: 'unban',
-            userId, userTag: ban.user.tag,
-            moderatorId: message.author.id, moderatorTag: message.author.tag, reason,
+            userId, userTag: ban ? ban.user.tag : 'Unknown User',
+            moderatorId: message.author.id, moderatorTag: message.author.tag, reason: `[Unhardban] ${reason}`,
         });
 
         await sendLog({
@@ -102,19 +105,19 @@ export default {
             category: 'mod',
             event:    'memberUnban',
             color:    LogColour.CREATE,
-            title:    `${e('unlock')} Member Unbanned`,
+            title:    `${e('unlock')} Member Unhardbanned`,
             fields: [
-                { name: 'User',      value: `<@${ban.user.id}> (${ban.user.tag})` },
+                { name: 'User',      value: `<@${userId}>` },
                 { name: 'Moderator', value: `<@${message.author.id}>` },
                 { name: 'Reason',    value: reason },
                 { name: 'Case',      value: `\`#${newCase.caseNumber}\`` },
             ],
-            footer: `ID: ${ban.user.id}`,
+            footer: `ID: ${userId}`,
         });
 
         const card = new FadeContainer(Colours.SUCCESS)
             .text(
-                `${e('unlock')}  Unbanned ${ban.user.tag}` +
+                `${e('unlock')}  Unhardbanned <@${userId}>` +
                 `\n-# Case \`#${newCase.caseNumber}\``
             )
             .build();

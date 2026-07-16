@@ -3,6 +3,7 @@ import type { FadeClient } from '../client.js';
 import type { Event } from '../types/event.js';
 import { getWelcomeConfig } from '../db/queries/welcome.js';
 import { getAutoroles } from '../db/queries/autoroles.js';
+import { isHardbanned } from '../db/queries/hardbans.js';
 import { sendWelcome, sendDmWelcome, type WelcomeStyle } from '../utils/welcomecard.js';
 import { logger } from '../utils/logger.js';
 
@@ -13,6 +14,13 @@ const event: Event<'guildMemberAdd'> = {
         const guildId = member.guild.id;
 
         try {
+            // ── Hardban Check ─────────────────────────────────────────────────────
+            if (await isHardbanned(guildId, member.id)) {
+                logger.warn(`[Hardban] Banned user ${member.id} tried to join ${guildId}. Re-banning.`);
+                await member.ban({ reason: '[Fade Hardban System] User is hardbanned.' }).catch(() => null);
+                return; // Stop processing autoroles and welcome messages
+            }
+
             // ── Autoroles (standalone system, supports human/bot/all) ─────────────
             const autoroles = await getAutoroles(guildId);
             if (autoroles.length) {
