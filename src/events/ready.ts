@@ -45,11 +45,30 @@ const event: Event<'clientReady'> = {
         initializeVoiceSessions(client);
 
         // Resume 24/7 Voice connections
-        // Streaming status
-        const updateStatus = () => {
+        // Status Rotation
+        let toggle = false;
+        
+        const updateStatus = async () => {
+            let version = 'v2.0.0';
+            try {
+                // Safely read version from package.json using fs
+                const fs = await import('node:fs');
+                const path = await import('node:path');
+                const url = await import('node:url');
+                const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+                const pkgPath = path.resolve(__dirname, '../../package.json');
+                const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+                version = `v${pkg.version}`;
+            } catch {
+                // Fallback
+            }
+
+            const statusText = toggle ? version : 'fadebot.me';
+            toggle = !toggle;
+
             client.user?.setPresence({
                 activities: [{
-                    name: 'fadebot.me',
+                    name: statusText,
                     type: ActivityType.Streaming,
                     url: 'https://www.twitch.tv/fade',
                 }],
@@ -58,7 +77,7 @@ const event: Event<'clientReady'> = {
         };
 
         updateStatus();
-        // Removed setInterval since static status doesn't need refreshing every 15 minutes
+        setInterval(updateStatus, 15 * 1000); // Rotate every 15 seconds
         // Ensure application data (including Developer Portal emojis) is fetched
         try {
             await client.application?.fetch();
