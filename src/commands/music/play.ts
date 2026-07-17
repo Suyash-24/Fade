@@ -16,7 +16,7 @@ export default {
 
     category: 'music',
     guildOnly: true,
-    aliases:   ['play'],
+    aliases:   ['play', 'p'],
     cooldown:  3,
 
     async execute(interaction) {
