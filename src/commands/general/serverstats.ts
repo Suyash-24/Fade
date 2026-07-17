@@ -137,7 +137,7 @@ export default {
         const data = await fetchStatsData(interaction.guild!, client);
         const buffer = await buildServerStatsCard(data);
         const attachment = new AttachmentBuilder(buffer, { name: 'serverstats.png' });
-        await interaction.editReply({ content: null, embeds: [], components: [], files: [attachment] });
+        await interaction.editReply({ content: null, embeds: [], components: [], flags: [], files: [attachment] });
     },
 
     async prefixExecute(message, args, client) {
@@ -145,6 +145,6 @@ export default {
         const data = await fetchStatsData(message.guild!, client);
         const buffer = await buildServerStatsCard(data);
         const attachment = new AttachmentBuilder(buffer, { name: 'serverstats.png' });
-        await msg.edit({ content: null, embeds: [], components: [], files: [attachment] });
+        await msg.edit({ content: null, embeds: [], components: [], flags: [], files: [attachment] });
     },
 } satisfies Command;
