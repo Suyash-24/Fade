@@ -37,12 +37,12 @@ function buildCard(
             `-# ${user.username}`,
         ])
         .separator(true)
-        .section([
+        .section([[
             `**All Time**`,
             `${e('pinkarrow')} **Voice Time** — \`${formatDuration(allStats.seconds)}\``,
             `${e('pinkarrow')} **Server Rank** — \`#${allStats.rank || '—'}\``,
             `${e('pinkarrow')} **Server Share** — \`${calcPct(allStats.seconds, allStats.total)}%\``,
-        ], thumb(user.displayAvatarURL({ size: 128 })))
+        ].join('\n')], thumb(user.displayAvatarURL({ size: 128 })))
         .text([
             `\u200b`,
             `**This Week**`,
