@@ -1023,3 +1023,64 @@ export const autoroles = pgTable('autoroles', {
 }, (t) => [
     index('autoroles_guild_idx').on(t.guildId),
 ]);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// WARN THRESHOLDS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Auto-punishment when a user reaches a warning threshold
+export const warnThresholds = pgTable('warn_thresholds', {
+    id:        serial('id').primaryKey(),
+    guildId:   snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    count:     integer('count').notNull(),                            // warn count that triggers this
+    action:    varchar('action', { length: 20 }).notNull(),          // 'mute' | 'kick' | 'ban' | 'timeout'
+    duration:  integer('duration'),                                   // seconds for mute/timeout, null = permanent ban
+    reason:    text('reason').default('Automatic action: warning threshold reached'),
+    createdAt: now(),
+}, (t) => [
+    uniqueIndex('warn_thresholds_guild_count_idx').on(t.guildId, t.count),
+]);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// POLLS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+export const polls = pgTable('polls', {
+    id:          serial('id').primaryKey(),
+    guildId:     snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    channelId:   snowflake('channel_id').notNull(),
+    messageId:   snowflake('message_id'),
+    hostId:      snowflake('host_id').notNull(),
+    question:    text('question').notNull(),
+    options:     jsonb('options').$type<string[]>().notNull(),         // Array of option labels
+    votes:       jsonb('votes').$type<Record<string, string[]>>().default({}), // option index => user IDs
+    status:      varchar('status', { length: 20 }).default('active').notNull(), // active | ended
+    endsAt:      timestamp('ends_at', { withTimezone: true }),
+    createdAt:   now(),
+}, (t) => [
+    index('polls_guild_idx').on(t.guildId),
+]);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CONFESSIONS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+export const confessionConfig = pgTable('confession_config', {
+    guildId:    snowflake('guild_id').primaryKey().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    channelId:  snowflake('channel_id').notNull(),
+    modChannelId: snowflake('mod_channel_id'),  // where confessions with author are visible to mods
+    enabled:    boolean('enabled').default(true).notNull(),
+    updatedAt:  updatedAt(),
+});
+
+export const confessions = pgTable('confessions', {
+    id:        serial('id').primaryKey(),
+    guildId:   snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    userId:    snowflake('user_id').notNull(),   // identity stored secretly for mod use
+    messageId: snowflake('message_id'),          // the public confession message
+    content:   text('content').notNull(),
+    banned:    boolean('banned').default(false).notNull(), // confession-banned users
+    createdAt: now(),
+}, (t) => [
+    index('confessions_guild_idx').on(t.guildId),
+]);

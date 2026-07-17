@@ -173,6 +173,62 @@ const event: Event<'interactionCreate'> = {
                     return;
                 }
 
+                // Poll buttons
+                if (id.startsWith('poll:')) {
+                    if (!interaction.isButton()) return;
+                    const { db } = await import('../db/index.js');
+                    const { polls } = await import('../db/schema.js');
+                    const { eq } = await import('drizzle-orm');
+                    const { buildPollEmbed, buildPollButtons } = await import('../commands/utility/poll.js');
+
+                    const parts = id.split(':');
+                    const action = parts[1];
+                    const pollId = parseInt(parts[2]);
+
+                    const [poll] = await db.select().from(polls).where(eq(polls.id, pollId)).limit(1);
+                    if (!poll || poll.guildId !== interaction.guildId) {
+                        await interaction.reply({ content: `${e('error')} Poll not found.`, flags: MessageFlags.Ephemeral }); return;
+                    }
+                    if (poll.status === 'ended') {
+                        await interaction.reply({ content: `${e('error')} This poll has ended.`, flags: MessageFlags.Ephemeral }); return;
+                    }
+
+                    if (action === 'end') {
+                        if (poll.hostId !== interaction.user.id && !(interaction.member as any)?.permissions?.has?.('ManageGuild')) {
+                            await interaction.reply({ content: `${e('error')} Only the poll host or admins can end this poll.`, flags: MessageFlags.Ephemeral }); return;
+                        }
+                        await db.update(polls).set({ status: 'ended' }).where(eq(polls.id, pollId));
+                        const embed = buildPollEmbed(poll.question, poll.options, poll.votes ?? {}, 'ended', poll.endsAt);
+                        const components = buildPollButtons(pollId, poll.options, 'ended');
+                        await interaction.update({ embeds: [embed], components }); return;
+                    }
+
+                    if (action === 'vote') {
+                        const optionIndex = parts[3];
+                        const userId = interaction.user.id;
+                        const currentVotes: Record<string, string[]> = { ...(poll.votes ?? {}) };
+
+                        // Remove existing vote if any
+                        for (const key of Object.keys(currentVotes)) {
+                            currentVotes[key] = currentVotes[key].filter((id: string) => id !== userId);
+                        }
+
+                        // If user voted for a different option (toggle off if same)
+                        const existing = Object.entries(currentVotes).find(([, v]) => (v as string[]).includes(userId));
+                        if (!existing || existing[0] !== optionIndex) {
+                            if (!currentVotes[optionIndex]) currentVotes[optionIndex] = [];
+                            currentVotes[optionIndex].push(userId);
+                        }
+
+                        await db.update(polls).set({ votes: currentVotes }).where(eq(polls.id, pollId));
+                        const embed = buildPollEmbed(poll.question, poll.options, currentVotes, 'active', poll.endsAt);
+                        const components = buildPollButtons(pollId, poll.options, 'active');
+                        await interaction.update({ embeds: [embed], components }); return;
+                    }
+
+                    return;
+                }
+
                 if (id === 'ping_refresh') {
                     const { buildPing } = await import('../commands/general/ping.js');
                     let ping = interaction.client.ws.ping;

@@ -2,12 +2,14 @@
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { sendResponse, sendMessage, FadeContainer } from '../../components/builders.js';
-import { canModerate, dmUser } from '../../utils/moderation.js';
+import { canModerate, dmUser, parseDuration } from '../../utils/moderation.js';
 import { createCase, getWarningCount } from '../../db/queries/moderation.js';
+import { getTriggeredThreshold } from '../../db/queries/warnThresholds.js';
 import { e, Colours } from '../../components/emojis.js';
 import { sendLog, LogColour } from '../../utils/logsender.js';
 import { hasPermission } from '../../utils/fakePerms.js';
 import { getInvokeResponse } from '../../db/queries/invokeMessages.js';
+import { logger } from '../../utils/logger.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -60,6 +62,40 @@ export default {
 
         const warnCount = await getWarningCount(guild.id, targetUser.id);
         const dmSent    = await dmUser(targetUser, guild, 'warn', reason, newCase.caseNumber);
+
+        // ── Warning Threshold Auto-Actions ────────────────────────────────────
+        const threshold = await getTriggeredThreshold(guild.id, warnCount);
+        if (threshold && targetMember) {
+            const thresholdReason = threshold.reason ?? 'Automatic action: warning threshold reached';
+            try {
+                if (threshold.action === 'kick') {
+                    await dmUser(targetUser, guild, 'kick', thresholdReason, 0);
+                    await targetMember.kick(`[Fade Auto] ${thresholdReason}`);
+                    await createCase({ guildId: guild.id, type: 'kick', userId: targetUser.id, userTag: targetUser.tag, moderatorId: client.user!.id, moderatorTag: client.user!.tag, reason: thresholdReason });
+                } else if (threshold.action === 'ban') {
+                    await dmUser(targetUser, guild, 'ban', thresholdReason, 0);
+                    await guild.bans.create(targetUser.id, { reason: `[Fade Auto] ${thresholdReason}` });
+                    await createCase({ guildId: guild.id, type: 'ban', userId: targetUser.id, userTag: targetUser.tag, moderatorId: client.user!.id, moderatorTag: client.user!.tag, reason: thresholdReason });
+                } else if ((threshold.action === 'mute' || threshold.action === 'timeout') && threshold.duration) {
+                    const ms = threshold.duration * 1000;
+                    await targetMember.timeout(ms, `[Fade Auto] ${thresholdReason}`);
+                    await createCase({ guildId: guild.id, type: 'timeout', userId: targetUser.id, userTag: targetUser.tag, moderatorId: client.user!.id, moderatorTag: client.user!.tag, reason: thresholdReason, duration: threshold.duration });
+                }
+                await sendLog({
+                    guild, category: 'mod', event: 'memberWarn', color: LogColour.DELETE,
+                    title: `${e('warn')} Auto-Action Triggered`,
+                    fields: [
+                        { name: 'User', value: `<@${targetUser.id}>` },
+                        { name: 'Action', value: `\`${threshold.action}\`` },
+                        { name: 'Trigger', value: `\`${warnCount}\` warnings` },
+                        { name: 'Reason', value: thresholdReason },
+                    ],
+                    footer: `ID: ${targetUser.id}`,
+                });
+            } catch (err) {
+                logger.error('Warn threshold auto-action failed', err);
+            }
+        }
 
         await sendLog({
             guild,

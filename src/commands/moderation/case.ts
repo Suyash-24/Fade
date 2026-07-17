@@ -3,6 +3,9 @@ import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.
 import type { Command } from '../../types/command.js';
 import { FadeContainer, fadeReply, sendMessage } from '../../components/builders.js';
 import { getCase, updateCaseReason } from '../../db/queries/moderation.js';
+import { db } from '../../db/index.js';
+import { cases } from '../../db/schema.js';
+import { and, eq } from 'drizzle-orm';
 import { e, Colours } from '../../components/emojis.js';
 
 const MAX_CASE_NUMBER = 2_147_483_647; // PostgreSQL int4 max
@@ -39,48 +42,93 @@ const buildCaseView = (c: any) => {
 export default {
     data: new SlashCommandBuilder()
         .setName('case')
-        .setDescription('Look up a specific moderation case')
+        .setDescription('Look up, edit, or delete a moderation case')
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
-        .addIntegerOption(o => o.setName('number').setDescription('Case number').setRequired(true)),
+        .addSubcommand(s => s
+            .setName('view')
+            .setDescription('View a case')
+            .addIntegerOption(o => o.setName('number').setDescription('Case number').setRequired(true))
+        )
+        .addSubcommand(s => s
+            .setName('edit')
+            .setDescription('Edit a case reason')
+            .addIntegerOption(o => o.setName('number').setDescription('Case number').setRequired(true))
+            .addStringOption(o => o.setName('reason').setDescription('New reason').setRequired(true))
+        )
+        .addSubcommand(s => s
+            .setName('delete')
+            .setDescription('Delete a case (requires Manage Guild)')
+            .addIntegerOption(o => o.setName('number').setDescription('Case number').setRequired(true))
+        ),
 
     category: 'moderation', guildOnly: true,
     userPermissions: [PermissionFlagsBits.ModerateMembers],
     cooldown: 5,
 
     async execute(interaction, client) {
-        const num  = interaction.options.getInteger('number', true);
+        const sub = interaction.options.getSubcommand();
+        const num = interaction.options.getInteger('number', true);
+
         if (!Number.isSafeInteger(num) || num < 1 || num > MAX_CASE_NUMBER) {
-            await interaction.reply({
-                content: `${e('error')} Please provide a valid case number between 1 and ${MAX_CASE_NUMBER}.`,
-                flags: MessageFlags.Ephemeral,
-            });
-            return;
+            await interaction.reply({ content: `${e('error')} Invalid case number.`, flags: MessageFlags.Ephemeral }); return;
         }
 
-        const c    = await getCase(interaction.guild!.id, num);
-
+        const c = await getCase(interaction.guild!.id, num);
         if (!c) {
-            await interaction.reply({ content: `${e('error')} Case #${num} not found.`, flags: MessageFlags.Ephemeral });
-            return;
+            await interaction.reply({ content: `${e('error')} Case #${num} not found.`, flags: MessageFlags.Ephemeral }); return;
         }
 
-        await interaction.reply({
-            ...(fadeReply([buildCaseView(c)], true) as any),
-            allowedMentions: { parse: [] },
-        } as any);
+        if (sub === 'view') {
+            await interaction.reply({ ...(fadeReply([buildCaseView(c)], true) as any), allowedMentions: { parse: [] } } as any); return;
+        }
+
+        if (sub === 'edit') {
+            const newReason = interaction.options.getString('reason', true);
+            await updateCaseReason(interaction.guild!.id, num, newReason);
+            await interaction.reply({ content: `${e('success')} Case #${num} reason updated.`, flags: MessageFlags.Ephemeral }); return;
+        }
+
+        if (sub === 'delete') {
+            if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
+                await interaction.reply({ content: `${e('error')} You need Manage Guild permission to delete cases.`, flags: MessageFlags.Ephemeral }); return;
+            }
+            await db.delete(cases).where(and(eq(cases.guildId, interaction.guild!.id), eq(cases.caseNumber, num)));
+            await interaction.reply({ content: `${e('success')} Case #${num} deleted.`, flags: MessageFlags.Ephemeral }); return;
+        }
     },
 
     async prefixExecute(message, args, client) {
-        const firstArg = args[0] ?? '';
-        const num = parseCaseNumber(firstArg);
-        if (num === null) {
-            await message.reply(`${e('error')} Please provide a valid case number (e.g. \`13\` or \`#13\`).`);
-            return;
+        const sub = args[0]?.toLowerCase();
+
+        if (sub === 'edit') {
+            const num = parseCaseNumber(args[1] ?? '');
+            const newReason = args.slice(2).join(' ');
+            if (!num || !newReason) { await message.reply(`${e('error')} Usage: \`f!case edit <number> <new reason>\``); return; }
+            await updateCaseReason(message.guild!.id, num, newReason);
+            await message.reply(`${e('success')} Case #${num} reason updated.`); return;
         }
 
+        if (sub === 'delete' || sub === 'del') {
+            if (!message.member!.permissions.has(PermissionFlagsBits.ManageGuild)) {
+                await message.reply(`${e('error')} You need Manage Guild permission.`); return;
+            }
+            const num = parseCaseNumber(args[1] ?? '');
+            if (!num) { await message.reply(`${e('error')} Usage: \`f!case delete <number>\``); return; }
+            const c = await getCase(message.guild!.id, num);
+            if (!c) { await message.reply(`${e('error')} Case #${num} not found.`); return; }
+            await db.delete(cases).where(and(eq(cases.guildId, message.guild!.id), eq(cases.caseNumber, num)));
+            await message.reply(`${e('success')} Case #${num} deleted.`); return;
+        }
+
+        // Default: view
+        const firstArg = (sub === 'view' ? args[1] : args[0]) ?? '';
+        const num = parseCaseNumber(firstArg);
+        if (num === null) {
+            await message.reply(`${e('error')} Usage: \`f!case <number>\` or \`f!case edit/delete <number>\``);
+            return;
+        }
         const c = await getCase(message.guild!.id, num);
         if (!c) { await message.reply(`${e('error')} Case #${num} not found.`); return; }
-
         await sendMessage(message, [buildCaseView(c)]);
     },
 } satisfies Command;
