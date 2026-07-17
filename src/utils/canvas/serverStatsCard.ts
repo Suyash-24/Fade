@@ -40,13 +40,13 @@ function drawRoundedImage(ctx: any, img: Image, x: number, y: number, size: numb
 
 function drawBentoCard(ctx: any, x: number, y: number, w: number, h: number) {
     ctx.save();
-    ctx.shadowColor = 'rgba(244, 114, 182, 0.1)';
-    ctx.shadowBlur = 15;
-    ctx.shadowOffsetY = 6;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.02)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetY = 4;
     
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, 28);
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = '#fff5f6'; // Soft light pink cards
     ctx.fill();
     
     ctx.shadowColor = 'transparent';
@@ -60,7 +60,7 @@ function drawProgressBar(ctx: any, x: number, y: number, w: number, h: number, p
     ctx.save();
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, h/2);
-    ctx.fillStyle = '#f1f5f9'; // light gray underlay
+    ctx.fillStyle = '#ffffff'; // White underlay on pink card
     ctx.fill();
 
     if (pct > 0) {
@@ -108,11 +108,8 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
-    // Background gradient (soft pink to white)
-    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
-    bgGrad.addColorStop(0, '#fff5f6');
-    bgGrad.addColorStop(1, '#ffffff');
-    ctx.fillStyle = bgGrad;
+    // Pure White Background
+    ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, width, height);
 
     let guildImg: Image | null = null;
@@ -124,7 +121,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
             const scale = Math.max(width / guildImg.width, height / guildImg.height);
             const w = guildImg.width * scale;
             const h = guildImg.height * scale;
-            ctx.globalAlpha = 0.12; // super subtle blur overlay
+            ctx.globalAlpha = 0.08; // extremely subtle blur overlay
             ctx.drawImage(guildImg, width/2 - w/2, height/2 - h/2, w, h);
             ctx.restore();
         } catch {}
@@ -167,17 +164,17 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillText('Total Members', cbX + 40, row1Y + 125);
 
     ctx.save();
-    ctx.fillStyle = 'rgba(244, 114, 182, 0.15)'; // Pink bg
+    ctx.fillStyle = '#db2777'; // solid pink badge
     ctx.roundRect(cbX + 40, row1Y + 155, 160, 40, 12);
     ctx.fill();
-    ctx.fillStyle = '#db2777'; // Pink text
+    ctx.fillStyle = '#ffffff'; // White text
     ctx.font = '18px "RobotoBold", sans-serif';
     ctx.fillText(`+${data.joined24h} last 24h`, cbX + 55, row1Y + 182);
 
-    ctx.fillStyle = 'rgba(71, 85, 105, 0.08)'; // Slate bg
+    ctx.fillStyle = '#475569'; // solid slate badge
     ctx.roundRect(cbX + 220, row1Y + 155, 160, 40, 12);
     ctx.fill();
-    ctx.fillStyle = '#475569'; // Slate text
+    ctx.fillStyle = '#ffffff'; // White text
     ctx.fillText(`+${data.joined7d} last 7d`, cbX + 235, row1Y + 182);
     ctx.restore();
 
@@ -213,8 +210,8 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
         for (let i = 0; i < 3; i++) {
             const item = items[i];
             
-            // Rank Badge
-            ctx.fillStyle = 'rgba(244, 114, 182, 0.1)'; // Light pink rank bg
+            // Rank Badge (White badge on Pink card)
+            ctx.fillStyle = '#ffffff';
             ctx.beginPath();
             ctx.roundRect(x, curY - 22, 28, 28, 6);
             ctx.fill();
