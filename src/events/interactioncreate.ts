@@ -340,6 +340,71 @@ const event: Event<'interactionCreate'> = {
                     return;
                 }
 
+                // Stats leaderboard pagination: msglb:<guildId>:<page>:<timeframe>
+                if (id.startsWith('msglb:')) {
+                    const parts = id.split(':');
+                    const guildId = parts[1];
+                    const page = Number(parts[2]);
+                    const timeframe = parts[3] as any;
+                    if (!interaction.guild || isNaN(page) || page < 0) return;
+
+                    await interaction.deferUpdate().catch(() => null);
+
+                    const guild = interaction.guild;
+                    const iconURL = guild.iconURL({ size: 64 }) ?? null;
+
+                    const { buildMsgLeaderboard } = await import('../commands/stats/msglb.js');
+                    const card = await buildMsgLeaderboard(guildId, guild.name, iconURL, page, timeframe, guild);
+                    if (!card) return;
+
+                    const { fadeReply: fr } = await import('../components/builders.js');
+                    await interaction.message.edit(fr([card], false, { parse: [] }) as any).catch(() => null);
+                    return;
+                }
+
+                // Voice leaderboard pagination: vclb:<guildId>:<page>:<timeframe>
+                if (id.startsWith('vclb:')) {
+                    const parts = id.split(':');
+                    const guildId = parts[1];
+                    const page = Number(parts[2]);
+                    const timeframe = parts[3] as any;
+                    if (!interaction.guild || isNaN(page) || page < 0) return;
+
+                    await interaction.deferUpdate().catch(() => null);
+
+                    const guild = interaction.guild;
+                    const iconURL = guild.iconURL({ size: 64 }) ?? null;
+
+                    const { buildVoiceLeaderboard } = await import('../commands/stats/vclb.js');
+                    const card = await buildVoiceLeaderboard(guildId, guild.name, iconURL, page, timeframe, guild);
+                    if (!card) return;
+
+                    const { fadeReply: fr2 } = await import('../components/builders.js');
+                    await interaction.message.edit(fr2([card], false, { parse: [] }) as any).catch(() => null);
+                    return;
+                }
+
+                // Invite leaderboard pagination: invitelb:<guildId>:<page>
+                if (id.startsWith('invitelb:')) {
+                    const parts = id.split(':');
+                    const guildId = parts[1];
+                    const page = Number(parts[2]);
+                    if (!interaction.guild || isNaN(page) || page < 0) return;
+
+                    await interaction.deferUpdate().catch(() => null);
+
+                    const guild = interaction.guild;
+                    const iconURL = guild.iconURL({ size: 64 }) ?? null;
+
+                    const { buildInviteLeaderboard } = await import('../commands/stats/invitelb.js');
+                    const card = await buildInviteLeaderboard(guildId, guild.name, iconURL, page, guild);
+                    if (!card) return;
+
+                    const { fadeReply: fr3 } = await import('../components/builders.js');
+                    await interaction.message.edit(fr3([card], false, { parse: [] }) as any).catch(() => null);
+                    return;
+                }
+
 
                 if (id.startsWith('modhistory_page:')) {
                     const match = id.match(/^modhistory_page:(\d+):(\d+)$/);

@@ -1,6 +1,7 @@
 // src/utils/statsTracker.ts
 import { db } from '../db/index.js';
 import { guildStats, memberStats, channelStats } from '../db/schema.js';
+import { getBlacklist } from '../db/queries/statsBlacklist.js';
 import { sql } from 'drizzle-orm';
 
 interface GuildDelta { messages: number; voiceSeconds: number; joins: number; leaves: number; }
@@ -17,19 +18,50 @@ class StatsTrackerImpl {
     // Keys: `${guildId}:${channelId}:${date}`
     private channelQueue = new Map<string, ChannelDelta>();
     
-    // Tracking active voice sessions: userId -> { guildId, channelId, joinTime }
-    private activeVoiceSessions = new Map<string, { guildId: string, channelId: string, joinTime: number }>();
+    // Tracking active voice sessions: userId -> { guildId, channelId, categoryId, joinTime }
+    private activeVoiceSessions = new Map<string, { guildId: string, channelId: string, categoryId: string | null, joinTime: number }>();
+
+    // Cache: guildId -> Set<targetId>
+    private blacklistCache = new Map<string, Set<string>>();
 
     constructor() {
         // Flush to database every 60 seconds
         setInterval(() => this.flush(), 60_000);
+        // Refresh blacklist every 5 minutes to keep it mostly up to date without hammering DB
+        setInterval(() => this.refreshAllBlacklists(), 5 * 60_000);
+    }
+
+    private async refreshAllBlacklists() {
+        // Only refresh guilds that have active tracking in memory right now to save DB load
+        const activeGuilds = new Set([
+            ...Array.from(this.guildQueue.keys()).map(k => k.split(':')[0]),
+            ...Array.from(this.activeVoiceSessions.values()).map(s => s.guildId)
+        ]);
+
+        for (const guildId of activeGuilds) {
+            await this.refreshBlacklist(guildId);
+        }
+    }
+
+    public async refreshBlacklist(guildId: string) {
+        const blacklist = await getBlacklist(guildId);
+        this.blacklistCache.set(guildId, new Set(blacklist));
+    }
+
+    private isBlacklisted(guildId: string, channelId: string, categoryId: string | null): boolean {
+        const cache = this.blacklistCache.get(guildId);
+        if (!cache) return false;
+        if (cache.has(channelId)) return true;
+        if (categoryId && cache.has(categoryId)) return true;
+        return false;
     }
 
     private getDateStr(): string {
         return new Date().toISOString().split('T')[0];
     }
 
-    public trackMessage(guildId: string, userId: string, channelId: string) {
+    public trackMessage(guildId: string, userId: string, channelId: string, categoryId: string | null) {
+        if (this.isBlacklisted(guildId, channelId, categoryId)) return;
         const date = this.getDateStr();
         
         // Guild
@@ -60,12 +92,13 @@ class StatsTrackerImpl {
         this.guildQueue.set(gKey, gDelta);
     }
 
-    public voiceJoin(guildId: string, userId: string, channelId: string) {
+    public voiceJoin(guildId: string, userId: string, channelId: string, categoryId: string | null) {
+        if (this.isBlacklisted(guildId, channelId, categoryId)) return;
         // If they were already in a session, finalize it first
         if (this.activeVoiceSessions.has(userId)) {
             this.voiceLeave(userId);
         }
-        this.activeVoiceSessions.set(userId, { guildId, channelId, joinTime: Date.now() });
+        this.activeVoiceSessions.set(userId, { guildId, channelId, categoryId, joinTime: Date.now() });
     }
 
     public voiceLeave(userId: string) {
@@ -98,9 +131,9 @@ class StatsTrackerImpl {
     }
 
     // Call this if user switches VC
-    public voiceSwitch(guildId: string, userId: string, newChannelId: string) {
+    public voiceSwitch(guildId: string, userId: string, newChannelId: string, newCategoryId: string | null) {
         this.voiceLeave(userId);
-        this.voiceJoin(guildId, userId, newChannelId);
+        this.voiceJoin(guildId, userId, newChannelId, newCategoryId);
     }
 
     private async flush() {

@@ -5,6 +5,7 @@ import { getGoodbyeConfig } from '../db/queries/welcome.js';
 import { sendGoodbye, type WelcomeStyle } from '../utils/welcomecard.js';
 import { logger } from '../utils/logger.js';
 import { StatsTracker } from '../utils/statsTracker.js';
+import { handleMemberLeave } from './inviteTracking.js';
 
 const event: Event<'guildMemberRemove'> = {
     name: 'guildMemberRemove',
@@ -12,6 +13,7 @@ const event: Event<'guildMemberRemove'> = {
     async execute(client: FadeClient, member) {
         const guildId = member.guild.id;
         StatsTracker.trackJoinLeave(guildId, false);
+        handleMemberLeave(member as any).catch(() => null);
 
         try {
             const config = await getGoodbyeConfig(guildId);

@@ -7,6 +7,7 @@ import { isHardbanned } from '../db/queries/hardbans.js';
 import { sendWelcome, sendDmWelcome, type WelcomeStyle } from '../utils/welcomecard.js';
 import { logger } from '../utils/logger.js';
 import { StatsTracker } from '../utils/statsTracker.js';
+import { handleMemberJoin } from './inviteTracking.js';
 
 const event: Event<'guildMemberAdd'> = {
     name: 'guildMemberAdd',
@@ -14,6 +15,7 @@ const event: Event<'guildMemberAdd'> = {
     async execute(client: FadeClient, member) {
         const guildId = member.guild.id;
         StatsTracker.trackJoinLeave(guildId, true);
+        handleMemberJoin(member).catch(() => null);
 
         try {
             // ── Hardban Check ─────────────────────────────────────────────────────

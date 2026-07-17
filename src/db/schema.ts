@@ -273,15 +273,7 @@ export const voiceStats = pgTable('voice_stats', {
     updatedAt: updatedAt(),
 }, (t) => [index('vcstats_guild_idx').on(t.guildId)]);
 
-export const inviteStats = pgTable('invite_stats', {
-    id:       serial('id').primaryKey(),
-    guildId:  snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
-    userId:   snowflake('user_id').notNull(),
-    regular:  integer('regular').default(0).notNull(),
-    bonus:    integer('bonus').default(0).notNull(),
-    fake:     integer('fake').default(0).notNull(),
-    left:     integer('left').default(0).notNull(),
-}, (t) => [index('invstats_guild_idx').on(t.guildId)]);
+
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // TICKETS
@@ -1119,3 +1111,48 @@ export const channelStats = pgTable('channel_stats', {
 }, (t) => [
     primaryKey({ columns: [t.guildId, t.channelId, t.date] }),
 ]);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// INVITE TRACKING
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Aggregated invite stats per inviter per guild
+export const inviteStats = pgTable('invite_stats', {
+    guildId:  snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    userId:   snowflake('user_id').notNull(),
+    regular:  integer('regular').default(0).notNull(),   // normal valid joins
+    left:     integer('left_count').default(0).notNull(), // joined then left
+    fake:     integer('fake').default(0).notNull(),       // new accounts (< 7 days old)
+    bonus:    integer('bonus').default(0).notNull(),      // manually added bonus invites
+}, (t) => [
+    primaryKey({ columns: [t.guildId, t.userId] }),
+]);
+
+// Individual invite records — who invited whom
+export const inviteRecords = pgTable('invite_records', {
+    id:        serial('id').primaryKey(),
+    guildId:   snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    inviterId: snowflake('inviter_id').notNull(),
+    invitedId: snowflake('invited_id').notNull(),
+    fake:      boolean('fake').default(false).notNull(),
+    left:      boolean('left').default(false).notNull(),
+    code:      text('code'),
+    createdAt: now(),
+}, (t) => [
+    index('invite_records_guild_idx').on(t.guildId),
+    index('invite_records_inviter_idx').on(t.guildId, t.inviterId),
+    uniqueIndex('invite_records_unique_idx').on(t.guildId, t.invitedId),
+]);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// STATS BLACKLIST
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+export const statsBlacklist = pgTable('stats_blacklist', {
+    id:        serial('id').primaryKey(),
+    guildId:   snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    targetId:  snowflake('target_id').notNull(),       // channel or category ID
+    targetType: text('target_type').notNull(),          // 'channel' or 'category'
+}, (t) => [
+    uniqueIndex('stats_bl_unique_idx').on(t.guildId, t.targetId),
+]);

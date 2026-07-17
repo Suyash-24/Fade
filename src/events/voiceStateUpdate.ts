@@ -14,11 +14,11 @@ const event: Event<'voiceStateUpdate'> = {
         // --- Analytics Tracking ---
         if (!oldState.member?.user.bot) {
             if (!oldState.channelId && newState.channelId) {
-                StatsTracker.voiceJoin(newState.guild.id, newState.id, newState.channelId);
+                StatsTracker.voiceJoin(newState.guild.id, newState.id, newState.channelId, newState.channel?.parentId ?? null);
             } else if (oldState.channelId && !newState.channelId) {
                 StatsTracker.voiceLeave(oldState.id);
             } else if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
-                StatsTracker.voiceSwitch(newState.guild.id, newState.id, newState.channelId);
+                StatsTracker.voiceSwitch(newState.guild.id, newState.id, newState.channelId, newState.channel?.parentId ?? null);
             }
         }
 

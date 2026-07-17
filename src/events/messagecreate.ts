@@ -47,7 +47,9 @@ const event: Event<'messageCreate'> = {
     async execute(client: FadeClient, message) {
         if (message.author.bot || !message.guild) return;
         
-        StatsTracker.trackMessage(message.guild.id, message.author.id, message.channel.id);
+        // Analytics: Track message
+        const categoryId = 'parentId' in message.channel ? message.channel.parentId : null;
+        StatsTracker.trackMessage(message.guild.id, message.author.id, message.channel.id, categoryId);
 
         const guild = message.guild;
 
