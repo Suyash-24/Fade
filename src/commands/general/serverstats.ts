@@ -122,16 +122,18 @@ export default {
 
     async execute(interaction, client) {
         await interaction.deferReply();
+        const msg = await interaction.editReply({ embeds: [{ description: 'Loading server analytics...', color: 0x2b2d31 }] });
         const data = await fetchStatsData(interaction.guild!, client);
         const buffer = await buildServerStatsCard(data);
         const attachment = new AttachmentBuilder(buffer, { name: 'serverstats.png' });
-        await interaction.editReply({ files: [attachment] });
+        await interaction.editReply({ content: null, embeds: [], files: [attachment] });
     },
 
     async prefixExecute(message, args, client) {
+        const msg = await message.reply({ embeds: [{ description: 'Loading server analytics...', color: 0x2b2d31 }] });
         const data = await fetchStatsData(message.guild!, client);
         const buffer = await buildServerStatsCard(data);
         const attachment = new AttachmentBuilder(buffer, { name: 'serverstats.png' });
-        await message.reply({ files: [attachment] });
+        await msg.edit({ content: null, embeds: [], files: [attachment] });
     },
 } satisfies Command;

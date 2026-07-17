@@ -209,7 +209,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
 
     const drawList = (x: number, y: number, title: string, items: {name: string, value: string | number}[], valSuffix: string, color: string) => {
         ctx.fillStyle = '#e2e8f0';
-        ctx.font = '22px "RobotoBold", sans-serif';
+        ctx.font = '20px "RobotoBold", sans-serif';
         ctx.fillText(title, x, y);
         
         let curY = y + 40;
@@ -219,78 +219,78 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
             // Rank Badge
             ctx.fillStyle = 'rgba(255,255,255,0.05)';
             ctx.beginPath();
-            ctx.roundRect(x, curY - 22, 30, 30, 8);
+            ctx.roundRect(x, curY - 22, 28, 28, 6);
             ctx.fill();
             ctx.fillStyle = '#94a3b8';
-            ctx.font = '16px "RobotoBold", sans-serif';
-            ctx.fillText(`${i + 1}`, x + 10, curY - 1);
+            ctx.font = '14px "RobotoBold", sans-serif';
+            ctx.fillText(`${i + 1}`, x + 10, curY - 2);
 
             if (item) {
                 ctx.fillStyle = '#f8fafc';
-                ctx.font = '20px "Roboto", sans-serif';
+                ctx.font = '18px "Roboto", sans-serif';
                 let itemName = item.name;
-                if (itemName.length > 18) itemName = itemName.substring(0, 16) + '..';
-                ctx.fillText(itemName, x + 45, curY);
+                if (itemName.length > 12) itemName = itemName.substring(0, 10) + '..';
+                ctx.fillText(itemName, x + 40, curY);
 
                 ctx.fillStyle = color;
-                ctx.font = '20px "RobotoBold", sans-serif';
+                ctx.font = '18px "RobotoBold", sans-serif';
                 const valStr = `${item.value} ${valSuffix}`;
-                ctx.fillText(valStr, x + (colHalfW/2) - 40 - ctx.measureText(valStr).width, curY);
+                ctx.fillText(valStr, x + (colHalfW/2) - 15 - ctx.measureText(valStr).width, curY);
             } else {
                 ctx.fillStyle = 'rgba(255,255,255,0.2)';
                 ctx.font = '18px "Roboto", sans-serif';
-                ctx.fillText('-', x + 45, curY);
+                ctx.fillText('-', x + 40, curY);
             }
-            curY += 45;
+            curY += 40;
         }
     };
 
     // Card C: Top Contributors
     drawBentoCard(ctx, pad, row2Y, colHalfW, row2H);
     ctx.fillStyle = '#e2e8f0';
-    ctx.font = '26px "RobotoBold", sans-serif';
+    ctx.font = '24px "RobotoBold", sans-serif';
     ctx.fillText('Top Contributors (14d)', pad + 40, row2Y + 45);
     // line separator
     ctx.fillStyle = 'rgba(255,255,255,0.1)';
     ctx.fillRect(pad + 40, row2Y + 65, colHalfW - 80, 1);
 
-    drawList(pad + 40, row2Y + 105, 'Chatters', data.analytics.topChatters, 'msg', '#10b981');
-    drawList(pad + 40 + (colHalfW/2), row2Y + 105, 'Talkers', data.analytics.topTalkers, 'hrs', '#8b5cf6');
+    drawList(pad + 40, row2Y + 105, 'Chatters', data.analytics.topChatters, 'msg', '#60a5fa');
+    drawList(pad + 40 + (colHalfW/2), row2Y + 105, 'Talkers', data.analytics.topTalkers, 'hrs', '#94a3b8');
 
     // Card D: Top Channels
     const cdX = pad + colHalfW + gap;
     drawBentoCard(ctx, cdX, row2Y, colHalfW, row2H);
     ctx.fillStyle = '#e2e8f0';
-    ctx.font = '26px "RobotoBold", sans-serif';
+    ctx.font = '24px "RobotoBold", sans-serif';
     ctx.fillText('Top Channels (14d)', cdX + 40, row2Y + 45);
     ctx.fillStyle = 'rgba(255,255,255,0.1)';
     ctx.fillRect(cdX + 40, row2Y + 65, colHalfW - 80, 1);
 
-    drawList(cdX + 40, row2Y + 105, 'Text', data.analytics.topText, 'msg', '#10b981');
-    drawList(cdX + 40 + (colHalfW/2), row2Y + 105, 'Voice', data.analytics.topVoice, 'hrs', '#8b5cf6');
+    drawList(cdX + 40, row2Y + 105, 'Text', data.analytics.topText, 'msg', '#60a5fa');
+    drawList(cdX + 40 + (colHalfW/2), row2Y + 105, 'Voice', data.analytics.topVoice, 'hrs', '#94a3b8');
 
 
     // --- ROW 3: Activity Chart ---
     drawBentoCard(ctx, pad, row3Y, width - (pad * 2), row3H);
     ctx.fillStyle = '#e2e8f0';
-    ctx.font = '26px "RobotoBold", sans-serif';
+    ctx.font = '24px "RobotoBold", sans-serif';
     ctx.fillText('Activity Trends', pad + 40, row3Y + 45);
 
     // Legend
-    ctx.fillStyle = '#10b981';
+    ctx.fillStyle = '#60a5fa';
     ctx.beginPath();
     ctx.arc(pad + 250, row3Y + 38, 6, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = '#94a3b8';
-    ctx.font = '18px "Roboto", sans-serif';
-    ctx.fillText('Messages', pad + 265, row3Y + 44);
+    ctx.font = '16px "Roboto", sans-serif';
+    ctx.fillText('Messages', pad + 265, row3Y + 43);
 
-    ctx.fillStyle = '#8b5cf6';
+    ctx.fillStyle = '#94a3b8';
     ctx.beginPath();
     ctx.arc(pad + 380, row3Y + 38, 6, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText('Voice (Hours)', pad + 395, row3Y + 44);
+    ctx.fillText('Voice (Hours)', pad + 395, row3Y + 43);
 
     // Draw Line Chart
     const chartX = pad + 40;
@@ -324,7 +324,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
             ctx.closePath();
             
             const grad = ctx.createLinearGradient(0, chartY, 0, chartY + chartH);
-            grad.addColorStop(0, `rgba(${rgb}, 0.3)`);
+            grad.addColorStop(0, `rgba(${rgb}, 0.15)`);
             grad.addColorStop(1, `rgba(${rgb}, 0.0)`);
             ctx.fillStyle = grad;
             ctx.fill();
@@ -332,7 +332,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
             // 2. Draw Stroke
             ctx.beginPath();
             ctx.strokeStyle = colorStr;
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 3;
             ctx.lineJoin = 'round';
             first = true;
             for (let i = 0; i < dataValues.length; i++) {
@@ -345,16 +345,13 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
                     ctx.lineTo(x, y);
                 }
             }
-            ctx.shadowColor = colorStr;
-            ctx.shadowBlur = 10;
             ctx.stroke();
-            ctx.shadowColor = 'transparent';
         };
 
-        // Draw Message Line
-        drawLineChart(cData.map(d => d.messages), maxMsgs, '#10b981', '16, 185, 129');
-        // Draw Voice Line
-        drawLineChart(cData.map(d => d.voiceSeconds / 3600), maxVoice, '#8b5cf6', '139, 92, 246');
+        // Draw Message Line (Blue)
+        drawLineChart(cData.map(d => d.messages), maxMsgs, '#60a5fa', '96, 165, 250');
+        // Draw Voice Line (Gray)
+        drawLineChart(cData.map(d => d.voiceSeconds / 3600), maxVoice, '#94a3b8', '148, 163, 184');
     } else {
         ctx.fillStyle = '#94a3b8';
         ctx.font = '18px "Roboto", sans-serif';
