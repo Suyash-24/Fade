@@ -108,10 +108,10 @@ export interface ServerStatsData {
     };
     analytics: {
         chartData: { date: string, messages: number, voiceSeconds: number }[];
-        topChatters: { name: string, value: number }[];
-        topTalkers: { name: string, value: number }[];
-        topText: { name: string, value: number }[];
-        topVoice: { name: string, value: number }[];
+        topChatters: { name: string, value: string | number }[];
+        topTalkers: { name: string, value: string | number }[];
+        topText: { name: string, value: string | number }[];
+        topVoice: { name: string, value: string | number }[];
     }
 }
 
