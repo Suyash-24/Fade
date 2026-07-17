@@ -5,14 +5,18 @@ let fontLoaded = false;
 async function loadFonts() {
     if (fontLoaded) return;
     try {
-        const [boldRes, regRes] = await Promise.all([
+        const [boldRes, regRes, emojiRes, symbolRes] = await Promise.all([
             fetch('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Bold.ttf'),
-            fetch('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Regular.ttf')
+            fetch('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Regular.ttf'),
+            fetch('https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf'),
+            fetch('https://github.com/google/fonts/raw/main/ofl/notosans/NotoSans-Regular.ttf')
         ]);
         
-        if (boldRes.ok && regRes.ok) {
+        if (boldRes.ok && regRes.ok && emojiRes.ok && symbolRes.ok) {
             GlobalFonts.register(Buffer.from(await boldRes.arrayBuffer()), 'RobotoBold');
             GlobalFonts.register(Buffer.from(await regRes.arrayBuffer()), 'Roboto');
+            GlobalFonts.register(Buffer.from(await emojiRes.arrayBuffer()), 'NotoColorEmoji');
+            GlobalFonts.register(Buffer.from(await symbolRes.arrayBuffer()), 'NotoSans');
             fontLoaded = true;
         }
     } catch (e) {
@@ -148,12 +152,12 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     drawBentoCard(ctx, pad, row1Y, colAW, row1H);
     if (guildImg) drawRoundedImage(ctx, guildImg, pad + 40, row1Y + 40, 90, 25);
     ctx.fillStyle = '#0f172a'; // slate-900
-    ctx.font = '42px "RobotoBold", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif';
+    ctx.font = '42px "RobotoBold", "NotoColorEmoji", "NotoSans", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif';
     let name = data.guildName;
     if (name.length > 20) name = name.substring(0, 18) + '...';
     ctx.fillText(name, pad + 40, row1Y + 180);
     ctx.fillStyle = '#64748b'; // slate-500
-    ctx.font = '20px "Roboto", "Segoe UI Symbol", sans-serif';
+    ctx.font = '20px "Roboto", "NotoColorEmoji", "NotoSans", "Segoe UI Symbol", sans-serif';
     ctx.fillText(`Owner: ${data.overview.owner}`, pad + 40, row1Y + 220);
     ctx.fillText(`Roles: ${data.overview.roles} total`, pad + 40, row1Y + 250);
 
@@ -169,7 +173,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
 
     // Dates
     ctx.fillStyle = '#64748b';
-    ctx.font = '16px "Roboto", "Segoe UI Symbol", sans-serif';
+    ctx.font = '16px "Roboto", "NotoColorEmoji", "NotoSans", "Segoe UI Symbol", sans-serif';
     ctx.fillText(`Created: ${data.overview.createdFormatted}`, cbX + 40, row1Y + 180);
     ctx.fillText(`Bot Joined: ${data.overview.botJoinedFormatted}`, cbX + 40, row1Y + 210);
 
@@ -178,7 +182,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillStyle = '#1e293b'; // slate-800
     ctx.font = '20px "RobotoBold", sans-serif';
     ctx.fillText('Composition', barX, row1Y + 60);
-    drawProgressBar(ctx, barX, row1Y + 75, barW, 12, data.humanCount / data.memberCount, '#db2777'); // Pink
+    drawProgressBar(ctx, barX, row1Y + 75, barW, 12, data.humanCount / data.memberCount, '#be185d'); // Darker Pink
     ctx.fillStyle = '#64748b';
     ctx.font = '16px "Roboto", sans-serif';
     ctx.fillText(`Humans: ${data.humanCount}`, barX, row1Y + 110);
@@ -206,17 +210,17 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
             const item = items[i];
             
             // Rank Badge (Light pink badge on White card)
-            ctx.fillStyle = 'rgba(244, 114, 182, 0.1)';
+            ctx.fillStyle = 'rgba(190, 24, 93, 0.12)';
             ctx.beginPath();
             ctx.roundRect(x, curY - 22, 28, 28, 6);
             ctx.fill();
-            ctx.fillStyle = '#db2777'; // Pink text
+            ctx.fillStyle = '#be185d'; // Darker pink text
             ctx.font = '14px "RobotoBold", sans-serif';
             ctx.fillText(`${i + 1}`, x + 10, curY - 2);
 
             if (item) {
                 ctx.fillStyle = '#334155'; // Slate-700
-                ctx.font = '18px "Roboto", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Arial", sans-serif';
+                ctx.font = '18px "Roboto", "NotoColorEmoji", "NotoSans", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Arial", sans-serif';
                 let itemName = item.name;
                 let truncated = false;
                 while (ctx.measureText(itemName).width > 90 && itemName.length > 3) {
@@ -232,7 +236,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
                 ctx.fillText(valStr, x + 215 - ctx.measureText(valStr).width, curY);
             } else {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // Darker dash for light mode
-                ctx.font = '18px "Roboto", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif';
+                ctx.font = '18px "Roboto", "NotoColorEmoji", "NotoSans", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif';
                 ctx.fillText('-', x + 40, curY);
             }
             curY += 40;
@@ -248,7 +252,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillStyle = '#ffe4e6'; // rose-100
     ctx.fillRect(pad + 40, row2Y + 65, colHalfW - 80, 1);
 
-    drawList(pad + 40, row2Y + 105, 'Chatters', data.analytics.topChatters, 'msg', '#db2777'); // Pink
+    drawList(pad + 40, row2Y + 105, 'Chatters', data.analytics.topChatters, 'msg', '#be185d'); // Darker Pink
     drawList(pad + 40 + (colHalfW/2), row2Y + 105, 'Talkers', data.analytics.topTalkers, 'hrs', '#475569'); // Slate
 
     // Card D: Top Channels
@@ -260,7 +264,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillStyle = '#ffe4e6'; // rose-100
     ctx.fillRect(cdX + 40, row2Y + 65, colHalfW - 80, 1);
 
-    drawList(cdX + 40, row2Y + 105, 'Text', data.analytics.topText, 'msg', '#db2777');
+    drawList(cdX + 40, row2Y + 105, 'Text', data.analytics.topText, 'msg', '#be185d');
     drawList(cdX + 40 + (colHalfW/2), row2Y + 105, 'Voice', data.analytics.topVoice, 'hrs', '#475569');
 
 
@@ -271,7 +275,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillText('Activity Trends', pad + 40, row3Y + 45);
 
     // Legend
-    ctx.fillStyle = '#db2777'; // Pink dot
+    ctx.fillStyle = '#be185d'; // Darker pink dot
     ctx.beginPath();
     ctx.arc(pad + 250, row3Y + 38, 6, 0, Math.PI * 2);
     ctx.fill();
@@ -356,8 +360,8 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
             }
         };
 
-        // Draw Message Line (Pink)
-        drawLineChart(cData.map(d => d.messages), maxMsgs, '#db2777', '219, 39, 119');
+        // Draw Message Line (Darker Pink)
+        drawLineChart(cData.map(d => d.messages), maxMsgs, '#be185d', '190, 24, 93');
         // Draw Voice Line (Slate-600)
         drawLineChart(cData.map(d => d.voiceSeconds / 3600), maxVoice, '#475569', '71, 85, 105');
     } else {
