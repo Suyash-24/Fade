@@ -64,7 +64,7 @@ export default {
             .map(([type, cnt]) => `\`${type}\`: **${cnt}**`)
             .join(' · ') || '*No cases yet.*';
 
-        const card = new FadeContainer(Colours.FADE)
+        const card = new FadeContainer(Colours.NONE)
             .text(`## ${e('stats')} Server Stats — ${guild.name}`)
             .separator(true)
             .text([
@@ -116,7 +116,7 @@ export default {
             .map(([type, cnt]) => `\`${type}\`: **${cnt}**`)
             .join(' · ') || '*None yet.*';
 
-        const card = new FadeContainer(Colours.FADE)
+        const card = new FadeContainer(Colours.NONE)
             .text(`## ${e('stats')} Server Stats — ${guild.name}`)
             .separator(true)
             .text([

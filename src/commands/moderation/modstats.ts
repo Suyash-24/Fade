@@ -49,13 +49,13 @@ export default {
             .map(([type, cnt]) => `${typeEmojis[type] ?? '•'} **${type}** — \`${cnt}\``)
             .join('\n');
 
-        const card = new FadeContainer(Colours.FADE)
+        const card = new FadeContainer(Colours.NONE)
             .text(`## ${e('stats')} Mod Stats — ${target.tag}`)
             .separator(true)
             .text(
                 total === 0
                     ? '*No moderation actions found.*'
-                    : lines + `\n\n**Total Actions:** \`${total}\``
+                    : lines + `\n\n**Total:** \`${total}\``
             )
             .build();
 
