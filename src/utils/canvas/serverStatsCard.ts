@@ -229,13 +229,18 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
                 ctx.fillStyle = '#f8fafc';
                 ctx.font = '18px "Roboto", sans-serif';
                 let itemName = item.name;
-                if (itemName.length > 12) itemName = itemName.substring(0, 10) + '..';
+                let truncated = false;
+                while (ctx.measureText(itemName).width > 90 && itemName.length > 3) {
+                    itemName = itemName.substring(0, itemName.length - 1);
+                    truncated = true;
+                }
+                if (truncated) itemName += '..';
                 ctx.fillText(itemName, x + 40, curY);
 
                 ctx.fillStyle = color;
                 ctx.font = '18px "RobotoBold", sans-serif';
                 const valStr = `${item.value} ${valSuffix}`;
-                ctx.fillText(valStr, x + (colHalfW/2) - 15 - ctx.measureText(valStr).width, curY);
+                ctx.fillText(valStr, x + 215 - ctx.measureText(valStr).width, curY);
             } else {
                 ctx.fillStyle = 'rgba(255,255,255,0.2)';
                 ctx.font = '18px "Roboto", sans-serif';
@@ -254,8 +259,8 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillStyle = 'rgba(255,255,255,0.1)';
     ctx.fillRect(pad + 40, row2Y + 65, colHalfW - 80, 1);
 
-    drawList(pad + 40, row2Y + 105, 'Chatters', data.analytics.topChatters, 'msg', '#60a5fa');
-    drawList(pad + 40 + (colHalfW/2), row2Y + 105, 'Talkers', data.analytics.topTalkers, 'hrs', '#94a3b8');
+    drawList(pad + 40, row2Y + 105, 'Chatters', data.analytics.topChatters, 'msg', '#f472b6'); // Pink
+    drawList(pad + 40 + (colHalfW/2), row2Y + 105, 'Talkers', data.analytics.topTalkers, 'hrs', '#ffffff'); // White
 
     // Card D: Top Channels
     const cdX = pad + colHalfW + gap;
@@ -266,8 +271,8 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillStyle = 'rgba(255,255,255,0.1)';
     ctx.fillRect(cdX + 40, row2Y + 65, colHalfW - 80, 1);
 
-    drawList(cdX + 40, row2Y + 105, 'Text', data.analytics.topText, 'msg', '#60a5fa');
-    drawList(cdX + 40 + (colHalfW/2), row2Y + 105, 'Voice', data.analytics.topVoice, 'hrs', '#94a3b8');
+    drawList(cdX + 40, row2Y + 105, 'Text', data.analytics.topText, 'msg', '#f472b6');
+    drawList(cdX + 40 + (colHalfW/2), row2Y + 105, 'Voice', data.analytics.topVoice, 'hrs', '#ffffff');
 
 
     // --- ROW 3: Activity Chart ---
@@ -277,7 +282,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillText('Activity Trends', pad + 40, row3Y + 45);
 
     // Legend
-    ctx.fillStyle = '#60a5fa';
+    ctx.fillStyle = '#f472b6';
     ctx.beginPath();
     ctx.arc(pad + 250, row3Y + 38, 6, 0, Math.PI * 2);
     ctx.fill();
@@ -285,7 +290,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.font = '16px "Roboto", sans-serif';
     ctx.fillText('Messages', pad + 265, row3Y + 43);
 
-    ctx.fillStyle = '#94a3b8';
+    ctx.fillStyle = '#ffffff';
     ctx.beginPath();
     ctx.arc(pad + 380, row3Y + 38, 6, 0, Math.PI * 2);
     ctx.fill();
@@ -305,22 +310,27 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
 
         const drawLineChart = (dataValues: number[], maxVal: number, colorStr: string, rgb: string) => {
             const stepX = chartW / (dataValues.length - 1);
+            const pts = dataValues.map((v, i) => ({
+                x: chartX + (i * stepX),
+                y: chartY + chartH - ((v / maxVal) * chartH)
+            }));
+
+            const buildPath = () => {
+                ctx.moveTo(pts[0].x, pts[0].y);
+                for (let i = 0; i < pts.length - 1; i++) {
+                    const curr = pts[i];
+                    const next = pts[i + 1];
+                    const cx = (curr.x + next.x) / 2;
+                    ctx.bezierCurveTo(cx, curr.y, cx, next.y, next.x, next.y);
+                }
+            };
             
             // 1. Draw Fill
             ctx.beginPath();
-            let first = true;
-            for (let i = 0; i < dataValues.length; i++) {
-                const x = chartX + (i * stepX);
-                const y = chartY + chartH - ((dataValues[i] / maxVal) * chartH);
-                if (first) {
-                    ctx.moveTo(x, chartY + chartH);
-                    ctx.lineTo(x, y);
-                    first = false;
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            }
-            ctx.lineTo(chartX + chartW, chartY + chartH);
+            ctx.moveTo(pts[0].x, chartY + chartH);
+            ctx.lineTo(pts[0].x, pts[0].y);
+            buildPath();
+            ctx.lineTo(pts[pts.length - 1].x, chartY + chartH);
             ctx.closePath();
             
             const grad = ctx.createLinearGradient(0, chartY, 0, chartY + chartH);
@@ -334,24 +344,22 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
             ctx.strokeStyle = colorStr;
             ctx.lineWidth = 3;
             ctx.lineJoin = 'round';
-            first = true;
-            for (let i = 0; i < dataValues.length; i++) {
-                const x = chartX + (i * stepX);
-                const y = chartY + chartH - ((dataValues[i] / maxVal) * chartH);
-                if (first) {
-                    ctx.moveTo(x, y);
-                    first = false;
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            }
+            buildPath();
             ctx.stroke();
+
+            // 3. Draw Points
+            ctx.fillStyle = colorStr;
+            for (let i = 0; i < pts.length; i++) {
+                ctx.beginPath();
+                ctx.arc(pts[i].x, pts[i].y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
         };
 
-        // Draw Message Line (Blue)
-        drawLineChart(cData.map(d => d.messages), maxMsgs, '#60a5fa', '96, 165, 250');
-        // Draw Voice Line (Gray)
-        drawLineChart(cData.map(d => d.voiceSeconds / 3600), maxVoice, '#94a3b8', '148, 163, 184');
+        // Draw Message Line (Pink)
+        drawLineChart(cData.map(d => d.messages), maxMsgs, '#f472b6', '244, 114, 182');
+        // Draw Voice Line (White)
+        drawLineChart(cData.map(d => d.voiceSeconds / 3600), maxVoice, '#ffffff', '255, 255, 255');
     } else {
         ctx.fillStyle = '#94a3b8';
         ctx.font = '18px "Roboto", sans-serif';
