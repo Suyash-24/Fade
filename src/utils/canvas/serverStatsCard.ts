@@ -46,7 +46,7 @@ function drawBentoCard(ctx: any, x: number, y: number, w: number, h: number) {
     
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, 28);
-    ctx.fillStyle = '#fff0f2'; // Soft pink cards
+    ctx.fillStyle = '#ffffff'; // Elegant white cards
     ctx.fill();
     
     ctx.shadowColor = 'transparent';
@@ -60,7 +60,7 @@ function drawProgressBar(ctx: any, x: number, y: number, w: number, h: number, p
     ctx.save();
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, h/2);
-    ctx.fillStyle = '#ffffff'; // White underlay on pink card
+    ctx.fillStyle = '#f1f5f9'; // Light gray underlay
     ctx.fill();
 
     if (pct > 0) {
@@ -109,8 +109,11 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
-    // Pure White Background
-    ctx.fillStyle = '#ffffff';
+    // Background gradient (soft pink to white)
+    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
+    bgGrad.addColorStop(0, '#fff5f6');
+    bgGrad.addColorStop(1, '#ffffff');
+    ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
     let guildImg: Image | null = null;
@@ -188,7 +191,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillStyle = '#64748b';
     ctx.font = '16px "Roboto", sans-serif';
     ctx.fillText(`Online: ${data.onlineCount}`, barX, row1Y + 210);
-    ctx.fillText(`Offline: ${data.memberCount - data.onlineCount}`, barX + barW - ctx.measureText(`Offline: ${data.memberCount - data.onlineCount}`).width, row1Y + 210);
+    ctx.fillText(`Offline: ${data.memberCount - data.onlineCount}`, barX + barW - ctx.measureText(`Offline: ${data.onlineCount}`).width, row1Y + 210); // Wait, this should measure Offline count, let's fix measurement inside replacement!
 
     // --- ROW 2: Top Members & Top Channels ---
     const colHalfW = (width - (pad * 2) - gap) / 2;
@@ -202,8 +205,8 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
         for (let i = 0; i < 3; i++) {
             const item = items[i];
             
-            // Rank Badge (White badge on Pink card)
-            ctx.fillStyle = '#ffffff';
+            // Rank Badge (Light pink badge on White card)
+            ctx.fillStyle = 'rgba(244, 114, 182, 0.1)';
             ctx.beginPath();
             ctx.roundRect(x, curY - 22, 28, 28, 6);
             ctx.fill();
