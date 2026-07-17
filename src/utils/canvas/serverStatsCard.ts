@@ -63,17 +63,20 @@ export interface ServerStatsData {
     humanCount: number;
     botCount: number;
     onlineCount: number;
-    modStats: {
-        allTime: number;
-        last30: number;
-        breakdown: Record<string, number>;
+    overview: {
+        owner: string;
+        createdFormatted: string;
+        boosts: number;
+        boostTier: number;
+        roles: number;
     };
-    topMembers: Array<{
-        username: string;
-        avatar: string | null;
-        xp: number;
-        level: number;
-    }>;
+    infrastructure: {
+        textChannels: number;
+        voiceChannels: number;
+        categories: number;
+        emojis: number;
+        stickers: number;
+    };
 }
 
 export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffer> {
@@ -116,17 +119,12 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
         drawRoundedImage(ctx, guildImg, padX, padY, 80, 20);
         ctx.fillStyle = '#f8fafc';
         ctx.font = '54px "RobotoBold", sans-serif';
-        ctx.fillText(data.guildName, padX + 110, padY + 45);
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '24px "Roboto", sans-serif';
-        ctx.fillText('ANALYTICS DASHBOARD', padX + 110, padY + 75);
+        // Center vertically with the icon since subtitle is removed
+        ctx.fillText(data.guildName, padX + 110, padY + 55); 
     } else {
         ctx.fillStyle = '#f8fafc';
         ctx.font = '54px "RobotoBold", sans-serif';
-        ctx.fillText(data.guildName, padX, padY + 45);
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '24px "Roboto", sans-serif';
-        ctx.fillText('ANALYTICS DASHBOARD', padX, padY + 75);
+        ctx.fillText(data.guildName, padX, padY + 55);
     }
 
     padY += 140;
@@ -146,6 +144,14 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
         ctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
         ctx.lineWidth = 2;
         ctx.stroke();
+    };
+
+    const drawStatLine = (x: number, y: number, label: string, value: string) => {
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '18px "RobotoBold", sans-serif';
+        ctx.fillText(label, x, y);
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText(value, x + colWidth - 60 - ctx.measureText(value).width, y);
     };
 
     // Column 1: Audience
@@ -189,82 +195,46 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillText(`Online: ${data.onlineCount} (${Math.round(onlinePct*100)}%)`, col1X + 30, barY + 55);
     ctx.fillText(`Offline: ${data.memberCount - data.onlineCount}`, col1X + 30 + colWidth - 60 - ctx.measureText(`Offline: ${data.memberCount - data.onlineCount}`).width, barY + 55);
 
-    // Column 2: Moderation
+
+    // Column 2: Overview
     const col2X = col1X + colWidth + gap;
-    drawCard(col2X, padY, colWidth, 380, 'Moderation');
+    drawCard(col2X, padY, colWidth, 380, 'Overview');
 
-    ctx.fillStyle = '#f8fafc';
-    ctx.font = '48px "RobotoBold", sans-serif';
-    ctx.fillText(data.modStats.allTime.toLocaleString(), col2X + 30, padY + 120);
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '20px "Roboto", sans-serif';
-    ctx.fillText('All-time Actions', col2X + 30, padY + 150);
+    let startY = padY + 110;
+    const lineSpacing = 45;
 
-    ctx.fillStyle = '#f8fafc';
-    ctx.font = '36px "RobotoBold", sans-serif';
-    ctx.fillText(data.modStats.last30.toLocaleString(), col2X + 30, padY + 210);
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '20px "Roboto", sans-serif';
-    ctx.fillText('Last 30 Days', col2X + 30, padY + 240);
+    drawStatLine(col2X + 30, startY, 'Owner', data.overview.owner);
+    startY += lineSpacing;
+    drawStatLine(col2X + 30, startY, 'Created On', data.overview.createdFormatted);
+    startY += lineSpacing;
+    
+    // Boosts with Tier
+    const boostLabel = `Boosts (Tier ${data.overview.boostTier})`;
+    drawStatLine(col2X + 30, startY, boostLabel, data.overview.boosts.toString());
+    startY += lineSpacing;
+    
+    drawStatLine(col2X + 30, startY, 'Total Roles', data.overview.roles.toLocaleString());
 
-    barY = padY + 280;
-    const topCases = Object.entries(data.modStats.breakdown)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3);
 
-    if (topCases.length === 0) {
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '18px "Roboto", sans-serif';
-        ctx.fillText('No actions logged yet.', col2X + 30, barY + 20);
-    } else {
-        topCases.forEach((c, idx) => {
-            const label = c[0].charAt(0).toUpperCase() + c[0].slice(1);
-            ctx.fillStyle = '#cbd5e1';
-            ctx.font = '18px "RobotoBold", sans-serif';
-            ctx.fillText(label, col2X + 30, barY + idx * 30 + 15);
-            ctx.fillStyle = '#94a3b8';
-            ctx.fillText(c[1].toLocaleString(), col2X + colWidth - 30 - ctx.measureText(c[1].toLocaleString()).width, barY + idx * 30 + 15);
-        });
-    }
-
-    // Column 3: Leaderboard
+    // Column 3: Infrastructure
     const col3X = col2X + colWidth + gap;
-    drawCard(col3X, padY, colWidth, 380, 'Leaderboard');
+    drawCard(col3X, padY, colWidth, 380, 'Infrastructure');
 
-    if (data.topMembers.length === 0) {
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '18px "Roboto", sans-serif';
-        ctx.fillText('No leveling data found.', col3X + 30, padY + 120);
-    } else {
-        const itemH = 55;
-        let startY = padY + 85;
-        
-        for (let i = 0; i < data.topMembers.length; i++) {
-            const m = data.topMembers[i];
-            
-            if (m.avatar) {
-                try {
-                    const avImg = await loadImage(m.avatar);
-                    drawRoundedImage(ctx, avImg, col3X + 30, startY, 40, 20);
-                } catch {}
-            } else {
-                drawRoundedRect(ctx, col3X + 30, startY, 40, 40, 20, '#334155');
-            }
+    startY = padY + 110;
 
-            ctx.fillStyle = i === 0 ? '#fbbf24' : i === 1 ? '#cbd5e1' : i === 2 ? '#b45309' : '#94a3b8';
-            ctx.font = '18px "RobotoBold", sans-serif';
-            ctx.fillText(`#${i + 1}`, col3X + 85, startY + 17);
-
-            ctx.fillStyle = '#f8fafc';
-            ctx.fillText(m.username.substring(0, 15), col3X + 115, startY + 17);
-
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = '14px "Roboto", sans-serif';
-            ctx.fillText(`Level ${m.level} • ${m.xp.toLocaleString()} XP`, col3X + 85, startY + 36);
-
-            startY += itemH;
-        }
-    }
+    drawStatLine(col3X + 30, startY, 'Text Channels', data.infrastructure.textChannels.toLocaleString());
+    startY += lineSpacing;
+    
+    drawStatLine(col3X + 30, startY, 'Voice Channels', data.infrastructure.voiceChannels.toLocaleString());
+    startY += lineSpacing;
+    
+    drawStatLine(col3X + 30, startY, 'Categories', data.infrastructure.categories.toLocaleString());
+    startY += lineSpacing;
+    
+    drawStatLine(col3X + 30, startY, 'Emojis', data.infrastructure.emojis.toLocaleString());
+    startY += lineSpacing;
+    
+    drawStatLine(col3X + 30, startY, 'Stickers', data.infrastructure.stickers.toLocaleString());
 
     return canvas.toBuffer('image/png');
 }

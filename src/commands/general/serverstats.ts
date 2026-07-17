@@ -2,47 +2,15 @@
 // View server activity statistics: joins, leaves, mod actions, top members.
 import { SlashCommandBuilder, MessageFlags, AttachmentBuilder } from 'discord.js';
 import type { Command } from '../../types/command.js';
-import { db } from '../../db/index.js';
-import { cases, levels } from '../../db/schema.js';
-import { eq, gte, count, desc, and } from 'drizzle-orm';
 import { buildServerStatsCard, type ServerStatsData } from '../../utils/canvas/serverStatsCard.js';
 
 async function fetchStatsData(guild: any, client: any): Promise<ServerStatsData> {
-    const guildId = guild.id;
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-
-    const [modCount] = await db.select({ count: count() }).from(cases).where(eq(cases.guildId, guildId));
-    const [recentModCount] = await db.select({ count: count() }).from(cases)
-        .where(and(eq(cases.guildId, guildId), gte(cases.createdAt, thirtyDaysAgo)));
-
-    const topMembersDb = await db.select({ userId: levels.userId, xp: levels.xp, level: levels.level })
-        .from(levels)
-        .where(eq(levels.guildId, guildId))
-        .orderBy(desc(levels.xp))
-        .limit(5);
-
-    const caseBreakdown = await db.select({ type: cases.type, count: count() })
-        .from(cases)
-        .where(eq(cases.guildId, guildId))
-        .groupBy(cases.type);
-
-    const breakdown: Record<string, number> = {};
-    for (const row of caseBreakdown) breakdown[row.type] = row.count;
+    const owner = await client.users.fetch(guild.ownerId).catch(() => null);
 
     const memberCount = guild.memberCount;
     const botCount    = guild.members.cache.filter((m: any) => m.user.bot).size;
     const humanCount  = memberCount - botCount;
     const onlineCount = guild.members.cache.filter((m: any) => m.presence?.status === 'online' || m.presence?.status === 'dnd' || m.presence?.status === 'idle').size;
-
-    const topMembers = await Promise.all(topMembersDb.map(async m => {
-        const u = await client.users.fetch(m.userId).catch(() => null);
-        return {
-            username: u?.username ?? 'Unknown',
-            avatar: u?.displayAvatarURL({ extension: 'png', size: 128 }) ?? null,
-            xp: m.xp,
-            level: m.level
-        };
-    }));
 
     return {
         guildName: guild.name,
@@ -51,12 +19,20 @@ async function fetchStatsData(guild: any, client: any): Promise<ServerStatsData>
         humanCount,
         botCount,
         onlineCount,
-        modStats: {
-            allTime: modCount?.count ?? 0,
-            last30: recentModCount?.count ?? 0,
-            breakdown
+        overview: {
+            owner: owner?.username ?? 'Unknown',
+            createdFormatted: new Date(guild.createdTimestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+            boosts: guild.premiumSubscriptionCount ?? 0,
+            boostTier: guild.premiumTier ?? 0,
+            roles: guild.roles.cache.size
         },
-        topMembers
+        infrastructure: {
+            textChannels: guild.channels.cache.filter((c: any) => c.type === 0).size,
+            voiceChannels: guild.channels.cache.filter((c: any) => c.type === 2).size,
+            categories: guild.channels.cache.filter((c: any) => c.type === 4).size,
+            emojis: guild.emojis.cache.size,
+            stickers: guild.stickers?.cache?.size ?? 0
+        }
     };
 }
 
@@ -66,7 +42,7 @@ export default {
         .setDescription('View activity statistics for this server'),
 
     category: 'general', guildOnly: true,
-    cooldown: 15, // Using canvas is slightly more heavy, so longer cooldown is good
+    cooldown: 15,
 
     async execute(interaction, client) {
         await interaction.deferReply();
