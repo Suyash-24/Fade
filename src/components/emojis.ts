@@ -94,7 +94,8 @@ const EMOJI_IDS: Record<string, string> = {
     vcpermit: '<:vcpermit:1516714675675463700>',
     afkset: '<:afkset:1518968712257081516>',
     isafk: '<a:isafk:1518968827369488527>',
-    welcomeback: '<:wave:1518968774001168395>'
+    welcomeback: '<:wave:1518968774001168395>',
+    loading: '<a:loading:1527670885647908875>'
 };
 
 // Unicode fallbacks — aesthetic, minimal, consistent
@@ -179,6 +180,7 @@ const UNICODE = {
     afkset: '',
     isafk: '',
     welcomeback: '',
+    loading: '',
 };
 
 type EmojiKey = keyof typeof UNICODE;

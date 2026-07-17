@@ -2,6 +2,8 @@
 import { SlashCommandBuilder, MessageFlags, AttachmentBuilder } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { buildServerStatsCard, type ServerStatsData } from '../../utils/canvas/serverStatsCard.js';
+import { FadeContainer } from '../../components/builders.js';
+import { e } from '../../components/emojis.js';
 import { db } from '../../db/index.js';
 import { guildStats, memberStats, channelStats } from '../../db/schema.js';
 import { and, eq, gte, sql } from 'drizzle-orm';
@@ -132,7 +134,7 @@ export default {
 
     async execute(interaction, client) {
         await interaction.deferReply();
-        const msg = await interaction.editReply({ embeds: [{ description: 'Loading server analytics...', color: 0x2b2d31 }] });
+        const msg = await interaction.editReply({ embeds: [new FadeContainer().text(`${e('loading')} Loading server analytics...`).build()] });
         const data = await fetchStatsData(interaction.guild!, client);
         const buffer = await buildServerStatsCard(data);
         const attachment = new AttachmentBuilder(buffer, { name: 'serverstats.png' });
@@ -140,7 +142,7 @@ export default {
     },
 
     async prefixExecute(message, args, client) {
-        const msg = await message.reply({ embeds: [{ description: 'Loading server analytics...', color: 0x2b2d31 }] });
+        const msg = await message.reply({ embeds: [new FadeContainer().text(`${e('loading')} Loading server analytics...`).build()] });
         const data = await fetchStatsData(message.guild!, client);
         const buffer = await buildServerStatsCard(data);
         const attachment = new AttachmentBuilder(buffer, { name: 'serverstats.png' });
