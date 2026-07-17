@@ -28,22 +28,24 @@ function buildCard(
             `-# ${user.username}`,
         ])
         .separator(true)
-        .section([[
+        .section([
             `**All Time**`,
             `${e('pinkarrow')} **Messages Sent** — \`${allStats.msgs.toLocaleString()}\``,
             `${e('pinkarrow')} **Server Rank** — \`#${allStats.rank || '—'}\``,
             `${e('pinkarrow')} **Server Share** — \`${calcPct(allStats.msgs, allStats.total)}%\``,
-            '',
+        ], thumb(user.displayAvatarURL({ size: 128 })))
+        .text([
+            `\u200b`,
             `**This Week**`,
             `${e('pinkarrow')} **Messages Sent** — \`${weeklyStats.msgs.toLocaleString()}\``,
             `${e('pinkarrow')} **Server Rank** — \`#${weeklyStats.rank || '—'}\``,
             `${e('pinkarrow')} **Server Share** — \`${calcPct(weeklyStats.msgs, weeklyStats.total)}%\``,
-            '',
+            `\u200b`,
             `**Today**`,
             `${e('pinkarrow')} **Messages Sent** — \`${todayStats.msgs.toLocaleString()}\``,
             `${e('pinkarrow')} **Server Rank** — \`#${todayStats.rank || '—'}\``,
             `${e('pinkarrow')} **Server Share** — \`${calcPct(todayStats.msgs, todayStats.total)}%\``,
-        ].join('\n')], thumb(user.displayAvatarURL({ size: 128 })))
+        ].join('\n'))
         .separator(true)
         .text(`-# ${e('server')} ${guildName}`);
 

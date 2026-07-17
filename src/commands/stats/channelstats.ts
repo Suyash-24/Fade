@@ -33,22 +33,24 @@ function buildCard(
     const emoji = isVoice ? e('voice') : e('channels');
 
     const card = new FadeContainer(0x2b2d31)
-        .text(`## ${emoji} Channel Stats`)
-        .text(`-# <#${channel.id}>`)
+        .section([
+            `## ${emoji} Channel Stats`,
+            `-# <#${channel.id}>`,
+        ])
         .separator(true)
-        .section([[
+        .text([
             `**All Time**`,
             `${e('pinkarrow')} **Messages** — \`${allStats.messages.toLocaleString()}\``,
             `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(allStats.voiceSeconds)}\``,
-            '',
+            `\u200b`,
             `**This Week**`,
             `${e('pinkarrow')} **Messages** — \`${weeklyStats.messages.toLocaleString()}\``,
             `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(weeklyStats.voiceSeconds)}\``,
-            '',
+            `\u200b`,
             `**Today**`,
             `${e('pinkarrow')} **Messages** — \`${todayStats.messages.toLocaleString()}\``,
             `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(todayStats.voiceSeconds)}\``,
-        ].join('\n')])
+        ].join('\n'))
         .separator(true)
         .text(`-# ${e('server')} ${guildName}`);
 
