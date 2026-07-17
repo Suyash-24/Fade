@@ -3,6 +3,7 @@
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { FadeContainer, fadeReply, sendMessage } from '../../components/builders.js';
+import { canModerate } from '../../utils/moderation.js';
 import { createCase } from '../../db/queries/moderation.js';
 import { e, Colours } from '../../components/emojis.js';
 import { sendLog, LogColour } from '../../utils/logsender.js';
@@ -58,6 +59,16 @@ export default {
         for (const id of ids) {
             try {
                 const user = await client.users.fetch(id).catch(() => null);
+                const targetMember = await guild.members.fetch(id).catch(() => null);
+
+                if (targetMember) {
+                    const check = canModerate(interaction.member as any, targetMember, 'ban');
+                    if (!check.ok) {
+                        failed.push(id);
+                        continue;
+                    }
+                }
+
                 await guild.bans.create(id, {
                     reason: `[Fade Massban] ${reason} | Moderator: ${interaction.user.tag}`,
                     deleteMessageSeconds: deleteDays * 86400,
@@ -122,6 +133,16 @@ export default {
         for (const id of ids) {
             try {
                 const user = await client.users.fetch(id).catch(() => null);
+                const targetMember = await message.guild!.members.fetch(id).catch(() => null);
+
+                if (targetMember) {
+                    const check = canModerate(message.member!, targetMember, 'ban');
+                    if (!check.ok) {
+                        failed.push(id);
+                        continue;
+                    }
+                }
+
                 await message.guild!.bans.create(id, {
                     reason: `[Fade Massban] ${reason} | Moderator: ${message.author.tag}`,
                 });
