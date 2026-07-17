@@ -164,8 +164,13 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillStyle = '#0f172a'; // slate-900
     ctx.font = '42px "RobotoBold", "NotoColorEmoji", "NotoSans", "NotoSansMath", "NotoSansSymbols", "NotoSansSymbols2", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", sans-serif';
     let name = data.guildName;
-    const nameArr = [...name];
-    if (nameArr.length > 20) name = nameArr.slice(0, 18).join('') + '...';
+    if (ctx.measureText(name).width > 360) {
+        let nameArr = [...name];
+        while (nameArr.length > 0 && ctx.measureText(nameArr.join('') + '...').width > 360) {
+            nameArr.pop();
+        }
+        name = nameArr.join('') + '...';
+    }
     ctx.fillText(name, pad + 40, row1Y + 180);
     ctx.fillStyle = '#64748b'; // slate-500
     ctx.font = '20px "Roboto", "NotoColorEmoji", "NotoSans", "NotoSansMath", "NotoSansSymbols", "Segoe UI Symbol", "Segoe UI", sans-serif';
@@ -236,15 +241,14 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
             if (item) {
                 ctx.fillStyle = '#334155'; // Slate-700
                 ctx.font = '18px "Roboto", "NotoColorEmoji", "NotoSans", "NotoSansMath", "NotoSansSymbols", "NotoSansSymbols2", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Arial", sans-serif';
-                let itemChars = [...item.name];
                 let itemName = item.name;
-                let truncated = false;
-                while (ctx.measureText(itemName).width > 110 && itemChars.length > 3) {
-                    itemChars.pop();
-                    itemName = itemChars.join('');
-                    truncated = true;
+                if (ctx.measureText(itemName).width > 90) {
+                    let itemChars = [...itemName];
+                    while (itemChars.length > 0 && ctx.measureText(itemChars.join('') + '..').width > 90) {
+                        itemChars.pop();
+                    }
+                    itemName = itemChars.join('') + '..';
                 }
-                if (truncated) itemName += '..';
                 ctx.fillText(itemName, x + 40, curY);
 
                 ctx.fillStyle = color;
