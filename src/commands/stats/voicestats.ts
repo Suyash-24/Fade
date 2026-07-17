@@ -78,7 +78,7 @@ export default {
     category: 'stats',
     prefixOnly: true,
     guildOnly: true,
-    aliases: ['vcstats', 'vc', 'vctime'],
+    aliases: ['vcstats', 'vctime'],
     cooldown: 5,
 
     async execute(interaction, client) {
