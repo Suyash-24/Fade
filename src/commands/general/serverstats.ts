@@ -1,7 +1,6 @@
 import { SlashCommandBuilder, MessageFlags, AttachmentBuilder } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { buildServerStatsCard, type ServerStatsData } from '../../utils/canvas/serverStatsCard.js';
-import { FadeContainer, sendResponse, sendMessage } from '../../components/builders.js';
 import { e } from '../../components/emojis.js';
 import { db } from '../../db/index.js';
 import { guildStats, memberStats, channelStats } from '../../db/schema.js';
@@ -133,18 +132,18 @@ export default {
 
     async execute(interaction, client) {
         await interaction.deferReply();
-        await sendResponse(interaction, [new FadeContainer().text(`${e('loading')} Loading server analytics...`).build()]);
+        await interaction.editReply({ embeds: [{ description: `${e('loading')} Loading server analytics...`, color: 0x2b2d31 }] });
         const data = await fetchStatsData(interaction.guild!, client);
         const buffer = await buildServerStatsCard(data);
         const attachment = new AttachmentBuilder(buffer, { name: 'serverstats.png' });
-        await interaction.editReply({ content: null, embeds: [], components: [], flags: [], files: [attachment] });
+        await interaction.editReply({ content: null, embeds: [], components: [], files: [attachment] });
     },
 
     async prefixExecute(message, args, client) {
-        const msg = await sendMessage(message, [new FadeContainer().text(`${e('loading')} Loading server analytics...`).build()]);
+        const msg = await message.reply({ embeds: [{ description: `${e('loading')} Loading server analytics...`, color: 0x2b2d31 }] });
         const data = await fetchStatsData(message.guild!, client);
         const buffer = await buildServerStatsCard(data);
         const attachment = new AttachmentBuilder(buffer, { name: 'serverstats.png' });
-        await msg.edit({ content: null, embeds: [], components: [], flags: [], files: [attachment] });
+        await msg.edit({ content: null, embeds: [], components: [], files: [attachment] });
     },
 } satisfies Command;
