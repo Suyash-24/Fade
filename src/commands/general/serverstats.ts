@@ -95,6 +95,9 @@ async function fetchStatsData(guild: any, client: any): Promise<ServerStatsData>
         overview: {
             owner: owner?.username ?? 'Unknown',
             createdFormatted: new Date(guild.createdTimestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+            botJoinedFormatted: guild.members.me?.joinedAt 
+                ? new Date(guild.members.me.joinedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                : 'Unknown',
             roles: guild.roles.cache.size
         },
         engagement: {

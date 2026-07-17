@@ -46,7 +46,7 @@ function drawBentoCard(ctx: any, x: number, y: number, w: number, h: number) {
     
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, 28);
-    ctx.fillStyle = '#fff5f6'; // Soft light pink cards
+    ctx.fillStyle = '#fff0f2'; // Soft pink cards
     ctx.fill();
     
     ctx.shadowColor = 'transparent';
@@ -84,6 +84,7 @@ export interface ServerStatsData {
     overview: {
         owner: string;
         createdFormatted: string;
+        botJoinedFormatted: string;
         roles: number;
     };
     engagement: {
@@ -144,14 +145,14 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     drawBentoCard(ctx, pad, row1Y, colAW, row1H);
     if (guildImg) drawRoundedImage(ctx, guildImg, pad + 40, row1Y + 40, 90, 25);
     ctx.fillStyle = '#0f172a'; // slate-900
-    ctx.font = '42px "RobotoBold", sans-serif';
+    ctx.font = '42px "RobotoBold", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif';
     let name = data.guildName;
     if (name.length > 20) name = name.substring(0, 18) + '...';
     ctx.fillText(name, pad + 40, row1Y + 180);
     ctx.fillStyle = '#64748b'; // slate-500
-    ctx.font = '22px "Roboto", sans-serif';
-    ctx.fillText(`Owned by ${data.overview.owner}`, pad + 40, row1Y + 220);
-    ctx.fillText(`Created ${data.overview.createdFormatted}`, pad + 40, row1Y + 250);
+    ctx.font = '20px "Roboto", "Segoe UI Symbol", sans-serif';
+    ctx.fillText(`Owner: ${data.overview.owner}`, pad + 40, row1Y + 220);
+    ctx.fillText(`Roles: ${data.overview.roles} total`, pad + 40, row1Y + 250);
 
     // Card B: Audience
     const cbX = pad + colAW + gap;
@@ -163,20 +164,11 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.font = '24px "Roboto", sans-serif';
     ctx.fillText('Total Members', cbX + 40, row1Y + 125);
 
-    ctx.save();
-    ctx.fillStyle = '#db2777'; // solid pink badge
-    ctx.roundRect(cbX + 40, row1Y + 155, 160, 40, 12);
-    ctx.fill();
-    ctx.fillStyle = '#ffffff'; // White text
-    ctx.font = '18px "RobotoBold", sans-serif';
-    ctx.fillText(`+${data.joined24h} last 24h`, cbX + 55, row1Y + 182);
-
-    ctx.fillStyle = '#475569'; // solid slate badge
-    ctx.roundRect(cbX + 220, row1Y + 155, 160, 40, 12);
-    ctx.fill();
-    ctx.fillStyle = '#ffffff'; // White text
-    ctx.fillText(`+${data.joined7d} last 7d`, cbX + 235, row1Y + 182);
-    ctx.restore();
+    // Dates
+    ctx.fillStyle = '#64748b';
+    ctx.font = '16px "Roboto", "Segoe UI Symbol", sans-serif';
+    ctx.fillText(`Created: ${data.overview.createdFormatted}`, cbX + 40, row1Y + 180);
+    ctx.fillText(`Bot Joined: ${data.overview.botJoinedFormatted}`, cbX + 40, row1Y + 210);
 
     const barW = colBW - 420;
     const barX = cbX + 380;
@@ -221,7 +213,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
 
             if (item) {
                 ctx.fillStyle = '#334155'; // Slate-700
-                ctx.font = '18px "Roboto", sans-serif';
+                ctx.font = '18px "Roboto", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Arial", sans-serif';
                 let itemName = item.name;
                 let truncated = false;
                 while (ctx.measureText(itemName).width > 90 && itemName.length > 3) {
@@ -237,7 +229,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
                 ctx.fillText(valStr, x + 215 - ctx.measureText(valStr).width, curY);
             } else {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // Darker dash for light mode
-                ctx.font = '18px "Roboto", sans-serif';
+                ctx.font = '18px "Roboto", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif';
                 ctx.fillText('-', x + 40, curY);
             }
             curY += 40;
