@@ -32,10 +32,10 @@ function buildCard(
     const calcPct = (m: number, t: number) => t > 0 ? ((m / t) * 100).toFixed(1) : '0.0';
 
     const card = new FadeContainer(0x2b2d31)
-        .section([
+        .text([
             `## ${e('stats')} Voice Stats`,
             `-# ${user.username}`,
-        ])
+        ].join('\n'))
         .separator(true)
         .section([[
             `**All Time**`,

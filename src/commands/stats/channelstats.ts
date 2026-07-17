@@ -33,10 +33,10 @@ function buildCard(
     const emoji = isVoice ? e('voice') : e('channels');
 
     const card = new FadeContainer(0x2b2d31)
-        .section([
+        .text([
             `## ${emoji} Channel Stats`,
             `-# <#${channel.id}>`,
-        ])
+        ].join('\n'))
         .separator(true)
         .text([
             `**All Time**`,
