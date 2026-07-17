@@ -37,22 +37,22 @@ function buildCard(
             `-# ${user.username}`,
         ])
         .separator(true)
-        .section([
+        .section([[
             `**All Time**`,
             `${e('pinkarrow')} **Voice Time** — \`${formatDuration(allStats.seconds)}\``,
             `${e('pinkarrow')} **Server Rank** — \`#${allStats.rank || '—'}\``,
             `${e('pinkarrow')} **Server Share** — \`${calcPct(allStats.seconds, allStats.total)}%\``,
-            '\u200b',
+            '',
             `**This Week**`,
             `${e('pinkarrow')} **Voice Time** — \`${formatDuration(weeklyStats.seconds)}\``,
             `${e('pinkarrow')} **Server Rank** — \`#${weeklyStats.rank || '—'}\``,
             `${e('pinkarrow')} **Server Share** — \`${calcPct(weeklyStats.seconds, weeklyStats.total)}%\``,
-            '\u200b',
+            '',
             `**Today**`,
             `${e('pinkarrow')} **Voice Time** — \`${formatDuration(todayStats.seconds)}\``,
             `${e('pinkarrow')} **Server Rank** — \`#${todayStats.rank || '—'}\``,
             `${e('pinkarrow')} **Server Share** — \`${calcPct(todayStats.seconds, todayStats.total)}%\``,
-        ], thumb(user.displayAvatarURL({ size: 128 })))
+        ].join('\n')], thumb(user.displayAvatarURL({ size: 128 })))
         .separator(true)
         .text(`-# ${e('server')} ${guildName}`);
 

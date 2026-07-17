@@ -36,19 +36,19 @@ function buildCard(
         .text(`## ${emoji} Channel Stats`)
         .text(`-# <#${channel.id}>`)
         .separator(true)
-        .section([
+        .section([[
             `**All Time**`,
             `${e('pinkarrow')} **Messages** — \`${allStats.messages.toLocaleString()}\``,
             `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(allStats.voiceSeconds)}\``,
-            '\u200b',
+            '',
             `**This Week**`,
             `${e('pinkarrow')} **Messages** — \`${weeklyStats.messages.toLocaleString()}\``,
             `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(weeklyStats.voiceSeconds)}\``,
-            '\u200b',
+            '',
             `**Today**`,
             `${e('pinkarrow')} **Messages** — \`${todayStats.messages.toLocaleString()}\``,
             `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(todayStats.voiceSeconds)}\``,
-        ])
+        ].join('\n')])
         .separator(true)
         .text(`-# ${e('server')} ${guildName}`);
 
