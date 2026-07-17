@@ -361,7 +361,8 @@ const event: Event<'messageCreate'> = {
 
             if (expiry && now < expiry) {
                 const remaining = ((expiry - now) / 1_000).toFixed(1);
-                await message.reply(`⏳ Wait **${remaining}s** before using this command again.`);
+                const msg = await message.reply(`⏳ Wait **${remaining}s** before using this command again.`);
+                setTimeout(() => msg.delete().catch(() => null), expiry - now);
                 return;
             }
 

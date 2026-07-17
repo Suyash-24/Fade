@@ -93,6 +93,7 @@ const event: Event<'interactionCreate'> = {
                     content: `⏳ Wait **${remaining}s** before using \`/${interaction.commandName}\` again.`,
                     flags: MessageFlags.Ephemeral,
                 });
+                setTimeout(() => interaction.deleteReply().catch(() => null), expiry - now);
                 return;
             }
 

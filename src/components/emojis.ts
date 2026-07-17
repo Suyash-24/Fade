@@ -211,5 +211,5 @@ export const Colours = {
     INFO: 0x63B3ED,
     VOID: 0x2D3748,
     WHITE: 0xDED4F3,
-    NONE: null,
+    NONE: 0x2b2d31,
 } as const;
