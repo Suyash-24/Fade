@@ -22,6 +22,39 @@ function formatDuration(seconds: number): string {
     return `${h}h ${m}m`;
 }
 
+function buildCard(
+    channel: { id: string, type: any },
+    allStats: { messages: number, voiceSeconds: number },
+    weeklyStats: { messages: number, voiceSeconds: number },
+    todayStats: { messages: number, voiceSeconds: number },
+    guildName: string
+) {
+    const isVoice = channel.type === ChannelType.GuildVoice || channel.type === ChannelType.GuildStageVoice;
+    const emoji = isVoice ? e('voice') : e('channels');
+
+    const card = new FadeContainer(0x2b2d31)
+        .text(`## ${emoji} Channel Stats`)
+        .text(`-# <#${channel.id}>`)
+        .separator(true)
+        .section([
+            `**All Time**`,
+            `${e('pinkarrow')} **Messages** — \`${allStats.messages.toLocaleString()}\``,
+            `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(allStats.voiceSeconds)}\``,
+            '',
+            `**This Week**`,
+            `${e('pinkarrow')} **Messages** — \`${weeklyStats.messages.toLocaleString()}\``,
+            `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(weeklyStats.voiceSeconds)}\``,
+            '',
+            `**Today**`,
+            `${e('pinkarrow')} **Messages** — \`${todayStats.messages.toLocaleString()}\``,
+            `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(todayStats.voiceSeconds)}\``,
+        ])
+        .separator(true)
+        .text(`-# ${e('server')} ${guildName}`);
+
+    return card.build();
+}
+
 export default {
     data: new SlashCommandBuilder()
         .setName('channelstats')
@@ -31,17 +64,6 @@ export default {
             .setDescription('Channel to check (defaults to current)')
             .addChannelTypes(ChannelType.GuildText, ChannelType.GuildVoice, ChannelType.GuildForum, ChannelType.GuildStageVoice)
             .setRequired(false)
-        )
-        .addStringOption(o => o
-            .setName('timeframe')
-            .setDescription('Time period to check')
-            .setRequired(false)
-            .addChoices(
-                { name: 'Today', value: 'today' },
-                { name: 'Weekly (7d)', value: 'weekly' },
-                { name: 'Monthly (30d)', value: 'monthly' },
-                { name: 'All Time', value: 'alltime' },
-            )
         ),
 
     category: 'stats',
@@ -52,34 +74,20 @@ export default {
 
     async execute(interaction, client) {
         const channel = interaction.options.getChannel('channel') ?? interaction.channel!;
-        const timeframe = (interaction.options.getString('timeframe') ?? 'alltime') as Timeframe;
         const guild = interaction.guild!;
 
-        const stats = await getChannelActivity(guild.id, channel.id, timeframe);
-        const label = TIMEFRAME_LABELS[timeframe];
+        const [allStats, wStats, tStats] = await Promise.all([
+            getChannelActivity(guild.id, channel.id, 'alltime'),
+            getChannelActivity(guild.id, channel.id, 'weekly'),
+            getChannelActivity(guild.id, channel.id, 'today'),
+        ]);
 
-        const isVoice = (channel as any).type === ChannelType.GuildVoice || (channel as any).type === ChannelType.GuildStageVoice;
-        const emoji = isVoice ? e('voice') : e('channels');
-
-        const card = new FadeContainer(Colours.FADE)
-            .text(`## ${emoji} Channel Stats`)
-            .text(`-# <#${channel.id}> · ${label}`)
-            .separator(true)
-            .text(
-                `${e('pinkarrow')} **Messages** — \`${stats.messages.toLocaleString()}\`\n` +
-                `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(stats.voiceSeconds)}\``
-            )
-            .separator(true)
-            .text(`-# ${e('server')} ${guild.name} · ${label}`)
-            .build();
-
+        const card = buildCard(channel as any, allStats, wStats, tStats, guild.name);
         await sendResponse(interaction, [card]);
     },
 
     async prefixExecute(message, args, client) {
         const guild = message.guild!;
-        const timeframe: Timeframe = (['today', 'daily', 'weekly', 'monthly', 'alltime'].includes(args[0]?.toLowerCase()) ? args.shift()!.toLowerCase() : 'alltime') as Timeframe;
-
         const channelId = args[0]?.replace(/[<#>]/g, '');
         const channel = channelId ? guild.channels.cache.get(channelId) : message.channel;
         if (!channel) {
@@ -90,24 +98,13 @@ export default {
             return;
         }
 
-        const stats = await getChannelActivity(guild.id, channel.id, timeframe);
-        const label = TIMEFRAME_LABELS[timeframe];
+        const [allStats, wStats, tStats] = await Promise.all([
+            getChannelActivity(guild.id, channel.id, 'alltime'),
+            getChannelActivity(guild.id, channel.id, 'weekly'),
+            getChannelActivity(guild.id, channel.id, 'today'),
+        ]);
 
-        const isVoice = channel.type === ChannelType.GuildVoice || channel.type === ChannelType.GuildStageVoice;
-        const emoji = isVoice ? e('voice') : e('channels');
-
-        const card = new FadeContainer(Colours.FADE)
-            .text(`## ${emoji} Channel Stats`)
-            .text(`-# <#${channel.id}> · ${label}`)
-            .separator(true)
-            .text(
-                `${e('pinkarrow')} **Messages** — \`${stats.messages.toLocaleString()}\`\n` +
-                `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(stats.voiceSeconds)}\``
-            )
-            .separator(true)
-            .text(`-# ${e('server')} ${guild.name} · ${label}`)
-            .build();
-
+        const card = buildCard(channel as any, allStats, wStats, tStats, guild.name);
         await sendMessage(message, [card]);
     },
 } satisfies Command;

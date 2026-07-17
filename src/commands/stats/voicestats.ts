@@ -24,32 +24,37 @@ function formatDuration(seconds: number): string {
 
 function buildCard(
     user: { username: string; displayAvatarURL: (opts?: any) => string; id: string },
-    voiceSeconds: number,
-    rank: number,
-    serverTotal: number,
-    timeframe: Timeframe,
+    allStats: { seconds: number, rank: number, total: number },
+    weeklyStats: { seconds: number, rank: number, total: number },
+    todayStats: { seconds: number, rank: number, total: number },
     guildName: string,
 ) {
-    const label = TIMEFRAME_LABELS[timeframe];
-    const pct = serverTotal > 0 ? ((voiceSeconds / serverTotal) * 100).toFixed(1) : '0.0';
+    const calcPct = (m: number, t: number) => t > 0 ? ((m / t) * 100).toFixed(1) : '0.0';
 
-    const card = new FadeContainer(Colours.FADE)
-        .section(
-            [
-                `## ${e('voice')} Voice Stats`,
-                `-# ${user.username} · ${label}`,
-            ],
-            thumb(user.displayAvatarURL({ size: 128 })),
-        )
+    const card = new FadeContainer(0x2b2d31)
+        .section([
+            `## ${e('stats')} Voice Stats`,
+            `-# ${user.username}`,
+        ])
         .separator(true)
-        .text(
-            `${e('pinkarrow')} **Time in Voice** — \`${formatDuration(voiceSeconds)}\`\n` +
-            `${e('pinkarrow')} **Server Rank** — \`#${rank || '—'}\`\n` +
-            `${e('pinkarrow')} **Server Share** — \`${pct}%\`\n` +
-            `${e('pinkarrow')} **Server Total** — \`${formatDuration(serverTotal)}\``
-        )
+        .section([
+            `**All Time**`,
+            `${e('pinkarrow')} **Voice Time** — \`${formatDuration(allStats.seconds)}\``,
+            `${e('pinkarrow')} **Server Rank** — \`#${allStats.rank || '—'}\``,
+            `${e('pinkarrow')} **Server Share** — \`${calcPct(allStats.seconds, allStats.total)}%\``,
+            '',
+            `**This Week**`,
+            `${e('pinkarrow')} **Voice Time** — \`${formatDuration(weeklyStats.seconds)}\``,
+            `${e('pinkarrow')} **Server Rank** — \`#${weeklyStats.rank || '—'}\``,
+            `${e('pinkarrow')} **Server Share** — \`${calcPct(weeklyStats.seconds, weeklyStats.total)}%\``,
+            '',
+            `**Today**`,
+            `${e('pinkarrow')} **Voice Time** — \`${formatDuration(todayStats.seconds)}\``,
+            `${e('pinkarrow')} **Server Rank** — \`#${todayStats.rank || '—'}\``,
+            `${e('pinkarrow')} **Server Share** — \`${calcPct(todayStats.seconds, todayStats.total)}%\``,
+        ], thumb(user.displayAvatarURL({ size: 128 })))
         .separator(true)
-        .text(`-# ${e('server')} ${guildName} · ${label}`);
+        .text(`-# ${e('server')} ${guildName}`);
 
     return card.build();
 }
@@ -62,17 +67,6 @@ export default {
             .setName('user')
             .setDescription('User to check (defaults to you)')
             .setRequired(false)
-        )
-        .addStringOption(o => o
-            .setName('timeframe')
-            .setDescription('Time period to check')
-            .setRequired(false)
-            .addChoices(
-                { name: 'Today', value: 'today' },
-                { name: 'Weekly (7d)', value: 'weekly' },
-                { name: 'Monthly (30d)', value: 'monthly' },
-                { name: 'All Time', value: 'alltime' },
-            )
         ),
 
     category: 'stats',
@@ -83,34 +77,55 @@ export default {
 
     async execute(interaction, client) {
         const target = interaction.options.getUser('user') ?? interaction.user;
-        const timeframe = (interaction.options.getString('timeframe') ?? 'alltime') as Timeframe;
         const guild = interaction.guild!;
 
-        const [voiceSeconds, rank, totals] = await Promise.all([
-            getUserVoiceSeconds(guild.id, target.id, timeframe),
-            getUserVoiceRank(guild.id, target.id, timeframe),
-            getServerTotals(guild.id, timeframe),
+        const [allSec, allRank, allTot, wSec, wRank, wTot, tSec, tRank, tTot] = await Promise.all([
+            getUserVoiceSeconds(guild.id, target.id, 'alltime'),
+            getUserVoiceRank(guild.id, target.id, 'alltime'),
+            getServerTotals(guild.id, 'alltime'),
+            getUserVoiceSeconds(guild.id, target.id, 'weekly'),
+            getUserVoiceRank(guild.id, target.id, 'weekly'),
+            getServerTotals(guild.id, 'weekly'),
+            getUserVoiceSeconds(guild.id, target.id, 'today'),
+            getUserVoiceRank(guild.id, target.id, 'today'),
+            getServerTotals(guild.id, 'today'),
         ]);
 
-        const card = buildCard(target, voiceSeconds, rank, totals.voiceSeconds, timeframe, guild.name);
+        const card = buildCard(
+            target,
+            { seconds: allSec, rank: allRank, total: allTot.voiceSeconds },
+            { seconds: wSec, rank: wRank, total: wTot.voiceSeconds },
+            { seconds: tSec, rank: tRank, total: tTot.voiceSeconds },
+            guild.name
+        );
         await sendResponse(interaction, [card]);
     },
 
     async prefixExecute(message, args, client) {
         const guild = message.guild!;
-        const timeframe: Timeframe = (['today', 'daily', 'weekly', 'monthly', 'alltime'].includes(args[0]?.toLowerCase()) ? args.shift()!.toLowerCase() : 'alltime') as Timeframe;
-
         const targetId = args[0]?.replace(/[<@!>]/g, '');
         let target = targetId ? await client.users.fetch(targetId).catch(() => undefined) : undefined;
         if (!target) target = message.author;
 
-        const [voiceSeconds, rank, totals] = await Promise.all([
-            getUserVoiceSeconds(guild.id, target.id, timeframe),
-            getUserVoiceRank(guild.id, target.id, timeframe),
-            getServerTotals(guild.id, timeframe),
+        const [allSec, allRank, allTot, wSec, wRank, wTot, tSec, tRank, tTot] = await Promise.all([
+            getUserVoiceSeconds(guild.id, target.id, 'alltime'),
+            getUserVoiceRank(guild.id, target.id, 'alltime'),
+            getServerTotals(guild.id, 'alltime'),
+            getUserVoiceSeconds(guild.id, target.id, 'weekly'),
+            getUserVoiceRank(guild.id, target.id, 'weekly'),
+            getServerTotals(guild.id, 'weekly'),
+            getUserVoiceSeconds(guild.id, target.id, 'today'),
+            getUserVoiceRank(guild.id, target.id, 'today'),
+            getServerTotals(guild.id, 'today'),
         ]);
 
-        const card = buildCard(target as any, voiceSeconds, rank, totals.voiceSeconds, timeframe, guild.name);
+        const card = buildCard(
+            target as any,
+            { seconds: allSec, rank: allRank, total: allTot.voiceSeconds },
+            { seconds: wSec, rank: wRank, total: wTot.voiceSeconds },
+            { seconds: tSec, rank: tRank, total: tTot.voiceSeconds },
+            guild.name
+        );
         await sendMessage(message, [card]);
     },
 } satisfies Command;
