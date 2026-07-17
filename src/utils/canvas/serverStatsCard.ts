@@ -20,24 +20,6 @@ async function loadFonts() {
     }
 }
 
-function drawRoundedRect(ctx: any, x: number, y: number, width: number, height: number, radius: number, fill: string) {
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    ctx.lineTo(x + radius, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
-    ctx.closePath();
-    if (fill) {
-        ctx.fillStyle = fill;
-        ctx.fill();
-    }
-}
-
 function drawRoundedImage(ctx: any, img: Image, x: number, y: number, size: number, radius: number) {
     ctx.save();
     ctx.beginPath();
@@ -56,6 +38,46 @@ function drawRoundedImage(ctx: any, img: Image, x: number, y: number, size: numb
     ctx.restore();
 }
 
+function drawBentoCard(ctx: any, x: number, y: number, w: number, h: number) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+    ctx.shadowBlur = 20;
+    ctx.shadowOffsetY = 10;
+    
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 28);
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+    ctx.fill();
+    
+    ctx.shadowColor = 'transparent';
+    ctx.lineWidth = 1.5;
+    const gradient = ctx.createLinearGradient(x, y, x + w, y + h);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0.02)');
+    ctx.strokeStyle = gradient;
+    ctx.stroke();
+    ctx.restore();
+}
+
+function drawProgressBar(ctx: any, x: number, y: number, w: number, h: number, pct: number, color: string) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, h/2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.fill();
+
+    if (pct > 0) {
+        ctx.beginPath();
+        ctx.roundRect(x, y, Math.max(h, w * pct), h, h/2);
+        
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
 export interface ServerStatsData {
     guildName: string;
     guildIcon: string | null;
@@ -63,19 +85,28 @@ export interface ServerStatsData {
     humanCount: number;
     botCount: number;
     onlineCount: number;
+    joined24h: number;
+    joined7d: number;
     overview: {
         owner: string;
         createdFormatted: string;
+        roles: number;
+    };
+    security: {
+        verificationLevel: string;
+        explicitContent: string;
+        mfaLevel: string;
+    };
+    engagement: {
+        voiceActive: number;
         boosts: number;
         boostTier: number;
-        roles: number;
     };
     infrastructure: {
         textChannels: number;
         voiceChannels: number;
         categories: number;
         emojis: number;
-        stickers: number;
     };
 }
 
@@ -83,158 +114,185 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     await loadFonts();
 
     const width = 1200;
-    const height = 675;
+    const height = 750;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
     // 1. Background
-    ctx.fillStyle = '#0f172a'; // slate-900 base
+    ctx.fillStyle = '#020617'; // slate-950
     ctx.fillRect(0, 0, width, height);
 
     let guildImg: Image | null = null;
     if (data.guildIcon) {
         try {
             guildImg = await loadImage(data.guildIcon);
-            // Draw blurred background
             ctx.save();
-            ctx.filter = 'blur(70px)';
+            ctx.filter = 'blur(90px)';
             const scale = Math.max(width / guildImg.width, height / guildImg.height);
             const w = guildImg.width * scale;
             const h = guildImg.height * scale;
-            ctx.globalAlpha = 0.5;
+            ctx.globalAlpha = 0.6;
             ctx.drawImage(guildImg, width/2 - w/2, height/2 - h/2, w, h);
             ctx.restore();
         } catch {}
     }
 
-    // Glassmorphism overlay
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.75)'; // slate-900 with opacity
-    ctx.fillRect(0, 0, width, height);
-
-    // 2. Header
-    const padX = 60;
-    let padY = 60;
-    
-    if (guildImg) {
-        drawRoundedImage(ctx, guildImg, padX, padY, 80, 20);
-        ctx.fillStyle = '#f8fafc';
-        ctx.font = '54px "RobotoBold", sans-serif';
-        // Center vertically with the icon since subtitle is removed
-        ctx.fillText(data.guildName, padX + 110, padY + 55); 
-    } else {
-        ctx.fillStyle = '#f8fafc';
-        ctx.font = '54px "RobotoBold", sans-serif';
-        ctx.fillText(data.guildName, padX, padY + 55);
-    }
-
-    padY += 140;
-
-    // 3 Columns Layout
-    const colWidth = (width - padX * 2 - 60) / 3;
+    // Grid layout coordinates
+    const pad = 50;
     const gap = 30;
+    const row1Y = pad;
+    const row1H = 280;
+    const row2Y = pad + row1H + gap;
+    const row2H = 340;
 
-    const drawCard = (x: number, y: number, w: number, h: number, title: string) => {
-        drawRoundedRect(ctx, x, y, w, h, 24, 'rgba(30, 41, 59, 0.6)'); // slate-800
-        ctx.fillStyle = '#e2e8f0';
-        ctx.font = '26px "RobotoBold", sans-serif';
-        ctx.fillText(title, x + 30, y + 45);
-        ctx.beginPath();
-        ctx.moveTo(x + 30, y + 65);
-        ctx.lineTo(x + w - 30, y + 65);
-        ctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-    };
+    const colAW = 450;
+    const colBW = width - (pad * 2) - gap - colAW;
+    
+    const colCW = (width - (pad * 2) - (gap * 2)) / 3;
 
-    const drawStatLine = (x: number, y: number, label: string, value: string) => {
-        ctx.fillStyle = '#cbd5e1';
-        ctx.font = '18px "RobotoBold", sans-serif';
-        ctx.fillText(label, x, y);
-        ctx.fillStyle = '#94a3b8';
-        ctx.fillText(value, x + colWidth - 60 - ctx.measureText(value).width, y);
-    };
-
-    // Column 1: Audience
-    const col1X = padX;
-    drawCard(col1X, padY, colWidth, 380, 'Audience');
-
+    // CARD A: PROFILE
+    drawBentoCard(ctx, pad, row1Y, colAW, row1H);
+    if (guildImg) {
+        drawRoundedImage(ctx, guildImg, pad + 40, row1Y + 40, 90, 25);
+    }
     ctx.fillStyle = '#f8fafc';
-    ctx.font = '48px "RobotoBold", sans-serif';
-    ctx.fillText(data.memberCount.toLocaleString(), col1X + 30, padY + 120);
+    ctx.font = '42px "RobotoBold", sans-serif';
+    // Handle long names
+    let name = data.guildName;
+    if (name.length > 20) name = name.substring(0, 18) + '...';
+    ctx.fillText(name, pad + 40, row1Y + 180);
+    
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '22px "Roboto", sans-serif';
+    ctx.fillText(`Owned by ${data.overview.owner}`, pad + 40, row1Y + 220);
+    ctx.fillText(`Created ${data.overview.createdFormatted}`, pad + 40, row1Y + 250);
+
+
+    // CARD B: GROWTH & AUDIENCE
+    const cbX = pad + colAW + gap;
+    drawBentoCard(ctx, cbX, row1Y, colBW, row1H);
+    
+    // Large members count on left
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = '64px "RobotoBold", sans-serif';
+    ctx.fillText(data.memberCount.toLocaleString(), cbX + 40, row1Y + 90);
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '24px "Roboto", sans-serif';
+    ctx.fillText('Total Members', cbX + 40, row1Y + 125);
+
+    // Join rates (Badges)
+    ctx.save();
+    ctx.fillStyle = 'rgba(16, 185, 129, 0.15)'; // Emerald tint
+    ctx.roundRect(cbX + 40, row1Y + 155, 160, 40, 12);
+    ctx.fill();
+    ctx.fillStyle = '#10b981';
+    ctx.font = '18px "RobotoBold", sans-serif';
+    ctx.fillText(`+${data.joined24h} last 24h`, cbX + 55, row1Y + 182);
+
+    ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+    ctx.roundRect(cbX + 220, row1Y + 155, 160, 40, 12);
+    ctx.fill();
+    ctx.fillStyle = '#10b981';
+    ctx.fillText(`+${data.joined7d} last 7d`, cbX + 235, row1Y + 182);
+    ctx.restore();
+
+    // Bars on right side
+    const barW = colBW - 420;
+    const barX = cbX + 380;
+    
+    // Composition Bar
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = '20px "RobotoBold", sans-serif';
+    ctx.fillText('Composition', barX, row1Y + 60);
+    drawProgressBar(ctx, barX, row1Y + 75, barW, 12, data.humanCount / data.memberCount, '#8b5cf6'); // Violet
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '16px "Roboto", sans-serif';
+    ctx.fillText(`Humans: ${data.humanCount}`, barX, row1Y + 110);
+    ctx.fillText(`Bots: ${data.botCount}`, barX + barW - ctx.measureText(`Bots: ${data.botCount}`).width, row1Y + 110);
+
+    // Online Bar
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = '20px "RobotoBold", sans-serif';
+    ctx.fillText('Online Status', barX, row1Y + 160);
+    drawProgressBar(ctx, barX, row1Y + 175, barW, 12, data.onlineCount / data.memberCount, '#10b981');
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '16px "Roboto", sans-serif';
+    ctx.fillText(`Online: ${data.onlineCount}`, barX, row1Y + 210);
+    ctx.fillText(`Offline: ${data.memberCount - data.onlineCount}`, barX + barW - ctx.measureText(`Offline: ${data.memberCount - data.onlineCount}`).width, row1Y + 210);
+
+
+    // CARD C: ENGAGEMENT
+    const ccX = pad;
+    drawBentoCard(ctx, ccX, row2Y, colCW, row2H);
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = '24px "RobotoBold", sans-serif';
+    ctx.fillText('Voice Activity', ccX + 40, row2Y + 50);
+
+    ctx.fillStyle = '#10b981';
+    ctx.font = '72px "RobotoBold", sans-serif';
+    ctx.fillText(data.engagement.voiceActive.toString(), ccX + 40, row2Y + 130);
     ctx.fillStyle = '#94a3b8';
     ctx.font = '20px "Roboto", sans-serif';
-    ctx.fillText('Total Members', col1X + 30, padY + 150);
+    ctx.fillText('Users Active in VC', ccX + 40, row2Y + 165);
 
-    let barY = padY + 200;
-    ctx.fillStyle = '#f8fafc';
-    ctx.font = '20px "RobotoBold", sans-serif';
-    ctx.fillText('Composition', col1X + 30, barY);
-    
-    drawRoundedRect(ctx, col1X + 30, barY + 15, colWidth - 60, 16, 8, 'rgba(15, 23, 42, 0.8)');
-    const humanPct = Math.max(0, Math.min(1, data.humanCount / data.memberCount));
-    if (humanPct > 0) {
-        drawRoundedRect(ctx, col1X + 30, barY + 15, Math.max(16, (colWidth - 60) * humanPct), 16, 8, '#7B8CDE');
-    }
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '16px "Roboto", sans-serif';
-    ctx.fillText(`Humans: ${data.humanCount} (${Math.round(humanPct*100)}%)`, col1X + 30, barY + 55);
-    ctx.fillText(`Bots: ${data.botCount}`, col1X + 30 + colWidth - 60 - ctx.measureText(`Bots: ${data.botCount}`).width, barY + 55);
+    // line separator
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    ctx.fillRect(ccX + 40, row2Y + 200, colCW - 80, 2);
 
-    barY += 90;
-    ctx.fillStyle = '#f8fafc';
-    ctx.font = '20px "RobotoBold", sans-serif';
-    ctx.fillText('Online Status', col1X + 30, barY);
-    
-    drawRoundedRect(ctx, col1X + 30, barY + 15, colWidth - 60, 16, 8, 'rgba(15, 23, 42, 0.8)');
-    const onlinePct = Math.max(0, Math.min(1, data.onlineCount / data.memberCount));
-    if (onlinePct > 0) {
-        drawRoundedRect(ctx, col1X + 30, barY + 15, Math.max(16, (colWidth - 60) * onlinePct), 16, 8, '#10b981');
-    }
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '16px "Roboto", sans-serif';
-    ctx.fillText(`Online: ${data.onlineCount} (${Math.round(onlinePct*100)}%)`, col1X + 30, barY + 55);
-    ctx.fillText(`Offline: ${data.memberCount - data.onlineCount}`, col1X + 30 + colWidth - 60 - ctx.measureText(`Offline: ${data.memberCount - data.onlineCount}`).width, barY + 55);
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = '24px "RobotoBold", sans-serif';
+    ctx.fillText(`Level ${data.engagement.boostTier} Perks`, ccX + 40, row2Y + 250);
+    ctx.fillStyle = '#f472b6'; // Pink for boosts
+    ctx.fillText(`${data.engagement.boosts} Boosts`, ccX + 40, row2Y + 290);
 
 
-    // Column 2: Overview
-    const col2X = col1X + colWidth + gap;
-    drawCard(col2X, padY, colWidth, 380, 'Overview');
+    // CARD D: INFRASTRUCTURE
+    const cdX = pad + colCW + gap;
+    drawBentoCard(ctx, cdX, row2Y, colCW, row2H);
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = '24px "RobotoBold", sans-serif';
+    ctx.fillText('Infrastructure', cdX + 40, row2Y + 50);
 
-    let startY = padY + 110;
-    const lineSpacing = 45;
+    const drawLine = (x: number, y: number, label: string, val: string) => {
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '20px "Roboto", sans-serif';
+        ctx.fillText(label, x, y);
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '22px "RobotoBold", sans-serif';
+        ctx.fillText(val, x + colCW - 80 - ctx.measureText(val).width, y);
+    };
 
-    drawStatLine(col2X + 30, startY, 'Owner', data.overview.owner);
-    startY += lineSpacing;
-    drawStatLine(col2X + 30, startY, 'Created On', data.overview.createdFormatted);
-    startY += lineSpacing;
-    
-    // Boosts with Tier
-    const boostLabel = `Boosts (Tier ${data.overview.boostTier})`;
-    drawStatLine(col2X + 30, startY, boostLabel, data.overview.boosts.toString());
-    startY += lineSpacing;
-    
-    drawStatLine(col2X + 30, startY, 'Total Roles', data.overview.roles.toLocaleString());
+    let startY = row2Y + 110;
+    drawLine(cdX + 40, startY, 'Text Channels', data.infrastructure.textChannels.toString());
+    startY += 45;
+    drawLine(cdX + 40, startY, 'Voice Channels', data.infrastructure.voiceChannels.toString());
+    startY += 45;
+    drawLine(cdX + 40, startY, 'Categories', data.infrastructure.categories.toString());
+    startY += 45;
+    drawLine(cdX + 40, startY, 'Server Roles', data.overview.roles.toString());
+    startY += 45;
+    drawLine(cdX + 40, startY, 'Emojis', data.infrastructure.emojis.toString());
 
 
-    // Column 3: Infrastructure
-    const col3X = col2X + colWidth + gap;
-    drawCard(col3X, padY, colWidth, 380, 'Infrastructure');
+    // CARD E: SECURITY
+    const ceX = pad + colCW * 2 + gap * 2;
+    drawBentoCard(ctx, ceX, row2Y, colCW, row2H);
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = '24px "RobotoBold", sans-serif';
+    ctx.fillText('Security Settings', ceX + 40, row2Y + 50);
 
-    startY = padY + 110;
+    const drawSecBlock = (x: number, y: number, title: string, subtitle: string, isHigh: boolean) => {
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = '20px "RobotoBold", sans-serif';
+        ctx.fillText(title, x, y);
+        ctx.fillStyle = isHigh ? '#38bdf8' : '#94a3b8';
+        ctx.font = '18px "Roboto", sans-serif';
+        ctx.fillText(subtitle, x, y + 28);
+    };
 
-    drawStatLine(col3X + 30, startY, 'Text Channels', data.infrastructure.textChannels.toLocaleString());
-    startY += lineSpacing;
-    
-    drawStatLine(col3X + 30, startY, 'Voice Channels', data.infrastructure.voiceChannels.toLocaleString());
-    startY += lineSpacing;
-    
-    drawStatLine(col3X + 30, startY, 'Categories', data.infrastructure.categories.toLocaleString());
-    startY += lineSpacing;
-    
-    drawStatLine(col3X + 30, startY, 'Emojis', data.infrastructure.emojis.toLocaleString());
-    startY += lineSpacing;
-    
-    drawStatLine(col3X + 30, startY, 'Stickers', data.infrastructure.stickers.toLocaleString());
+    drawSecBlock(ceX + 40, row2Y + 110, 'Verification Level', data.security.verificationLevel, data.security.verificationLevel === 'High' || data.security.verificationLevel === 'Highest');
+    drawSecBlock(ceX + 40, row2Y + 190, 'Content Filter', data.security.explicitContent, data.security.explicitContent === 'All members');
+    drawSecBlock(ceX + 40, row2Y + 270, 'MFA Requirement', data.security.mfaLevel, data.security.mfaLevel === 'Elevated');
 
     return canvas.toBuffer('image/png');
 }
