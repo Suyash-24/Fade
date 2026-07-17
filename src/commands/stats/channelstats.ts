@@ -32,7 +32,7 @@ function buildCard(
     const isVoice = channel.type === ChannelType.GuildVoice || channel.type === ChannelType.GuildStageVoice;
     const emoji = isVoice ? e('voice') : e('channels');
 
-    const card = new FadeContainer(0x2b2d31)
+    const card = new FadeContainer()
         .text([
             `## ${emoji} Channel Stats`,
             `-# <#${channel.id}>`,

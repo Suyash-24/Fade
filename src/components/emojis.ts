@@ -96,7 +96,8 @@ const EMOJI_IDS: Record<string, string> = {
     isafk: '<a:isafk:1518968827369488527>',
     welcomeback: '<:wave:1518968774001168395>',
     loading: '<a:loading:1527670885647908875>',
-    pinkarrow: '<a:pinkarrow:1527708995769466962>'
+    pinkarrow: '<a:pinkarrow:1527708995769466962>',
+    statistics:'<:statistics:1527745278063677651>'
 };
 
 // Unicode fallbacks — aesthetic, minimal, consistent
@@ -182,7 +183,8 @@ const UNICODE = {
     isafk: '',
     welcomeback: '',
     loading: '',
-    pinkarrow: ''
+    pinkarrow: '',
+    statistics: '',
 };
 
 type EmojiKey = keyof typeof UNICODE;
