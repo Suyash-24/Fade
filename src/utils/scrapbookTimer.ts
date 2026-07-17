@@ -1,5 +1,5 @@
 import type { FadeClient } from '../client.js';
-import { getScrapbookWinners, wipeAllWeeklyScrapbookData, saveScrapbookArchive } from '../db/queries/scrapbook.js';
+import { getScrapbookWinners, wipeAllWeeklyScrapbookData, saveScrapbookArchive, hasScrapbookRunToday } from '../db/queries/scrapbook.js';
 import { ScrapbookData } from './canvas/scrapbookCard.js';
 import { logger } from './logger.js';
 import { flushVoiceSessions } from '../events/voiceScrapbook.js';
@@ -86,22 +86,21 @@ export async function processWeeklyScrapbooks(client: FadeClient) {
     logger.info('Weekly Scrapbook snapshots complete. Data wiped.');
 }
 
-export function startScrapbookTimer(client: FadeClient) {
+export async function startScrapbookTimer(client: FadeClient) {
     // Catch-up check: if the bot starts on a Sunday after 12:00 PM UTC and
     // hasn't run yet today, run immediately (handles restarts mid-day).
     const bootCheck = new Date();
     const bootIsSunday = bootCheck.getUTCDay() === 0;
     const bootPast12PM = bootCheck.getUTCHours() >= 12;
     if (bootIsSunday && bootPast12PM) {
-        const todayStr = bootCheck.toDateString();
-        if (lastRunDate !== todayStr) {
-            lastRunDate = todayStr;
+        const ranToday = await hasScrapbookRunToday().catch(() => false);
+        if (!ranToday) {
             logger.info('[Scrapbook] Bot started after scheduled window — running catch-up now.');
-            processWeeklyScrapbooks(client);
+            await processWeeklyScrapbooks(client);
         }
     }
 
-    setInterval(() => {
+    setInterval(async () => {
         const now = new Date();
         const isSunday = now.getUTCDay() === 0;
         const is12PM = now.getUTCHours() === 12;
@@ -110,8 +109,12 @@ export function startScrapbookTimer(client: FadeClient) {
         if (isSunday && is12PM && is0Minute) {
             const todayStr = now.toDateString();
             if (lastRunDate !== todayStr) {
-                lastRunDate = todayStr;
-                processWeeklyScrapbooks(client);
+                // Secondary safeguard: Ensure DB hasn't run today (useful in multi-shard environments)
+                const ranToday = await hasScrapbookRunToday().catch(() => false);
+                if (!ranToday) {
+                    lastRunDate = todayStr;
+                    await processWeeklyScrapbooks(client);
+                }
             }
         }
     }, 60 * 1000); // Check every minute

@@ -16,6 +16,16 @@ export async function getLatestScrapbookArchive(guildId: string) {
     return archive[0]?.snapshotData ?? null;
 }
 
+export async function hasScrapbookRunToday(): Promise<boolean> {
+    const latest = await db.select({ createdAt: scrapbookArchives.createdAt })
+        .from(scrapbookArchives)
+        .orderBy(desc(scrapbookArchives.createdAt))
+        .limit(1);
+    
+    if (latest.length === 0) return false;
+    return latest[0].createdAt.toDateString() === new Date().toDateString();
+}
+
 // Stats tracking (always on, no enable/disable checks)
 export async function incrementScrapbookMessageCount(guildId: string, userId: string): Promise<void> {
     const isNightOwl = new Date().getUTCHours() >= 0 && new Date().getUTCHours() < 6;
