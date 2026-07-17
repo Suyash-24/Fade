@@ -18,6 +18,7 @@ async function loadFonts() {
             }
         };
 
+        await Promise.all([
             fetchAndRegister('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Bold.ttf', 'RobotoBold'),
             fetchAndRegister('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Regular.ttf', 'Roboto'),
             fetchAndRegister('https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf', 'NotoColorEmoji'),
