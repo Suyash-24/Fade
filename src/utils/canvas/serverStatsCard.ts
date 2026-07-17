@@ -18,12 +18,13 @@ async function loadFonts() {
             }
         };
 
-        await Promise.all([
             fetchAndRegister('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Bold.ttf', 'RobotoBold'),
             fetchAndRegister('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Regular.ttf', 'Roboto'),
             fetchAndRegister('https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf', 'NotoColorEmoji'),
             fetchAndRegister('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf', 'NotoSans'),
-            fetchAndRegister('https://github.com/google/fonts/raw/main/ofl/notosansmath/NotoSansMath-Regular.ttf', 'NotoSansMath')
+            fetchAndRegister('https://github.com/google/fonts/raw/main/ofl/notosansmath/NotoSansMath-Regular.ttf', 'NotoSansMath'),
+            fetchAndRegister('https://github.com/google/fonts/raw/main/ofl/notosanssymbols/NotoSansSymbols-Regular.ttf', 'NotoSansSymbols'),
+            fetchAndRegister('https://github.com/google/fonts/raw/main/ofl/notosanssymbols2/NotoSansSymbols2-Regular.ttf', 'NotoSansSymbols2')
         ]);
         
         fontLoaded = true;
@@ -160,13 +161,13 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     drawBentoCard(ctx, pad, row1Y, colAW, row1H);
     if (guildImg) drawRoundedImage(ctx, guildImg, pad + 40, row1Y + 40, 90, 25);
     ctx.fillStyle = '#0f172a'; // slate-900
-    ctx.font = '42px "RobotoBold", "NotoColorEmoji", "NotoSans", "NotoSansMath", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", sans-serif';
+    ctx.font = '42px "RobotoBold", "NotoColorEmoji", "NotoSans", "NotoSansMath", "NotoSansSymbols", "NotoSansSymbols2", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", sans-serif';
     let name = data.guildName;
     const nameArr = [...name];
     if (nameArr.length > 20) name = nameArr.slice(0, 18).join('') + '...';
     ctx.fillText(name, pad + 40, row1Y + 180);
     ctx.fillStyle = '#64748b'; // slate-500
-    ctx.font = '20px "Roboto", "NotoColorEmoji", "NotoSans", "NotoSansMath", "Segoe UI Symbol", "Segoe UI", sans-serif';
+    ctx.font = '20px "Roboto", "NotoColorEmoji", "NotoSans", "NotoSansMath", "NotoSansSymbols", "Segoe UI Symbol", "Segoe UI", sans-serif';
     ctx.fillText(`Owner: ${data.overview.owner}`, pad + 40, row1Y + 220);
     ctx.fillText(`Roles: ${data.overview.roles} total`, pad + 40, row1Y + 250);
 
@@ -182,7 +183,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
 
     // Dates
     ctx.fillStyle = '#64748b';
-    ctx.font = '16px "Roboto", "NotoColorEmoji", "NotoSans", "Segoe UI Symbol", sans-serif';
+    ctx.font = '16px "Roboto", "NotoColorEmoji", "NotoSans", "NotoSansSymbols", "Segoe UI Symbol", sans-serif';
     ctx.fillText(`Created: ${data.overview.createdFormatted}`, cbX + 40, row1Y + 180);
     ctx.fillText(`Bot Joined: ${data.overview.botJoinedFormatted}`, cbX + 40, row1Y + 210);
 
@@ -195,7 +196,9 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillStyle = '#64748b';
     ctx.font = '16px "Roboto", sans-serif';
     ctx.fillText(`Humans: ${data.humanCount}`, barX, row1Y + 110);
-    ctx.fillText(`Bots: ${data.botCount}`, barX + barW - ctx.measureText(`Bots: ${data.botCount}`).width, row1Y + 110);
+    ctx.textAlign = 'right';
+    ctx.fillText(`Bots: ${data.botCount}`, barX + barW, row1Y + 110);
+    ctx.textAlign = 'left';
 
     ctx.fillStyle = '#1e293b';
     ctx.font = '20px "RobotoBold", sans-serif';
@@ -204,7 +207,9 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillStyle = '#64748b';
     ctx.font = '16px "Roboto", sans-serif';
     ctx.fillText(`Online: ${data.onlineCount}`, barX, row1Y + 210);
-    ctx.fillText(`Offline: ${data.memberCount - data.onlineCount}`, barX + barW - ctx.measureText(`Offline: ${data.onlineCount}`).width, row1Y + 210); // Wait, this should measure Offline count, let's fix measurement inside replacement!
+    ctx.textAlign = 'right';
+    ctx.fillText(`Offline: ${data.memberCount - data.onlineCount}`, barX + barW, row1Y + 210);
+    ctx.textAlign = 'left';
 
     // --- ROW 2: Top Members & Top Channels ---
     const colHalfW = (width - (pad * 2) - gap) / 2;
@@ -229,11 +234,11 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
 
             if (item) {
                 ctx.fillStyle = '#334155'; // Slate-700
-                ctx.font = '18px "Roboto", "NotoColorEmoji", "NotoSans", "NotoSansMath", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Arial", sans-serif';
+                ctx.font = '18px "Roboto", "NotoColorEmoji", "NotoSans", "NotoSansMath", "NotoSansSymbols", "NotoSansSymbols2", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Arial", sans-serif';
                 let itemChars = [...item.name];
                 let itemName = item.name;
                 let truncated = false;
-                while (ctx.measureText(itemName).width > 90 && itemChars.length > 3) {
+                while (ctx.measureText(itemName).width > 110 && itemChars.length > 3) {
                     itemChars.pop();
                     itemName = itemChars.join('');
                     truncated = true;
@@ -244,10 +249,12 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
                 ctx.fillStyle = color;
                 ctx.font = '18px "RobotoBold", sans-serif';
                 const valStr = `${item.value} ${valSuffix}`;
-                ctx.fillText(valStr, x + 215 - ctx.measureText(valStr).width, curY);
+                ctx.textAlign = 'right';
+                ctx.fillText(valStr, x + 240, curY);
+                ctx.textAlign = 'left';
             } else {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // Darker dash for light mode
-                ctx.font = '18px "Roboto", "NotoColorEmoji", "NotoSans", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif';
+                ctx.font = '18px "Roboto", "NotoColorEmoji", "NotoSans", "NotoSansSymbols", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif';
                 ctx.fillText('-', x + 40, curY);
             }
             curY += 40;
