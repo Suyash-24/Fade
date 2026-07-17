@@ -1084,3 +1084,38 @@ export const confessions = pgTable('confessions', {
 }, (t) => [
     index('confessions_guild_idx').on(t.guildId),
 ]);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ANALYTICS & STATS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+export const guildStats = pgTable('guild_stats', {
+    guildId: snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    date:    text('date').notNull(), // 'YYYY-MM-DD' UTC
+    messages: integer('messages').default(0).notNull(),
+    voiceSeconds: integer('voice_seconds').default(0).notNull(),
+    joins: integer('joins').default(0).notNull(),
+    leaves: integer('leaves').default(0).notNull(),
+}, (t) => [
+    primaryKey({ columns: [t.guildId, t.date] }),
+]);
+
+export const memberStats = pgTable('member_stats', {
+    guildId: snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    userId:  snowflake('user_id').notNull(),
+    date:    text('date').notNull(), // 'YYYY-MM-DD' UTC
+    messages: integer('messages').default(0).notNull(),
+    voiceSeconds: integer('voice_seconds').default(0).notNull(),
+}, (t) => [
+    primaryKey({ columns: [t.guildId, t.userId, t.date] }),
+]);
+
+export const channelStats = pgTable('channel_stats', {
+    guildId: snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    channelId: snowflake('channel_id').notNull(),
+    date:    text('date').notNull(), // 'YYYY-MM-DD' UTC
+    messages: integer('messages').default(0).notNull(),
+    voiceSeconds: integer('voice_seconds').default(0).notNull(),
+}, (t) => [
+    primaryKey({ columns: [t.guildId, t.channelId, t.date] }),
+]);

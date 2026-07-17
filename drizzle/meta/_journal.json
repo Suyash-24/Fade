@@ -134,6 +134,13 @@
       "when": 1784225423009,
       "tag": "0018_hardbans",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1784225424000,
+      "tag": "0019_analytics",
+      "breakpoints": true
     }
   ]
 }

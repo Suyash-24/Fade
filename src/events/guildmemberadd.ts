@@ -6,12 +6,14 @@ import { getAutoroles } from '../db/queries/autoroles.js';
 import { isHardbanned } from '../db/queries/hardbans.js';
 import { sendWelcome, sendDmWelcome, type WelcomeStyle } from '../utils/welcomecard.js';
 import { logger } from '../utils/logger.js';
+import { StatsTracker } from '../utils/statsTracker.js';
 
 const event: Event<'guildMemberAdd'> = {
     name: 'guildMemberAdd',
 
     async execute(client: FadeClient, member) {
         const guildId = member.guild.id;
+        StatsTracker.trackJoinLeave(guildId, true);
 
         try {
             // ── Hardban Check ─────────────────────────────────────────────────────

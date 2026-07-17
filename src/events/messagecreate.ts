@@ -3,6 +3,7 @@ import { MessageFlags, PermissionsBitField } from 'discord.js';
 import type { FadeClient } from '../client.js';
 import type { Event } from '../types/event.js';
 import { logger } from '../utils/logger.js';
+import { StatsTracker } from '../utils/statsTracker.js';
 import { isBotOwner } from '../utils/owner.js';
 import { getAlias } from '../db/queries/commandAliases.js';
 import { checkCommandRestrictions } from '../utils/commandCheck.js';
@@ -45,6 +46,8 @@ const event: Event<'messageCreate'> = {
 
     async execute(client: FadeClient, message) {
         if (message.author.bot || !message.guild) return;
+        
+        StatsTracker.trackMessage(message.guild.id, message.author.id, message.channel.id);
 
         const guild = message.guild;
 

@@ -6,11 +6,23 @@ import { get247, set247 } from '../db/queries/twentyFourSeven.js';
 import { e, Colours } from '../components/emojis.js';
 import { FadeContainer } from '../components/builders.js';
 import { logger } from '../utils/logger.js';
+import { StatsTracker } from '../utils/statsTracker.js';
 
 const event: Event<'voiceStateUpdate'> = {
     name: 'voiceStateUpdate',
     async execute(client: FadeClient, oldState, newState) {
-        // We only care if the bot itself triggered a state change
+        // --- Analytics Tracking ---
+        if (!oldState.member?.user.bot) {
+            if (!oldState.channelId && newState.channelId) {
+                StatsTracker.voiceJoin(newState.guild.id, newState.id, newState.channelId);
+            } else if (oldState.channelId && !newState.channelId) {
+                StatsTracker.voiceLeave(oldState.id);
+            } else if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
+                StatsTracker.voiceSwitch(newState.guild.id, newState.id, newState.channelId);
+            }
+        }
+
+        // We only care if the bot itself triggered a state change for 24/7
         if (oldState.id !== client.user?.id) return;
         
         const guildId = oldState.guild.id;
