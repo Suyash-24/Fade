@@ -85,7 +85,8 @@ export default {
         if (sub === 'edit') {
             const newReason = interaction.options.getString('reason', true);
             await updateCaseReason(interaction.guild!.id, num, newReason);
-            await interaction.reply({ content: `${e('success')} Case #${num} reason updated.`, flags: MessageFlags.Ephemeral }); return;
+            const card = new FadeContainer(Colours.NONE).text(`${e('success')} Case #${num} reason updated.`).build();
+            await interaction.reply({ ...(fadeReply([card], false) as any), flags: MessageFlags.Ephemeral }); return;
         }
 
         if (sub === 'delete') {
@@ -93,7 +94,8 @@ export default {
                 await interaction.reply({ content: `${e('error')} You need Manage Guild permission to delete cases.`, flags: MessageFlags.Ephemeral }); return;
             }
             await db.delete(cases).where(and(eq(cases.guildId, interaction.guild!.id), eq(cases.caseNumber, num)));
-            await interaction.reply({ content: `${e('success')} Case #${num} deleted.`, flags: MessageFlags.Ephemeral }); return;
+            const card = new FadeContainer(Colours.NONE).text(`${e('success')} Case #${num} deleted.`).build();
+            await interaction.reply({ ...(fadeReply([card], false) as any), flags: MessageFlags.Ephemeral }); return;
         }
     },
 
@@ -105,7 +107,8 @@ export default {
             const newReason = args.slice(2).join(' ');
             if (!num || !newReason) { await message.reply(`${e('error')} Usage: \`f!case edit <number> <new reason>\``); return; }
             await updateCaseReason(message.guild!.id, num, newReason);
-            await message.reply(`${e('success')} Case #${num} reason updated.`); return;
+            const card = new FadeContainer(Colours.NONE).text(`${e('success')} Case #${num} reason updated.`).build();
+            await sendMessage(message, [card]); return;
         }
 
         if (sub === 'delete' || sub === 'del') {
@@ -117,7 +120,8 @@ export default {
             const c = await getCase(message.guild!.id, num);
             if (!c) { await message.reply(`${e('error')} Case #${num} not found.`); return; }
             await db.delete(cases).where(and(eq(cases.guildId, message.guild!.id), eq(cases.caseNumber, num)));
-            await message.reply(`${e('success')} Case #${num} deleted.`); return;
+            const card = new FadeContainer(Colours.NONE).text(`${e('success')} Case #${num} deleted.`).build();
+            await sendMessage(message, [card]); return;
         }
 
         // Default: view
