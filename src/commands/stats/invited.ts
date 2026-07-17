@@ -52,6 +52,7 @@ export default {
         ),
 
     category: 'stats',
+    prefixOnly: true,
     guildOnly: true,
     aliases: ['whoinvitedby'],
     cooldown: 5,

@@ -97,6 +97,7 @@ export default {
         ),
 
     category: 'stats',
+    prefixOnly: true,
     guildOnly: true,
     aliases: ['voiceleaderboard', 'topvoice'],
     cooldown: 10,

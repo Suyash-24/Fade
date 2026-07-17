@@ -67,6 +67,7 @@ export default {
         ),
 
     category: 'stats',
+    prefixOnly: true,
     guildOnly: true,
     aliases: ['msgs', 'msgcount'],
     cooldown: 5,

@@ -80,6 +80,7 @@ export default {
         ),
 
     category: 'stats',
+    prefixOnly: true,
     guildOnly: true,
     cooldown: 5,
 

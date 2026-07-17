@@ -69,6 +69,7 @@ export default {
         ),
 
     category: 'stats',
+    prefixOnly: true,
     guildOnly: true,
     aliases: ['inviteleaderboard', 'topinvites'],
     cooldown: 10,

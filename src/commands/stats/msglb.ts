@@ -89,6 +89,7 @@ export default {
         ),
 
     category: 'stats',
+    prefixOnly: true,
     guildOnly: true,
     aliases: ['messageleaderboard', 'topmessages'],
     cooldown: 10,

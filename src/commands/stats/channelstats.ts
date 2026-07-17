@@ -45,6 +45,7 @@ export default {
         ),
 
     category: 'stats',
+    prefixOnly: true,
     guildOnly: true,
     aliases: ['cstats'],
     cooldown: 5,

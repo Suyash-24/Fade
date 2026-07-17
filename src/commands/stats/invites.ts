@@ -46,6 +46,7 @@ export default {
         ),
 
     category: 'stats',
+    prefixOnly: true,
     guildOnly: true,
     aliases: ['inv'],
     cooldown: 5,

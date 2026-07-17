@@ -76,6 +76,7 @@ export default {
         ),
 
     category: 'stats',
+    prefixOnly: true,
     guildOnly: true,
     aliases: ['vcstats', 'vc', 'vctime'],
     cooldown: 5,
