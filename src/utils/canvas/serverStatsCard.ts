@@ -5,22 +5,28 @@ let fontLoaded = false;
 async function loadFonts() {
     if (fontLoaded) return;
     try {
-        const [boldRes, regRes, emojiRes, symbolRes, mathRes] = await Promise.all([
-            fetch('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Bold.ttf'),
-            fetch('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Regular.ttf'),
-            fetch('https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf'),
-            fetch('https://github.com/google/fonts/raw/main/ofl/notosans/NotoSans-Regular.ttf'),
-            fetch('https://github.com/google/fonts/raw/main/ofl/notosansmath/NotoSansMath-Regular.ttf')
+        const fetchAndRegister = async (url: string, name: string) => {
+            try {
+                const res = await fetch(url);
+                if (res.ok) {
+                    GlobalFonts.register(Buffer.from(await res.arrayBuffer()), name);
+                } else {
+                    console.error(`Failed to load font ${name}, status: ${res.status}`);
+                }
+            } catch (e) {
+                console.error(`Failed to fetch font ${name}:`, e);
+            }
+        };
+
+        await Promise.all([
+            fetchAndRegister('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Bold.ttf', 'RobotoBold'),
+            fetchAndRegister('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Regular.ttf', 'Roboto'),
+            fetchAndRegister('https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf', 'NotoColorEmoji'),
+            fetchAndRegister('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf', 'NotoSans'),
+            fetchAndRegister('https://github.com/google/fonts/raw/main/ofl/notosansmath/NotoSansMath-Regular.ttf', 'NotoSansMath')
         ]);
         
-        if (boldRes.ok && regRes.ok && emojiRes.ok && symbolRes.ok && mathRes.ok) {
-            GlobalFonts.register(Buffer.from(await boldRes.arrayBuffer()), 'RobotoBold');
-            GlobalFonts.register(Buffer.from(await regRes.arrayBuffer()), 'Roboto');
-            GlobalFonts.register(Buffer.from(await emojiRes.arrayBuffer()), 'NotoColorEmoji');
-            GlobalFonts.register(Buffer.from(await symbolRes.arrayBuffer()), 'NotoSans');
-            GlobalFonts.register(Buffer.from(await mathRes.arrayBuffer()), 'NotoSansMath');
-            fontLoaded = true;
-        }
+        fontLoaded = true;
     } catch (e) {
         console.error('Failed to load remote fonts for Server Stats Canvas', e);
     }
