@@ -5,18 +5,20 @@ let fontLoaded = false;
 async function loadFonts() {
     if (fontLoaded) return;
     try {
-        const [boldRes, regRes, emojiRes, symbolRes] = await Promise.all([
+        const [boldRes, regRes, emojiRes, symbolRes, mathRes] = await Promise.all([
             fetch('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Bold.ttf'),
             fetch('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Regular.ttf'),
             fetch('https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf'),
-            fetch('https://github.com/google/fonts/raw/main/ofl/notosans/NotoSans-Regular.ttf')
+            fetch('https://github.com/google/fonts/raw/main/ofl/notosans/NotoSans-Regular.ttf'),
+            fetch('https://github.com/google/fonts/raw/main/ofl/notosansmath/NotoSansMath-Regular.ttf')
         ]);
         
-        if (boldRes.ok && regRes.ok && emojiRes.ok && symbolRes.ok) {
+        if (boldRes.ok && regRes.ok && emojiRes.ok && symbolRes.ok && mathRes.ok) {
             GlobalFonts.register(Buffer.from(await boldRes.arrayBuffer()), 'RobotoBold');
             GlobalFonts.register(Buffer.from(await regRes.arrayBuffer()), 'Roboto');
             GlobalFonts.register(Buffer.from(await emojiRes.arrayBuffer()), 'NotoColorEmoji');
             GlobalFonts.register(Buffer.from(await symbolRes.arrayBuffer()), 'NotoSans');
+            GlobalFonts.register(Buffer.from(await mathRes.arrayBuffer()), 'NotoSansMath');
             fontLoaded = true;
         }
     } catch (e) {
@@ -152,12 +154,13 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     drawBentoCard(ctx, pad, row1Y, colAW, row1H);
     if (guildImg) drawRoundedImage(ctx, guildImg, pad + 40, row1Y + 40, 90, 25);
     ctx.fillStyle = '#0f172a'; // slate-900
-    ctx.font = '42px "RobotoBold", "NotoColorEmoji", "NotoSans", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif';
+    ctx.font = '42px "RobotoBold", "NotoColorEmoji", "NotoSans", "NotoSansMath", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", sans-serif';
     let name = data.guildName;
-    if (name.length > 20) name = name.substring(0, 18) + '...';
+    const nameArr = [...name];
+    if (nameArr.length > 20) name = nameArr.slice(0, 18).join('') + '...';
     ctx.fillText(name, pad + 40, row1Y + 180);
     ctx.fillStyle = '#64748b'; // slate-500
-    ctx.font = '20px "Roboto", "NotoColorEmoji", "NotoSans", "Segoe UI Symbol", sans-serif';
+    ctx.font = '20px "Roboto", "NotoColorEmoji", "NotoSans", "NotoSansMath", "Segoe UI Symbol", "Segoe UI", sans-serif';
     ctx.fillText(`Owner: ${data.overview.owner}`, pad + 40, row1Y + 220);
     ctx.fillText(`Roles: ${data.overview.roles} total`, pad + 40, row1Y + 250);
 
@@ -220,11 +223,13 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
 
             if (item) {
                 ctx.fillStyle = '#334155'; // Slate-700
-                ctx.font = '18px "Roboto", "NotoColorEmoji", "NotoSans", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Arial", sans-serif';
+                ctx.font = '18px "Roboto", "NotoColorEmoji", "NotoSans", "NotoSansMath", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Arial", sans-serif';
+                let itemChars = [...item.name];
                 let itemName = item.name;
                 let truncated = false;
-                while (ctx.measureText(itemName).width > 90 && itemName.length > 3) {
-                    itemName = itemName.substring(0, itemName.length - 1);
+                while (ctx.measureText(itemName).width > 90 && itemChars.length > 3) {
+                    itemChars.pop();
+                    itemName = itemChars.join('');
                     truncated = true;
                 }
                 if (truncated) itemName += '..';
