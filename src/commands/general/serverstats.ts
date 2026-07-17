@@ -49,14 +49,21 @@ async function fetchStatsData(guild: any, client: any): Promise<ServerStatsData>
     .where(and(eq(memberStats.guildId, guild.id), gte(memberStats.date, fourteenDaysAgo)))
     .groupBy(memberStats.userId);
 
+    const formatVoice = (sec: number) => {
+        if (sec === 0) return '0 hrs';
+        if (sec < 60) return '<1 min';
+        if (sec < 3600) return `${Math.floor(sec / 60)} min`;
+        return `${+(sec / 3600).toFixed(1)} hrs`;
+    };
+
     const topChatters = topMembersRows.sort((a, b) => b.messages - a.messages).slice(0, 3).map(r => {
         const m = guild.members.cache.get(r.userId);
-        return { name: m?.user.username ?? 'Unknown', value: r.messages };
+        return { name: m?.user.username ?? 'Unknown', value: `${r.messages.toLocaleString()} msg` };
     });
 
     const topTalkers = topMembersRows.sort((a, b) => b.voiceSeconds - a.voiceSeconds).slice(0, 3).map(r => {
         const m = guild.members.cache.get(r.userId);
-        return { name: m?.user.username ?? 'Unknown', value: +(r.voiceSeconds / 3600).toFixed(1) };
+        return { name: m?.user.username ?? 'Unknown', value: formatVoice(r.voiceSeconds) };
     });
 
     // Top Channels
@@ -71,12 +78,12 @@ async function fetchStatsData(guild: any, client: any): Promise<ServerStatsData>
 
     const topText = topChannelsRows.sort((a, b) => b.messages - a.messages).slice(0, 3).map(r => {
         const c = guild.channels.cache.get(r.channelId);
-        return { name: c?.name ?? 'deleted-channel', value: r.messages };
+        return { name: c?.name ?? 'deleted-channel', value: `${r.messages.toLocaleString()} msg` };
     });
 
     const topVoice = topChannelsRows.sort((a, b) => b.voiceSeconds - a.voiceSeconds).slice(0, 3).map(r => {
         const c = guild.channels.cache.get(r.channelId);
-        return { name: c?.name ?? 'deleted-channel', value: +(r.voiceSeconds / 3600).toFixed(1) };
+        return { name: c?.name ?? 'deleted-channel', value: formatVoice(r.voiceSeconds) };
     });
 
     // Sum last 7d joins

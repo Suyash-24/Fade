@@ -220,7 +220,12 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     // --- ROW 2: Top Members & Top Channels ---
     const colHalfW = (width - (pad * 2) - gap) / 2;
 
-    const drawList = (x: number, y: number, title: string, items: {name: string, value: string | number}[], valSuffix: string, color: string) => {
+    const drawDivider = (ctx: any, x: number, y: number, w: number) => {
+        ctx.fillStyle = '#ffe4e6';
+        ctx.fillRect(x, y, w, 1);
+    }
+
+    const drawList = (x: number, y: number, rightAnchor: number, title: string, items: {name: string, value: string | number}[], color: string) => {
         ctx.fillStyle = '#475569'; // Slate-600
         ctx.font = '20px "RobotoBold", sans-serif';
         ctx.fillText(title, x, y);
@@ -253,9 +258,9 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
 
                 ctx.fillStyle = color;
                 ctx.font = '18px "RobotoBold", sans-serif';
-                const valStr = `${item.value} ${valSuffix}`;
+                const valStr = `${item.value}`;
                 ctx.textAlign = 'right';
-                ctx.fillText(valStr, x + 240, curY);
+                ctx.fillText(valStr, rightAnchor, curY);
                 ctx.textAlign = 'left';
             } else {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // Darker dash for light mode
@@ -267,28 +272,29 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     };
 
     // Card C: Top Contributors
+    const leftAnchorCardC = pad + (colHalfW / 2) - 30;
+    const rightAnchorCardC = pad + colHalfW - 40;
     drawBentoCard(ctx, pad, row2Y, colHalfW, row2H);
     ctx.fillStyle = '#1e293b'; // slate-800
     ctx.font = '24px "RobotoBold", sans-serif';
     ctx.fillText('Top Contributors (14d)', pad + 40, row2Y + 45);
-    // line separator
-    ctx.fillStyle = '#ffe4e6'; // rose-100
-    ctx.fillRect(pad + 40, row2Y + 65, colHalfW - 80, 1);
+    drawDivider(ctx, pad + 40, row2Y + 65, colHalfW - 80);
 
-    drawList(pad + 40, row2Y + 105, 'Chatters', data.analytics.topChatters, 'msg', '#be185d'); // Darker Pink
-    drawList(pad + 40 + (colHalfW/2), row2Y + 105, 'Talkers', data.analytics.topTalkers, 'hrs', '#475569'); // Slate
+    drawList(pad + 40, row2Y + 105, leftAnchorCardC, 'Chatters', data.analytics.topChatters, '#be185d'); // Darker Pink
+    drawList(pad + 40 + (colHalfW/2), row2Y + 105, rightAnchorCardC, 'Talkers', data.analytics.topTalkers, '#475569'); // Slate
 
     // Card D: Top Channels
     const cdX = pad + colHalfW + gap;
+    const leftAnchorCardD = cdX + (colHalfW / 2) - 30;
+    const rightAnchorCardD = cdX + colHalfW - 40;
     drawBentoCard(ctx, cdX, row2Y, colHalfW, row2H);
     ctx.fillStyle = '#1e293b'; // slate-800
     ctx.font = '24px "RobotoBold", sans-serif';
     ctx.fillText('Top Channels (14d)', cdX + 40, row2Y + 45);
-    ctx.fillStyle = '#ffe4e6'; // rose-100
-    ctx.fillRect(cdX + 40, row2Y + 65, colHalfW - 80, 1);
+    drawDivider(ctx, cdX + 40, row2Y + 65, colHalfW - 80);
 
-    drawList(cdX + 40, row2Y + 105, 'Text', data.analytics.topText, 'msg', '#be185d');
-    drawList(cdX + 40 + (colHalfW/2), row2Y + 105, 'Voice', data.analytics.topVoice, 'hrs', '#475569');
+    drawList(cdX + 40, row2Y + 105, leftAnchorCardD, 'Text', data.analytics.topText, '#be185d');
+    drawList(cdX + 40 + (colHalfW/2), row2Y + 105, rightAnchorCardD, 'Voice', data.analytics.topVoice, '#475569');
 
 
     // --- ROW 3: Activity Chart ---
