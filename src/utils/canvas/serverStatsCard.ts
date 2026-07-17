@@ -169,17 +169,17 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillText('Total Members', cbX + 40, row1Y + 125);
 
     ctx.save();
-    ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+    ctx.fillStyle = 'rgba(244, 114, 182, 0.15)'; // Pink bg
     ctx.roundRect(cbX + 40, row1Y + 155, 160, 40, 12);
     ctx.fill();
-    ctx.fillStyle = '#10b981';
+    ctx.fillStyle = '#f472b6'; // Pink text
     ctx.font = '18px "RobotoBold", sans-serif';
     ctx.fillText(`+${data.joined24h} last 24h`, cbX + 55, row1Y + 182);
 
-    ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; // White bg
     ctx.roundRect(cbX + 220, row1Y + 155, 160, 40, 12);
     ctx.fill();
-    ctx.fillStyle = '#10b981';
+    ctx.fillStyle = '#ffffff'; // White text
     ctx.fillText(`+${data.joined7d} last 7d`, cbX + 235, row1Y + 182);
     ctx.restore();
 
@@ -188,7 +188,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillStyle = '#f8fafc';
     ctx.font = '20px "RobotoBold", sans-serif';
     ctx.fillText('Composition', barX, row1Y + 60);
-    drawProgressBar(ctx, barX, row1Y + 75, barW, 12, data.humanCount / data.memberCount, '#8b5cf6');
+    drawProgressBar(ctx, barX, row1Y + 75, barW, 12, data.humanCount / data.memberCount, '#f472b6'); // Pink
     ctx.fillStyle = '#94a3b8';
     ctx.font = '16px "Roboto", sans-serif';
     ctx.fillText(`Humans: ${data.humanCount}`, barX, row1Y + 110);
@@ -197,12 +197,11 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     ctx.fillStyle = '#f8fafc';
     ctx.font = '20px "RobotoBold", sans-serif';
     ctx.fillText('Online Status', barX, row1Y + 160);
-    drawProgressBar(ctx, barX, row1Y + 175, barW, 12, data.onlineCount / data.memberCount, '#10b981');
+    drawProgressBar(ctx, barX, row1Y + 175, barW, 12, data.onlineCount / data.memberCount, '#ffffff'); // White
     ctx.fillStyle = '#94a3b8';
     ctx.font = '16px "Roboto", sans-serif';
     ctx.fillText(`Online: ${data.onlineCount}`, barX, row1Y + 210);
     ctx.fillText(`Offline: ${data.memberCount - data.onlineCount}`, barX + barW - ctx.measureText(`Offline: ${data.memberCount - data.onlineCount}`).width, row1Y + 210);
-
 
     // --- ROW 2: Top Members & Top Channels ---
     const colHalfW = (width - (pad * 2) - gap) / 2;
