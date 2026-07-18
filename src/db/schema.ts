@@ -643,6 +643,7 @@ export const birthdayConfig = pgTable('birthday_config', {
     message:   text('message'),              // plain text, {embed}$v... script, or {card}$v... script
     style:     varchar('style', { length: 10 }).default('text').notNull(), // text | embed | card
     enabled:   boolean('enabled').default(true).notNull(),
+    systemEnabled: boolean('system_enabled').default(true).notNull(),
     updatedAt: updatedAt(),
 });
 

@@ -96,8 +96,13 @@ export default {
                 )
             )
             .addSubcommand(s => s
-                .setName('toggle')
+                .setName('announcements')
                 .setDescription('Enable or disable birthday announcements')
+                .addBooleanOption(o => o.setName('enabled').setDescription('On or off').setRequired(true))
+            )
+            .addSubcommand(s => s
+                .setName('system')
+                .setDescription('Enable or disable the ENTIRE birthday system globally')
                 .addBooleanOption(o => o.setName('enabled').setDescription('On or off').setRequired(true))
             )
             .addSubcommand(s => s
@@ -170,11 +175,18 @@ export default {
                     .text(`${e('success')}  Birthday style set to \`${style}\`\n-# ${hints[style]}`)
                     .build();
                 await sendResponse(interaction, [card]);
-            } else if (sub === 'toggle') {
+            } else if (sub === 'announcements') {
                 const enabled = interaction.options.getBoolean('enabled', true);
                 await upsertBirthdayConfig(guildId, { enabled });
-                const card = new FadeContainer(enabled ? Colours.SUCCESS : Colours.WARNING)
+                const card = new FadeContainer(Colours.SUCCESS)
                     .text(`${e('success')}  Birthday announcements **${enabled ? 'enabled' : 'disabled'}**`)
+                    .build();
+                await sendResponse(interaction, [card]);
+            } else if (sub === 'system') {
+                const enabled = interaction.options.getBoolean('enabled', true);
+                await upsertBirthdayConfig(guildId, { systemEnabled: enabled });
+                const card = new FadeContainer(Colours.SUCCESS)
+                    .text(`${e('success')}  The Birthday System is now globally **${enabled ? 'enabled' : 'disabled'}**`)
                     .build();
                 await sendResponse(interaction, [card]);
             } else if (sub === 'view') {
@@ -182,7 +194,8 @@ export default {
                 const card = new FadeContainer(Colours.FADE)
                     .text(
                         `## 🎂 Birthday Config\n` +
-                        `**Enabled** — \`${config?.enabled !== false ? 'Yes' : 'No'}\`\n` +
+                        `**System** — \`${config?.systemEnabled !== false ? 'Enabled' : 'Disabled'}\`\n` +
+                        `**Announcements** — \`${config?.enabled !== false ? 'Enabled' : 'Disabled'}\`\n` +
                         `**Channel** — ${config?.channelId ? `<#${config.channelId}>` : '`Not set`'}\n` +
                         `**Role** — ${config?.roleId ? `<@&${config.roleId}>` : '`Not set`'}\n` +
                         `**Style** — \`${config?.style ?? 'text'}\`\n` +
@@ -194,7 +207,13 @@ export default {
             return;
         }
 
-        // ── Set ───────────────────────────────────────────────────────────────
+        // ── Normal Commands (set, view, remove, list) ─────────────────────────
+        const config = await getBirthdayConfig(guildId);
+        if (config?.systemEnabled === false) {
+            await interaction.reply({ content: `${e('error')} The birthday system is completely disabled in this server.`, flags: MessageFlags.Ephemeral });
+            return;
+        }
+
         if (sub === 'set') {
             const input    = interaction.options.getString('date', true);
             const timezone = interaction.options.getString('timezone') ?? 'UTC';
@@ -252,6 +271,13 @@ export default {
 
     async prefixExecute(message, args) {
         const guildId = message.guild!.id;
+        const config = await getBirthdayConfig(guildId);
+        
+        if (config?.systemEnabled === false) {
+            await message.reply(`${e('error')} The birthday system is completely disabled in this server.`);
+            return;
+        }
+
         const sub     = args[0]?.toLowerCase();
 
         if (sub === 'set') {

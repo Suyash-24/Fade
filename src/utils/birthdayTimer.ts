@@ -43,7 +43,7 @@ export function startBirthdayTimer(client: FadeClient): void {
 
             for (const [guildId, users] of byGuild) {
                 const config = await getBirthdayConfig(guildId);
-                if (!config?.channelId || config.enabled === false) continue;
+                if (!config?.channelId || config.enabled === false || config.systemEnabled === false) continue;
 
                 const guild = client.guilds.cache.get(guildId);
                 if (!guild) continue;

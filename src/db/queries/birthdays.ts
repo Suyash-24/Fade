@@ -18,6 +18,7 @@ export async function upsertBirthdayConfig(guildId: string, values: Partial<{
     message:   string | null;
     style:     string;
     enabled:   boolean;
+    systemEnabled: boolean;
 }>) {
     await ensureGuild(guildId);
     await db.insert(birthdayConfig)
