@@ -27,7 +27,7 @@ function buildCard(
     allStats: { messages: number, voiceSeconds: number },
     weeklyStats: { messages: number, voiceSeconds: number },
     todayStats: { messages: number, voiceSeconds: number },
-    guildName: string
+    botName: string
 ) {
     const isVoice = channel.type === ChannelType.GuildVoice || channel.type === ChannelType.GuildStageVoice;
     const lines = [
@@ -52,7 +52,7 @@ function buildCard(
         .separator(true)
         .text(lines.join('\n'))
         .separator(true)
-        .text(`-# ${e('server')} ${guildName}`);
+        .text(`-# ${e('server')} ${botName}`);
 
     return card.build();
 }
@@ -84,7 +84,7 @@ export default {
             getChannelActivity(guild.id, channel.id, 'today'),
         ]);
 
-        const card = buildCard(channel as any, allStats, wStats, tStats, guild.name);
+        const card = buildCard(channel as any, allStats, wStats, tStats, client.user!.username);
         await sendResponse(interaction, [card]);
     },
 
@@ -106,7 +106,7 @@ export default {
             getChannelActivity(guild.id, channel.id, 'today'),
         ]);
 
-        const card = buildCard(channel as any, allStats, wStats, tStats, guild.name);
+        const card = buildCard(channel as any, allStats, wStats, tStats, client.user!.username);
         await sendMessage(message, [card]);
     },
 } satisfies Command;
