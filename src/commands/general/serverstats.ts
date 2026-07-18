@@ -180,27 +180,17 @@ async function fetchStatsData(guild: any, client: any, timeframe: SSTimeframe): 
 export default {
     data: new SlashCommandBuilder()
         .setName('serverstats')
-        .setDescription('View a detailed analytics dashboard for this server')
-        .addStringOption(o => o
-            .setName('timeframe')
-            .setDescription('Time period to show stats for (default: 7 days)')
-            .setRequired(false)
-            .addChoices(
-                { name: '7 Days (default)', value: 'weekly' },
-                { name: '30 Days',          value: 'monthly' },
-                { name: 'All Time',         value: 'alltime' },
-            )
-        ),
+        .setDescription('View a detailed analytics dashboard for this server'),
 
     category: 'general',
+    prefixOnly: true,
     guildOnly: true,
     cooldown: 15,
 
     async execute(interaction, client) {
-        const timeframe = (interaction.options.getString('timeframe') ?? 'weekly') as SSTimeframe;
         await interaction.deferReply();
         await interaction.editReply({ embeds: [{ description: `${e('loading')} Building server analytics...`, color: 0x13141f }] });
-        const data = await fetchStatsData(interaction.guild!, client, timeframe);
+        const data = await fetchStatsData(interaction.guild!, client, 'weekly');
         const buffer = await buildServerStatsCard(data);
         const attachment = new AttachmentBuilder(buffer, { name: 'serverstats.png' });
         await interaction.editReply({ content: null, embeds: [], files: [attachment] });
