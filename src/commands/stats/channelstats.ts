@@ -30,27 +30,27 @@ function buildCard(
     guildName: string
 ) {
     const isVoice = channel.type === ChannelType.GuildVoice || channel.type === ChannelType.GuildStageVoice;
-    const emoji = isVoice ? e('voice') : e('channels');
+    const lines = [
+        `**All Time**`,
+        `${e('pinkarrow')} **Messages** — \`${allStats.messages.toLocaleString()}\``,
+        isVoice ? `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(allStats.voiceSeconds)}\`` : null,
+        `\u200b`,
+        `**This Week**`,
+        `${e('pinkarrow')} **Messages** — \`${weeklyStats.messages.toLocaleString()}\``,
+        isVoice ? `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(weeklyStats.voiceSeconds)}\`` : null,
+        `\u200b`,
+        `**Today**`,
+        `${e('pinkarrow')} **Messages** — \`${todayStats.messages.toLocaleString()}\``,
+        isVoice ? `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(todayStats.voiceSeconds)}\`` : null,
+    ].filter(Boolean) as string[];
 
     const card = new FadeContainer()
         .text([
-            `## ${emoji} Channel Stats`,
+            `## ${e('statistics')} Channel Stats`,
             `-# <#${channel.id}>`,
         ].join('\n'))
         .separator(true)
-        .text([
-            `**All Time**`,
-            `${e('pinkarrow')} **Messages** — \`${allStats.messages.toLocaleString()}\``,
-            `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(allStats.voiceSeconds)}\``,
-            `\u200b`,
-            `**This Week**`,
-            `${e('pinkarrow')} **Messages** — \`${weeklyStats.messages.toLocaleString()}\``,
-            `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(weeklyStats.voiceSeconds)}\``,
-            `\u200b`,
-            `**Today**`,
-            `${e('pinkarrow')} **Messages** — \`${todayStats.messages.toLocaleString()}\``,
-            `${e('pinkarrow')} **Voice Activity** — \`${formatDuration(todayStats.voiceSeconds)}\``,
-        ].join('\n'))
+        .text(lines.join('\n'))
         .separator(true)
         .text(`-# ${e('server')} ${guildName}`);
 
