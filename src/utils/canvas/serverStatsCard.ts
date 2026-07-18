@@ -263,7 +263,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
         card(ctx, cx, y, CW, STAT_H, 14, s.tint);
         ctx.beginPath(); ctx.arc(cx + 18, y + 22, 5, 0, Math.PI * 2);
         ctx.fillStyle = s.dot; ctx.fill();
-        ctx.fillStyle = '#475569'; ctx.font = `10px ${BOLD}`; ctx.fillText(s.label, cx + 30, y + 26);
+        ctx.fillStyle = '#94a3b8'; ctx.font = `10px ${BOLD}`; ctx.fillText(s.label, cx + 30, y + 26);
         ctx.fillStyle = s.nc; ctx.font = `40px ${BOLD}`; ctx.fillText(s.value, cx + 16, y + 72);
         ctx.fillStyle = s.sub.startsWith('↑') ? C.green : s.sub.startsWith('↓') ? C.red : C.muted;
         ctx.font = `11px ${REGULAR}`; ctx.fillText(s.sub, cx + 16, y + 90);
