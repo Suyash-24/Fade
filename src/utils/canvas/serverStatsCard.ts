@@ -202,7 +202,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
     // Dynamic height — no empty space at the bottom
     const STAT_H  = 98;
     const CHART_H = 210;
-    const CH_H    = 230;
+    const CH_H    = 246;
     const ROW_H   = 48;
     const LB_HEAD = 82;
     const LB_H    = LB_HEAD + Math.max(data.topMembers.length, 1) * ROW_H + 14;
@@ -404,8 +404,8 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
             }
         }
         const total = items.reduce((s, it) => s + it.count, 0);
-        ctx.fillStyle = '#2d3748'; ctx.font = `10px ${REGULAR}`;
-        ctx.fillText(`Total ${total.toLocaleString()} ${items[0]?.unit ?? ''} across all channels`, sx + 16, y + CH_H - 10);
+        ctx.fillStyle = '#64748b'; ctx.font = `11px ${REGULAR}`;
+        ctx.fillText(`Total ${total.toLocaleString()} ${items[0]?.unit ?? ''} across all channels`, sx + 16, y + CH_H - 14);
     };
 
     const tl = data.timeframeLabel.toLowerCase();
