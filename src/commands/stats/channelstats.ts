@@ -52,7 +52,7 @@ function buildCard(
         .separator(true)
         .text(lines.join('\n'))
         .separator(true)
-        .text(`-# ${e('server')} ${botName}`);
+        .text(`-# ${e('bot')} ${botName}`);
 
     return card.build();
 }
