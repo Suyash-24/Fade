@@ -47,7 +47,8 @@ const navGroups = [
       { id: 'economy', name: 'Economy' },
       { id: 'giveaways', name: 'Giveaways' },
       { id: 'bump-reminder', name: 'Bump Reminder' },
-      { id: 'counters', name: 'Counters' }
+      { id: 'counters', name: 'Counters' },
+      { id: 'stats', name: 'Activity Stats & Invites' }
     ]
   },
   {
@@ -554,6 +555,40 @@ const sectionsData = {
         <li><strong>Bots:</strong> Total bot count.</li>
         <li><strong>Online:</strong> Total members currently online.</li>
       </ul>
+    `
+  },
+  'stats': {
+    category: 'Engagement', title: 'Activity Stats & Invites',
+    lead: 'Track server activity, message counts, voice time, and invites with beautiful canvas cards.',
+    content: `
+      <h2>Overview</h2>
+      <p>Fade tracks user activity (messages sent, voice time) and invites securely. Generate beautiful data visualizations using prefix commands.</p>
+      <div class="docs-cmd-block">
+          <div class="cmd-row"><code>f!serverstats</code><span>Display a global dashboard of server activity</span></div>
+          <div class="cmd-row"><code>f!messages [user]</code><span>Check your message count</span></div>
+          <div class="cmd-row"><code>f!voicestats [user]</code><span>Check your voice chat time</span></div>
+          <div class="cmd-row"><code>f!channelstats</code><span>View activity metrics for the current channel</span></div>
+      </div>
+      
+      <h2>Leaderboards</h2>
+      <p>Compete with other members for the top spots in your server.</p>
+      <div class="docs-cmd-block">
+          <div class="cmd-row"><code>f!msglb</code><span>Message count leaderboard</span></div>
+          <div class="cmd-row"><code>f!vclb</code><span>Voice time leaderboard</span></div>
+          <div class="cmd-row"><code>f!invitelb</code><span>Top inviters leaderboard</span></div>
+      </div>
+
+      <h2>Invite Tracking</h2>
+      <p>Fade tracks who invites whom, along with fake and left accounts.</p>
+      <div class="docs-cmd-block">
+          <div class="cmd-row"><code>f!invites [user]</code><span>Check how many people you've invited</span></div>
+          <div class="cmd-row"><code>f!inviter [user]</code><span>Check who invited a specific user</span></div>
+          <div class="cmd-row"><code>f!invited [user]</code><span>List all users you have invited</span></div>
+      </div>
+      
+      <div class="docs-callout callout-info">
+          <strong>Tip:</strong> Server administrators can use <code>f!managestats</code> to blacklist specific channels (like staff chats or spam channels) from being tracked in activity stats.
+      </div>
     `
   },
   'utility': {
