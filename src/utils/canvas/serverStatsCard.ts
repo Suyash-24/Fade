@@ -174,8 +174,26 @@ export interface ServerStatsData {
 
 // ── Builder ────────────────────────────────────────────────────────────────────
 
+/**
+ * Normalizes fancy fonts (NFKC) and strips all non-latin/non-standard characters 
+ * (like emojis or obscure symbols) that would otherwise render as missing boxes.
+ */
+function cleanText(str: string): string {
+    if (!str) return '';
+    let cleaned = str.normalize('NFKC');
+    // Keep ASCII printables + Unicode Letters/Numbers/Marks. Strip everything else (emojis, symbols)
+    cleaned = cleaned.replace(/[^\x20-\x7E\p{L}\p{N}\p{M}]/gu, '').replace(/\uFE0F/g, '');
+    return cleaned.trim() || 'Unknown';
+}
+
 export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffer> {
     await loadFonts();
+
+    // Clean text to avoid "tofu" boxes
+    data.guildName = cleanText(data.guildName);
+    data.topTextChannels.forEach(c => c.name = cleanText(c.name));
+    data.topVoiceChannels.forEach(c => c.name = cleanText(c.name));
+    data.topMembers.forEach(m => m.username = cleanText(m.username));
 
     const W   = 900;
     const PAD = 28;
