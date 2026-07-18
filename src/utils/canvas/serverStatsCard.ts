@@ -1,27 +1,84 @@
 // src/utils/canvas/serverStatsCard.ts — Premium Dark Dashboard
 import { createCanvas, loadImage, GlobalFonts } from '@napi-rs/canvas';
+import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
+import { join } from 'path';
 
+const FONT_CACHE = join(process.cwd(), '.font-cache');
 let fontLoaded = false;
-async function loadFonts() {
-    if (fontLoaded) return;
-    const reg = async (url: string, name: string) => {
-        try { const r = await fetch(url); if (r.ok) GlobalFonts.register(Buffer.from(await r.arrayBuffer()), name); } catch {}
-    };
-    await Promise.all([
-        reg('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Bold.ttf', 'RobotoBold'),
-        reg('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Regular.ttf', 'Roboto'),
-        reg('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf', 'NotoSans'),
-        reg('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSansThai/NotoSansThai-Regular.ttf', 'NotoSansThai'),
-        reg('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSansArabic/NotoSansArabic-Regular.ttf', 'NotoSansArabic'),
-        reg('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSansDevanagari/NotoSansDevanagari-Regular.ttf', 'NotoSansDevanagari'),
-        reg('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSansJP/NotoSansJP-Regular.ttf', 'NotoSansJP'),
-        reg('https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf', 'NotoColorEmoji'),
-    ]);
-    fontLoaded = true;
+
+/** Fetch a URL to a Buffer with a timeout, returns null on any failure. */
+async function fetchBuf(url: string, timeoutMs = 20_000): Promise<Buffer | null> {
+    try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), timeoutMs);
+        const r = await fetch(url, { signal: ctrl.signal });
+        clearTimeout(t);
+        return r.ok ? Buffer.from(await r.arrayBuffer()) : null;
+    } catch { return null; }
 }
 
-const BOLD    = '"RobotoBold", "NotoSans", "NotoSansThai", "NotoSansJP", "NotoSansArabic", "NotoSansDevanagari", "NotoColorEmoji", sans-serif';
-const REGULAR = '"Roboto", "NotoSans", "NotoSansThai", "NotoSansJP", "NotoSansArabic", "NotoSansDevanagari", "NotoColorEmoji", sans-serif';
+/**
+ * Use the Google Fonts CSS v1 API with an old IE user-agent.
+ * Google Fonts returns TTF format for old UAs — reliable and always up-to-date.
+ */
+async function fetchGoogleFontTTF(family: string): Promise<Buffer | null> {
+    try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 12_000);
+        const css = await fetch(
+            `https://fonts.googleapis.com/css?family=${encodeURIComponent(family)}:400`,
+            { headers: { 'User-Agent': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)' }, signal: ctrl.signal }
+        ).then(r => { clearTimeout(t); return r.ok ? r.text() : ''; });
+        // Extract the TTF url from the CSS
+        const m = css.match(/url\(([^)]+\.ttf[^)]*)\)/i);
+        if (!m?.[1]) return null;
+        return fetchBuf(m[1]);
+    } catch { return null; }
+}
+
+/** Load a font: read from disk cache if available, otherwise fetch and cache it. */
+async function regFont(name: string, file: string, fetchFn: () => Promise<Buffer | null>) {
+    try { mkdirSync(FONT_CACHE, { recursive: true }); } catch {}
+    const cachePath = join(FONT_CACHE, file);
+    let buf: Buffer | null = null;
+    if (existsSync(cachePath)) {
+        buf = readFileSync(cachePath);
+    } else {
+        buf = await fetchFn();
+        if (buf) try { writeFileSync(cachePath, buf); } catch {}
+    }
+    if (buf) {
+        GlobalFonts.register(buf, name);
+    } else {
+        console.warn(`[Canvas] Could not load font: ${name}`);
+    }
+}
+
+async function loadFonts() {
+    if (fontLoaded) return;
+    fontLoaded = true;
+    await Promise.all([
+        // Latin — directly from GitHub (reliable, small files)
+        regFont('RobotoBold', 'RobotoBold.ttf',
+            () => fetchBuf('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Bold.ttf')),
+        regFont('Roboto',     'Roboto.ttf',
+            () => fetchBuf('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Regular.ttf')),
+        regFont('NotoSans',   'NotoSans.ttf',
+            () => fetchBuf('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf')),
+        // Script fonts — fetched via Google Fonts CSS API (always returns correct TTF URL)
+        regFont('NotoSansThai',       'NotoSansThai.ttf',       () => fetchGoogleFontTTF('Noto Sans Thai')),
+        regFont('NotoSansJP',         'NotoSansJP.ttf',         () => fetchGoogleFontTTF('Noto Sans JP')),
+        regFont('NotoSansArabic',     'NotoSansArabic.ttf',     () => fetchGoogleFontTTF('Noto Sans Arabic')),
+        regFont('NotoSansDevanagari', 'NotoSansDevanagari.ttf', () => fetchGoogleFontTTF('Noto Sans Devanagari')),
+        regFont('NotoSansKhmer',      'NotoSansKhmer.ttf',      () => fetchGoogleFontTTF('Noto Sans Khmer')),
+        regFont('NotoColorEmoji',     'NotoColorEmoji.ttf',
+            () => fetchBuf('https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf', 60_000)),
+    ]);
+}
+
+
+const BOLD    = '"RobotoBold", "NotoSans", "NotoSansThai", "NotoSansJP", "NotoSansArabic", "NotoSansDevanagari", "NotoSansKhmer", "NotoColorEmoji", sans-serif';
+const REGULAR = '"Roboto", "NotoSans", "NotoSansThai", "NotoSansJP", "NotoSansArabic", "NotoSansDevanagari", "NotoSansKhmer", "NotoColorEmoji", sans-serif';
 
 const C = {
     bg:        '#0b0c18',
