@@ -94,9 +94,9 @@ export default {
                 const amount = interaction.options.getInteger('amount', true);
                 await addUserMessages(guild.id, user.id, amount);
                 const total = await getUserMessages(guild.id, user.id, 'alltime');
-                const card = new FadeContainer(Colours.SUCCESS)
+                const card = new FadeContainer()
                     .text(
-                        `## ${e('success')} Messages Added\n` +
+                        `## ${e('statistics')} Messages Added\n` +
                         `${e('pinkarrow')} **User** — ${user}\n` +
                         `${e('pinkarrow')} **Added** — \`${amount.toLocaleString()}\` messages\n` +
                         `${e('pinkarrow')} **New Total** — \`${total.toLocaleString()}\` messages`
@@ -110,9 +110,9 @@ export default {
                 const amount = interaction.options.getInteger('amount', true);
                 await removeUserMessages(guild.id, user.id, amount);
                 const total = await getUserMessages(guild.id, user.id, 'alltime');
-                const card = new FadeContainer(Colours.DANGER)
+                const card = new FadeContainer()
                     .text(
-                        `## ${e('success')} Messages Removed\n` +
+                        `## ${e('statistics')} Messages Removed\n` +
                         `${e('pinkarrow')} **User** — ${user}\n` +
                         `${e('pinkarrow')} **Removed** — \`${amount.toLocaleString()}\` messages\n` +
                         `${e('pinkarrow')} **New Total** — \`${total.toLocaleString()}\` messages`
@@ -133,9 +133,9 @@ export default {
                 const seconds = Math.floor(ms / 1000);
                 await addUserVoiceSeconds(guild.id, user.id, seconds);
                 const total = await getUserVoiceSeconds(guild.id, user.id, 'alltime');
-                const card = new FadeContainer(Colours.SUCCESS)
+                const card = new FadeContainer()
                     .text(
-                        `## ${e('success')} Voice Time Added\n` +
+                        `## ${e('statistics')} Voice Time Added\n` +
                         `${e('pinkarrow')} **User** — ${user}\n` +
                         `${e('pinkarrow')} **Added** — \`${formatDuration(seconds)}\`\n` +
                         `${e('pinkarrow')} **New Total** — \`${formatDuration(total)}\``
@@ -156,9 +156,9 @@ export default {
                 const seconds = Math.floor(ms / 1000);
                 await removeUserVoiceSeconds(guild.id, user.id, seconds);
                 const total = await getUserVoiceSeconds(guild.id, user.id, 'alltime');
-                const card = new FadeContainer(Colours.DANGER)
+                const card = new FadeContainer()
                     .text(
-                        `## ${e('success')} Voice Time Removed\n` +
+                        `## ${e('statistics')} Voice Time Removed\n` +
                         `${e('pinkarrow')} **User** — ${user}\n` +
                         `${e('pinkarrow')} **Removed** — \`${formatDuration(seconds)}\`\n` +
                         `${e('pinkarrow')} **New Total** — \`${formatDuration(total)}\``
@@ -171,9 +171,9 @@ export default {
                 const user = interaction.options.getUser('user');
                 await resetUserMessages(guild.id, user?.id);
                 const target = user ? `${user}` : 'the entire server';
-                const card = new FadeContainer(Colours.WARNING)
+                const card = new FadeContainer()
                     .text(
-                        `## ${e('refresh')} Messages Reset\n` +
+                        `## ${e('statistics')} Messages Reset\n` +
                         `${e('pinkarrow')} **Target** — ${target}\n` +
                         `${e('pinkarrow')} All message counts have been set to \`0\``
                     ).build();
@@ -185,9 +185,9 @@ export default {
                 const user = interaction.options.getUser('user');
                 await resetUserVoice(guild.id, user?.id);
                 const target = user ? `${user}` : 'the entire server';
-                const card = new FadeContainer(Colours.WARNING)
+                const card = new FadeContainer()
                     .text(
-                        `## ${e('refresh')} Voice Stats Reset\n` +
+                        `## ${e('statistics')} Voice Stats Reset\n` +
                         `${e('pinkarrow')} **Target** — ${target}\n` +
                         `${e('pinkarrow')} All voice time has been set to \`0\``
                     ).build();
@@ -208,8 +208,8 @@ export default {
                 // Refresh memory cache
                 await StatsTracker.refreshBlacklist(guild.id);
                 
-                const card = new FadeContainer(Colours.SUCCESS)
-                    .text(`${e('success')} Channel <#${channel.id}> has been ${remove ? 'removed from' : 'added to'} the stats blacklist.`)
+                const card = new FadeContainer()
+                    .text(`${e('statistics')} Channel <#${channel.id}> has been ${remove ? 'removed from' : 'added to'} the stats blacklist.`)
                     .build();
                 await sendResponse(interaction, [card]);
                 break;
@@ -234,8 +234,8 @@ export default {
                 // Refresh memory cache
                 await StatsTracker.refreshBlacklist(guild.id);
                 
-                const card = new FadeContainer(Colours.SUCCESS)
-                    .text(`${e('success')} Category **${category.name}** has been ${remove ? 'removed from' : 'added to'} the stats blacklist.`)
+                const card = new FadeContainer()
+                    .text(`${e('statistics')} Category **${category.name}** has been ${remove ? 'removed from' : 'added to'} the stats blacklist.`)
                     .build();
                 await sendResponse(interaction, [card]);
                 break;
@@ -244,8 +244,8 @@ export default {
     },
 
     async prefixExecute(message, args, client) {
-        const card = new FadeContainer(Colours.FADE)
-            .text(`${e('settings')} Please use the slash command \`/managestats\` for admin stats management.`)
+        const card = new FadeContainer()
+            .text(`${e('statistics')} Please use the slash command \`/managestats\` for admin stats management.`)
             .build();
         await sendMessage(message, [card]);
     },

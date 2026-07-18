@@ -11,10 +11,10 @@ function buildInvitedCard(
     guildName: string,
     guildMembers: any
 ) {
-    const card = new FadeContainer(Colours.FADE)
+    const card = new FadeContainer()
         .section(
             [
-                `## ${e('invite')} Invited Users`,
+                `## ${e('statistics')} Invited Users`,
                 `-# ${user.username} (Recent 20)`,
             ],
             thumb(user.displayAvatarURL({ size: 128 })),

@@ -11,10 +11,10 @@ function buildInviterCard(
     guildName: string,
     guildMembers: any // To resolve inviter name
 ) {
-    const card = new FadeContainer(Colours.FADE)
+    const card = new FadeContainer()
         .section(
             [
-                `## ${e('invite')} Inviter Info`,
+                `## ${e('statistics')} Inviter Info`,
                 `-# ${user.username}`,
             ],
             thumb(user.displayAvatarURL({ size: 128 })),

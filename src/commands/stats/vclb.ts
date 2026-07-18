@@ -49,20 +49,19 @@ export async function buildVoiceLeaderboard(
         return `${medal}  ${name} · **${formatDuration(row.total)}**`;
     });
 
-    const card = new FadeContainer(null);
+    const card = new FadeContainer();
 
-    if (iconURL) {
-        card.section(
-            [`## ${e('voice')} Voice Leaderboard`, `-# ${guildName} · ${label} · Page ${page + 1}`],
-            thumb(iconURL),
-        );
-    } else {
-        card.text(`## ${e('voice')} Voice Leaderboard`);
-        card.text(`-# ${guildName} · ${label} · Page ${page + 1}`);
-    }
+    card.text([
+        `## ${e('statistics')} Voice Leaderboard`,
+        `-# ${guildName} · ${label} · Page ${page + 1}`
+    ].join('\n'));
 
     card.separator(true);
-    card.text(lines.join('\n'));
+    if (iconURL) {
+        card.section([lines.join('\n')], thumb(iconURL));
+    } else {
+        card.text(lines.join('\n'));
+    }
 
     if (hasPrev || hasNext) {
         card.actionRow(

@@ -32,20 +32,19 @@ export async function buildInviteLeaderboard(
         return `${medal}  ${name} · **${row.total}** invites`;
     });
 
-    const card = new FadeContainer(null);
+    const card = new FadeContainer();
 
-    if (iconURL) {
-        card.section(
-            [`## ${e('invite')} Invite Leaderboard`, `-# ${guildName} · Page ${page + 1}`],
-            thumb(iconURL),
-        );
-    } else {
-        card.text(`## ${e('invite')} Invite Leaderboard`);
-        card.text(`-# ${guildName} · Page ${page + 1}`);
-    }
+    card.text([
+        `## ${e('statistics')} Invite Leaderboard`,
+        `-# ${guildName} · Page ${page + 1}`
+    ].join('\n'));
 
     card.separator(true);
-    card.text(lines.join('\n'));
+    if (iconURL) {
+        card.section([lines.join('\n')], thumb(iconURL));
+    } else {
+        card.text(lines.join('\n'));
+    }
 
     if (hasPrev || hasNext) {
         card.actionRow(

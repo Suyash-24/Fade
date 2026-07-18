@@ -14,10 +14,10 @@ function buildInvitesCard(
 ) {
     const total = getTotalInvites(stats);
 
-    return new FadeContainer(Colours.FADE)
+    return new FadeContainer()
         .section(
             [
-                `## ${e('invite')} Invite Stats`,
+                `## ${e('statistics')} Invite Stats`,
                 `-# ${user.username}`,
             ],
             thumb(user.displayAvatarURL({ size: 128 })),

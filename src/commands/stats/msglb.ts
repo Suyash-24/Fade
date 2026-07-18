@@ -41,20 +41,19 @@ export async function buildMsgLeaderboard(
         return `${medal}  ${name} · **${row.total.toLocaleString()}** msgs`;
     });
 
-    const card = new FadeContainer(null);
+    const card = new FadeContainer();
 
-    if (iconURL) {
-        card.section(
-            [`## ${e('stats')} Message Leaderboard`, `-# ${guildName} · ${label} · Page ${page + 1}`],
-            thumb(iconURL),
-        );
-    } else {
-        card.text(`## ${e('stats')} Message Leaderboard`);
-        card.text(`-# ${guildName} · ${label} · Page ${page + 1}`);
-    }
+    card.text([
+        `## ${e('statistics')} Message Leaderboard`,
+        `-# ${guildName} · ${label} · Page ${page + 1}`
+    ].join('\n'));
 
     card.separator(true);
-    card.text(lines.join('\n'));
+    if (iconURL) {
+        card.section([lines.join('\n')], thumb(iconURL));
+    } else {
+        card.text(lines.join('\n'));
+    }
 
     if (hasPrev || hasNext) {
         card.actionRow(
