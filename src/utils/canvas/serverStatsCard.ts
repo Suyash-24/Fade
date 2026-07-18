@@ -11,12 +11,17 @@ async function loadFonts() {
         reg('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Bold.ttf', 'RobotoBold'),
         reg('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Regular.ttf', 'Roboto'),
         reg('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf', 'NotoSans'),
+        reg('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSansThai/NotoSansThai-Regular.ttf', 'NotoSansThai'),
+        reg('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSansArabic/NotoSansArabic-Regular.ttf', 'NotoSansArabic'),
+        reg('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSansDevanagari/NotoSansDevanagari-Regular.ttf', 'NotoSansDevanagari'),
+        reg('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSansJP/NotoSansJP-Regular.ttf', 'NotoSansJP'),
+        reg('https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf', 'NotoColorEmoji'),
     ]);
     fontLoaded = true;
 }
 
-const BOLD    = '"RobotoBold", "NotoSans", sans-serif';
-const REGULAR = '"Roboto", "NotoSans", sans-serif';
+const BOLD    = '"RobotoBold", "NotoSans", "NotoSansThai", "NotoSansJP", "NotoSansArabic", "NotoSansDevanagari", "NotoColorEmoji", sans-serif';
+const REGULAR = '"Roboto", "NotoSans", "NotoSansThai", "NotoSansJP", "NotoSansArabic", "NotoSansDevanagari", "NotoColorEmoji", sans-serif';
 
 const C = {
     bg:        '#0b0c18',
