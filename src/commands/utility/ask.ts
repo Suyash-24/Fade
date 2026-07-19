@@ -1,0 +1,93 @@
+// src/commands/utility/ask.ts
+import { SlashCommandBuilder } from 'discord.js';
+import type { Command } from '../../types/command.js';
+import { FadeContainer, sendResponse, sendMessage } from '../../components/builders.js';
+import { e, Colours } from '../../components/emojis.js';
+
+export default {
+    data: new SlashCommandBuilder()
+        .setName('ask')
+        .setDescription('Ask the AI a question')
+        .addStringOption(o => o
+            .setName('prompt')
+            .setDescription('What do you want to ask?')
+            .setRequired(true)
+        ),
+
+    category: 'utility',
+    cooldown: 5,
+
+    async execute(interaction) {
+        const prompt = interaction.options.getString('prompt', true);
+        await interaction.deferReply();
+
+        try {
+            const res = await fetch('https://text.pollinations.ai/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: [{ role: 'user', content: prompt }],
+                }),
+            });
+
+            if (!res.ok) throw new Error('API Error');
+            const answer = await res.text();
+
+            const card = new FadeContainer()
+                .text(`**Q:** ${prompt}\n\n${answer}`)
+                .build();
+
+            await sendResponse(interaction as any, [card]);
+        } catch (error) {
+            const errCard = new FadeContainer(Colours.DANGER)
+                .text(`${e('error')} Failed to get a response from the AI. Try again later!`)
+                .build();
+            await sendResponse(interaction as any, [errCard], true);
+        }
+    },
+
+    async prefixExecute(message, args) {
+        if (!args.length) {
+            const card = new FadeContainer(Colours.DANGER)
+                .text(`${e('error')} You need to provide a question! Example: \`!ask What is the capital of France?\``)
+                .build();
+            await sendMessage(message, [card]);
+            return;
+        }
+
+        const prompt = args.join(' ');
+        
+        // Show typing indicator since AI generation takes a few seconds
+        await message.channel.sendTyping();
+
+        try {
+            const res = await fetch('https://text.pollinations.ai/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: [{ role: 'user', content: prompt }],
+                }),
+            });
+
+            if (!res.ok) throw new Error('API Error');
+            let answer = await res.text();
+            
+            // Discord limits messages to 4096 characters in embeds (or 2000 in regular text). 
+            // We truncate if it's too long.
+            if (answer.length > 3900) {
+                answer = answer.slice(0, 3900) + '... (Response truncated)';
+            }
+
+            const card = new FadeContainer()
+                .text(`**Q:** ${prompt}\n\n${answer}`)
+                .build();
+
+            await sendMessage(message, [card]);
+        } catch (error) {
+            const errCard = new FadeContainer(Colours.DANGER)
+                .text(`${e('error')} Failed to get a response from the AI. Try again later!`)
+                .build();
+            await sendMessage(message, [errCard]);
+        }
+    }
+} as Command;
