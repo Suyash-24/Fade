@@ -46,6 +46,17 @@ const event: Event<'clientReady'> = {
         initializeVoiceSessions(client);
         cacheAllInvites(client);
 
+        // Initialize active voice sessions for stats tracker (fixes missing time on bot restart)
+        import('../utils/statsTracker.js').then(({ StatsTracker }) => {
+            for (const guild of client.guilds.cache.values()) {
+                for (const voiceState of guild.voiceStates.cache.values()) {
+                    if (voiceState.channelId && !voiceState.member?.user.bot) {
+                        StatsTracker.voiceJoin(guild.id, voiceState.id, voiceState.channelId, voiceState.channel?.parentId ?? null);
+                    }
+                }
+            }
+        });
+
         // Resume 24/7 Voice connections
         // Status Rotation
         let toggle = false;

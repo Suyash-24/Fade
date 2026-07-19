@@ -137,6 +137,36 @@ class StatsTrackerImpl {
     }
 
     private async flush() {
+        const now = Date.now();
+        const date = this.getDateStr();
+
+        // 1. Credit active voice sessions so far
+        for (const [userId, session] of this.activeVoiceSessions.entries()) {
+            const durationSeconds = Math.floor((now - session.joinTime) / 1000);
+            if (durationSeconds >= 1) {
+                // Guild
+                const gKey = `${session.guildId}:${date}`;
+                const gDelta = this.guildQueue.get(gKey) ?? { messages: 0, voiceSeconds: 0, joins: 0, leaves: 0 };
+                gDelta.voiceSeconds += durationSeconds;
+                this.guildQueue.set(gKey, gDelta);
+
+                // Member
+                const mKey = `${session.guildId}:${userId}:${date}`;
+                const mDelta = this.memberQueue.get(mKey) ?? { messages: 0, voiceSeconds: 0 };
+                mDelta.voiceSeconds += durationSeconds;
+                this.memberQueue.set(mKey, mDelta);
+
+                // Channel
+                const cKey = `${session.guildId}:${session.channelId}:${date}`;
+                const cDelta = this.channelQueue.get(cKey) ?? { messages: 0, voiceSeconds: 0 };
+                cDelta.voiceSeconds += durationSeconds;
+                this.channelQueue.set(cKey, cDelta);
+
+                // Reset joinTime to now to avoid double counting
+                session.joinTime = now;
+            }
+        }
+
         const gKeys = Array.from(this.guildQueue.keys());
         const mKeys = Array.from(this.memberQueue.keys());
         const cKeys = Array.from(this.channelQueue.keys());
