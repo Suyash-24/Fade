@@ -1,0 +1,135 @@
+// src/commands/fun/action.ts
+import { SlashCommandBuilder, MessageFlags, EmbedBuilder } from 'discord.js';
+import type { Command } from '../../types/command.js';
+import { e, Colours } from '../../components/emojis.js';
+
+// The actions we support
+const ACTIONS = ['hug', 'kiss', 'pat', 'slap', 'bite', 'cuddle'] as const;
+type ActionType = typeof ACTIONS[number];
+
+// Config for each action (messages and colors)
+const ACTION_CONFIG: Record<ActionType, { text: string; color: number }> = {
+    hug:    { text: 'hugs', color: 0xffb6c1 }, // Light pink
+    kiss:   { text: 'kisses', color: 0xff69b4 }, // Hot pink
+    pat:    { text: 'pats', color: 0x87cefa }, // Light sky blue
+    slap:   { text: 'slaps', color: 0xff4500 }, // Orange red
+    bite:   { text: 'bites', color: 0xdc143c }, // Crimson
+    cuddle: { text: 'cuddles with', color: 0xffd700 }, // Gold
+};
+
+// Fetch GIF from waifu.pics API
+async function fetchGif(action: ActionType): Promise<string | null> {
+    try {
+        const res = await fetch(`https://api.waifu.pics/sfw/${action}`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data.url;
+    } catch {
+        return null;
+    }
+}
+
+export default {
+    // Slash command is grouped under /action <type> <user>
+    data: new SlashCommandBuilder()
+        .setName('action')
+        .setDescription('Roleplay actions (hug, kiss, pat, etc)')
+        .addStringOption(o => o
+            .setName('type')
+            .setDescription('The action to perform')
+            .setRequired(true)
+            .addChoices(...ACTIONS.map(a => ({ name: a, value: a })))
+        )
+        .addUserOption(o => o
+            .setName('user')
+            .setDescription('The user to target')
+            .setRequired(true)
+        ),
+
+    category:  'fun',
+    guildOnly: true,
+    cooldown:  3,
+
+    // Prefix aliases so users can type `!hug @user` directly instead of `!action hug @user`
+    aliases: [...ACTIONS],
+
+    async execute(interaction) {
+        const action = interaction.options.getString('type', true) as ActionType;
+        const target = interaction.options.getUser('user', true);
+        const author = interaction.user;
+
+        if (target.id === author.id) {
+            await interaction.reply({ content: `${e('error')} You can't ${action} yourself!`, flags: MessageFlags.Ephemeral });
+            return;
+        }
+
+        if (target.id === interaction.client.user?.id) {
+            await interaction.reply({ content: `${e('error')} I'm a bot! I don't feel physical touch!`, flags: MessageFlags.Ephemeral });
+            return;
+        }
+
+        await interaction.deferReply();
+
+        const url = await fetchGif(action);
+        if (!url) {
+            await interaction.editReply(`${e('error')} Failed to fetch a GIF right now. Try again later!`);
+            return;
+        }
+
+        const config = ACTION_CONFIG[action];
+        const embed = new EmbedBuilder()
+            .setColor(config.color)
+            .setDescription(`**${author.username}** ${config.text} **${target.username}**!`)
+            .setImage(url);
+
+        await interaction.editReply({ embeds: [embed] });
+    },
+
+    async prefixExecute(message, args) {
+        // Figure out the action based on the command used
+        let action: ActionType | null = null;
+        
+        const words = message.content.toLowerCase().split(/\W+/);
+        for (const word of words) {
+            if (ACTIONS.includes(word as ActionType)) {
+                action = word as ActionType;
+                break;
+            }
+        }
+
+        if (!action) {
+            await message.reply(`${e('error')} Invalid action.`);
+            return;
+        }
+
+        const target = message.mentions.users.first();
+        if (!target) {
+            await message.reply(`${e('error')} You need to mention someone to ${action}!`);
+            return;
+        }
+
+        if (target.id === message.author.id) {
+            await message.reply(`${e('error')} You can't ${action} yourself!`);
+            return;
+        }
+
+        if (target.id === message.client.user?.id) {
+            await message.reply(`${e('error')} I'm a bot! I don't feel physical touch!`);
+            return;
+        }
+
+        const url = await fetchGif(action);
+        if (!url) {
+            await message.reply(`${e('error')} Failed to fetch a GIF right now. Try again later!`);
+            return;
+        }
+
+        const config = ACTION_CONFIG[action];
+        const embed = new EmbedBuilder()
+            .setColor(config.color)
+            .setDescription(`**${message.author.username}** ${config.text} **${target.username}**!`)
+            .setImage(url);
+
+        await message.reply({ embeds: [embed] });
+    }
+} as Command;
