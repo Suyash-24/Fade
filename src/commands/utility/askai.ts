@@ -6,7 +6,7 @@ import { e, Colours } from '../../components/emojis.js';
 
 export default {
     data: new SlashCommandBuilder()
-        .setName('ask')
+        .setName('askai')
         .setDescription('Ask the AI a question')
         .addStringOption(o => o
             .setName('prompt')
@@ -49,7 +49,7 @@ export default {
     async prefixExecute(message, args) {
         if (!args.length) {
             const card = new FadeContainer(Colours.DANGER)
-                .text(`${e('error')} You need to provide a question! Example: \`!ask What is the capital of France?\``)
+                .text(`${e('error')} You need to provide a question! Example: \`!askai What is the capital of France?\``)
                 .build();
             await sendMessage(message, [card]);
             return;
@@ -58,7 +58,9 @@ export default {
         const prompt = args.join(' ');
         
         // Show typing indicator since AI generation takes a few seconds
-        await message.channel.sendTyping();
+        if ('sendTyping' in message.channel) {
+            await message.channel.sendTyping().catch(() => null);
+        }
 
         try {
             const res = await fetch('https://text.pollinations.ai/', {
