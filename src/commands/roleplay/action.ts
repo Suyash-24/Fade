@@ -1,5 +1,6 @@
 // src/commands/fun/action.ts
-import { SlashCommandBuilder, MessageFlags, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder, MessageFlags } from 'discord.js';
+import { FadeContainer, sendResponse, sendMessage } from '../../components/builders.js';
 import type { Command } from '../../types/command.js';
 import { e, Colours } from '../../components/emojis.js';
 
@@ -117,12 +118,12 @@ export default {
         }
 
         const config = ACTION_CONFIG[action];
-        const embed = new EmbedBuilder()
-            .setColor(config.color)
-            .setDescription(`**${author.username}** ${config.text} **${target.username}**!`)
-            .setImage(url);
+        const card = new FadeContainer(config.color)
+            .text(`**${author.username}** ${config.text} **${target.username}**!`)
+            .gallery([{ url }])
+            .build();
 
-        await interaction.editReply({ embeds: [embed] });
+        await interaction.editReply({ components: [card] });
     },
 
     async prefixExecute(message, args) {
@@ -165,11 +166,11 @@ export default {
         }
 
         const config = ACTION_CONFIG[action];
-        const embed = new EmbedBuilder()
-            .setColor(config.color)
-            .setDescription(`**${message.author.username}** ${config.text} **${target.username}**!`)
-            .setImage(url);
+        const card = new FadeContainer(config.color)
+            .text(`**${message.author.username}** ${config.text} **${target.username}**!`)
+            .gallery([{ url }])
+            .build();
 
-        await message.reply({ embeds: [embed] });
+        await message.reply({ components: [card] });
     }
 } as Command;
