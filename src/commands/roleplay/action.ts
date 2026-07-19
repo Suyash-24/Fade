@@ -26,16 +26,47 @@ const ACTION_CONFIG: Record<ActionType, { text: string; color: number }> = {
     poke:     { text: 'pokes', color: 0x00ced1 }, // Dark turquoise
 };
 
-// Fetch GIF from waifu.pics API
+// Fetch GIF using multiple fallback APIs to ensure it never fails
 async function fetchGif(action: ActionType): Promise<string | null> {
+    const headers = { 'User-Agent': 'FadeDiscordBot/1.0' };
+    
+    // 1. Try nekos.best
     try {
-        const res = await fetch(`https://api.waifu.pics/sfw/${action}`);
-        if (!res.ok) return null;
-        const data = await res.json();
-        return data.url;
-    } catch {
-        return null;
-    }
+        const res = await fetch(`https://nekos.best/api/v2/${action}`, { headers });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.results?.[0]?.url) return data.results[0].url;
+        }
+    } catch {}
+
+    // 2. Try otakugifs
+    try {
+        const res = await fetch(`https://api.otakugifs.xyz/gif?reaction=${action}`, { headers });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.url) return data.url;
+        }
+    } catch {}
+
+    // 3. Try nekos.life
+    try {
+        const res = await fetch(`https://nekos.life/api/v2/img/${action}`, { headers });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.url) return data.url;
+        }
+    } catch {}
+    
+    // 4. Try waifu.pics
+    try {
+        const res = await fetch(`https://api.waifu.pics/sfw/${action}`, { headers });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.url) return data.url;
+        }
+    } catch {}
+
+    return null;
 }
 
 export default {
@@ -55,7 +86,7 @@ export default {
             .setRequired(true)
         ),
 
-    category:  'fun',
+    category:  'roleplay',
     guildOnly: true,
     cooldown:  3,
 
