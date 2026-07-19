@@ -4,17 +4,26 @@ import type { Command } from '../../types/command.js';
 import { e, Colours } from '../../components/emojis.js';
 
 // The actions we support
-const ACTIONS = ['hug', 'kiss', 'pat', 'slap', 'bite', 'cuddle'] as const;
+const ACTIONS = ['hug', 'kiss', 'pat', 'slap', 'bite', 'cuddle', 'bully', 'lick', 'yeet', 'highfive', 'handhold', 'nom', 'kill', 'kick', 'poke'] as const;
 type ActionType = typeof ACTIONS[number];
 
 // Config for each action (messages and colors)
 const ACTION_CONFIG: Record<ActionType, { text: string; color: number }> = {
-    hug:    { text: 'hugs', color: 0xffb6c1 }, // Light pink
-    kiss:   { text: 'kisses', color: 0xff69b4 }, // Hot pink
-    pat:    { text: 'pats', color: 0x87cefa }, // Light sky blue
-    slap:   { text: 'slaps', color: 0xff4500 }, // Orange red
-    bite:   { text: 'bites', color: 0xdc143c }, // Crimson
-    cuddle: { text: 'cuddles with', color: 0xffd700 }, // Gold
+    hug:      { text: 'hugs', color: 0xffb6c1 }, // Light pink
+    kiss:     { text: 'kisses', color: 0xff69b4 }, // Hot pink
+    pat:      { text: 'pats', color: 0x87cefa }, // Light sky blue
+    slap:     { text: 'slaps', color: 0xff4500 }, // Orange red
+    bite:     { text: 'bites', color: 0xdc143c }, // Crimson
+    cuddle:   { text: 'cuddles with', color: 0xffd700 }, // Gold
+    bully:    { text: 'bullies', color: 0x800080 }, // Purple
+    lick:     { text: 'licks', color: 0xffa07a }, // Light salmon
+    yeet:     { text: 'yeets', color: 0x00fa9a }, // Medium spring green
+    highfive: { text: 'high-fives', color: 0x00bfff }, // Deep sky blue
+    handhold: { text: 'holds hands with', color: 0xffa500 }, // Orange
+    nom:      { text: 'noms on', color: 0xff6347 }, // Tomato
+    kill:     { text: 'kills', color: 0x000000 }, // Black
+    kick:     { text: 'kicks', color: 0x8b0000 }, // Dark red
+    poke:     { text: 'pokes', color: 0x00ced1 }, // Dark turquoise
 };
 
 // Fetch GIF from waifu.pics API
