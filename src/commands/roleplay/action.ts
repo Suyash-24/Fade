@@ -8,23 +8,23 @@ import { e, Colours } from '../../components/emojis.js';
 const ACTIONS = ['hug', 'kiss', 'pat', 'slap', 'bite', 'cuddle', 'bully', 'lick', 'yeet', 'highfive', 'handhold', 'nom', 'kill', 'kick', 'poke'] as const;
 type ActionType = typeof ACTIONS[number];
 
-// Config for each action (messages and colors)
-const ACTION_CONFIG: Record<ActionType, { text: string; color: number }> = {
-    hug:      { text: 'hugs', color: 0xffb6c1 }, // Light pink
-    kiss:     { text: 'kisses', color: 0xff69b4 }, // Hot pink
-    pat:      { text: 'pats', color: 0x87cefa }, // Light sky blue
-    slap:     { text: 'slaps', color: 0xff4500 }, // Orange red
-    bite:     { text: 'bites', color: 0xdc143c }, // Crimson
-    cuddle:   { text: 'cuddles with', color: 0xffd700 }, // Gold
-    bully:    { text: 'bullies', color: 0x800080 }, // Purple
-    lick:     { text: 'licks', color: 0xffa07a }, // Light salmon
-    yeet:     { text: 'yeets', color: 0x00fa9a }, // Medium spring green
-    highfive: { text: 'high-fives', color: 0x00bfff }, // Deep sky blue
-    handhold: { text: 'holds hands with', color: 0xffa500 }, // Orange
-    nom:      { text: 'noms on', color: 0xff6347 }, // Tomato
-    kill:     { text: 'kills', color: 0x000000 }, // Black
-    kick:     { text: 'kicks', color: 0x8b0000 }, // Dark red
-    poke:     { text: 'pokes', color: 0x00ced1 }, // Dark turquoise
+// Config for each action (messages)
+const ACTION_CONFIG: Record<ActionType, { text: string }> = {
+    hug:      { text: 'hugs' },
+    kiss:     { text: 'kisses' },
+    pat:      { text: 'pats' },
+    slap:     { text: 'slaps' },
+    bite:     { text: 'bites' },
+    cuddle:   { text: 'cuddles with' },
+    bully:    { text: 'bullies' },
+    lick:     { text: 'licks' },
+    yeet:     { text: 'yeets' },
+    highfive: { text: 'high-fives' },
+    handhold: { text: 'holds hands with' },
+    nom:      { text: 'noms on' },
+    kill:     { text: 'kills' },
+    kick:     { text: 'kicks' },
+    poke:     { text: 'pokes' },
 };
 
 // Fetch GIF using multiple fallback APIs to ensure it never fails
@@ -118,7 +118,7 @@ export default {
         }
 
         const config = ACTION_CONFIG[action];
-        const card = new FadeContainer(config.color)
+        const card = new FadeContainer()
             .text(`**${author.username}** ${config.text} **${target.username}**!`)
             .gallery([{ url }])
             .build();
@@ -166,7 +166,7 @@ export default {
         }
 
         const config = ACTION_CONFIG[action];
-        const card = new FadeContainer(config.color)
+        const card = new FadeContainer()
             .text(`**${message.author.username}** ${config.text} **${target.username}**!`)
             .gallery([{ url }])
             .build();
