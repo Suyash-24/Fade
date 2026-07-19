@@ -40,7 +40,7 @@ export default {
             await sendResponse(interaction as any, [card]);
         } catch (error) {
             const errCard = new FadeContainer(Colours.DANGER)
-                .text(`${e('error')} Failed to get a response from the AI. Try again later!`)
+                .text(`${e('error')} The AI system is currently under maintenance. We will be back soon!`)
                 .build();
             await sendResponse(interaction as any, [errCard], true);
         }
@@ -87,7 +87,7 @@ export default {
             await sendMessage(message, [card]);
         } catch (error) {
             const errCard = new FadeContainer(Colours.DANGER)
-                .text(`${e('error')} Failed to get a response from the AI. Try again later!`)
+                .text(`${e('error')} The AI system is currently under maintenance. We will be back soon!`)
                 .build();
             await sendMessage(message, [errCard]);
         }
