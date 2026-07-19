@@ -123,7 +123,7 @@ export default {
             .gallery([{ url }])
             .build();
 
-        await interaction.editReply({ components: [card] });
+        await sendResponse(interaction as any, [card]);
     },
 
     async prefixExecute(message, args) {
@@ -171,6 +171,6 @@ export default {
             .gallery([{ url }])
             .build();
 
-        await message.reply({ components: [card] });
+        await sendMessage(message, [card]);
     }
 } as Command;
