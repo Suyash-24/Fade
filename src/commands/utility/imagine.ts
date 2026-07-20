@@ -23,7 +23,7 @@ export default {
         try {
             // URL Encode the prompt for the URL path
             const encodedPrompt = encodeURIComponent(prompt);
-            const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true`;
+            const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true&model=flux`;
 
             // Pre-warm the generation so it's ready when Discord fetches it
             const res = await fetch(url);
@@ -62,7 +62,7 @@ export default {
 
         try {
             const encodedPrompt = encodeURIComponent(prompt);
-            const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true`;
+            const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true&model=flux`;
 
             // Pre-warm the generation so it's ready when Discord fetches it
             const res = await fetch(url);
