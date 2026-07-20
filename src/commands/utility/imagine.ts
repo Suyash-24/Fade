@@ -14,7 +14,7 @@ export default {
         ),
 
     category: 'utility',
-    cooldown: 10,
+    cooldown: 45,
 
     async execute(interaction) {
         const prompt = interaction.options.getString('prompt', true);
