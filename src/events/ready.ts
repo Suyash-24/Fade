@@ -76,7 +76,7 @@ const event: Event<'clientReady'> = {
                 // Fallback
             }
 
-            const statusText = toggle ? `✦ ${version}` : '✦ fadebot.me';
+            const statusText = toggle ? `🔗 ${version}` : 'f!imagine to generate images';
             toggle = !toggle;
 
             client.user?.setPresence({
