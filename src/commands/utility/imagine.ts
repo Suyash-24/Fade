@@ -42,7 +42,7 @@ export default {
             await interaction.editReply(payload);
         } catch (error) {
             const errCard = new FadeContainer(Colours.DANGER)
-                .text(`${e('error')} Failed to generate the image. The AI might be under maintenance!`)
+                .text(`${e('error')} The AI system is currently under maintenance. We will be back soon!`)
                 .build();
             await sendResponse(interaction as any, [errCard], true);
         }
@@ -83,7 +83,7 @@ export default {
             await message.reply(payload);
         } catch (error) {
             const errCard = new FadeContainer(Colours.DANGER)
-                .text(`${e('error')} Failed to generate the image. The AI might be under maintenance!`)
+                .text(`${e('error')} The AI system is currently under maintenance. We will be back soon!`)
                 .build();
             await sendMessage(message, [errCard]);
         }
