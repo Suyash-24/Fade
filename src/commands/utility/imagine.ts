@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, AttachmentBuilder } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { FadeContainer, sendResponse, sendMessage } from '../../components/builders.js';
 import { e, Colours } from '../../components/emojis.js';
@@ -25,22 +25,18 @@ export default {
             const encodedPrompt = encodeURIComponent(prompt);
             const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true`;
 
-            // Fetch the generated image buffer
+            // Pre-warm the generation so it's ready when Discord fetches it
             const res = await fetch(url);
             if (!res.ok) throw new Error('API Error');
-            const buffer = Buffer.from(await res.arrayBuffer());
-
-            // Create Discord attachment
-            const attachment = new AttachmentBuilder(buffer, { name: 'generation.jpg' });
 
             const card = new FadeContainer()
                 .text(`**Prompt:** ${prompt}`)
-                .gallery([{ url: 'attachment://generation.jpg' }])
+                .gallery([{ url }])
                 .build();
 
-            const payload = { components: [card], files: [attachment], flags: 1 << 13 } as any;
-            await interaction.editReply(payload);
+            await sendResponse(interaction as any, [card]);
         } catch (error) {
+            console.error('[Imagine Command Error (Slash)]', error);
             const errCard = new FadeContainer(Colours.DANGER)
                 .text(`${e('error')} The AI system is currently under maintenance. We will be back soon!`)
                 .build();
@@ -68,19 +64,16 @@ export default {
             const encodedPrompt = encodeURIComponent(prompt);
             const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true`;
 
+            // Pre-warm the generation so it's ready when Discord fetches it
             const res = await fetch(url);
             if (!res.ok) throw new Error('API Error');
-            const buffer = Buffer.from(await res.arrayBuffer());
-
-            const attachment = new AttachmentBuilder(buffer, { name: 'generation.jpg' });
 
             const card = new FadeContainer()
                 .text(`**Prompt:** ${prompt}`)
-                .gallery([{ url: 'attachment://generation.jpg' }])
+                .gallery([{ url }])
                 .build();
 
-            const payload = { components: [card], files: [attachment], flags: 1 << 13 } as any;
-            await message.reply(payload);
+            await sendMessage(message, [card]);
         } catch (error) {
             const errCard = new FadeContainer(Colours.DANGER)
                 .text(`${e('error')} The AI system is currently under maintenance. We will be back soon!`)
