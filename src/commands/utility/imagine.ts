@@ -21,9 +21,10 @@ export default {
         await interaction.deferReply();
 
         try {
-            // URL Encode the prompt for the URL path
+            // URL Encode the prompt and add a random seed so duplicate prompts generate unique images
             const encodedPrompt = encodeURIComponent(prompt);
-            const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true&model=flux`;
+            const seed = Math.floor(Math.random() * 1000000);
+            const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true&model=flux&seed=${seed}`;
 
             // Pre-warm the generation so it's ready when Discord fetches it
             const res = await fetch(url);
@@ -60,9 +61,17 @@ export default {
             await message.channel.sendTyping().catch(() => null);
         }
 
+        let loadingMsg: any = null;
         try {
+            // Send a temporary loading message
+            const loadingCard = new FadeContainer(Colours.FADE)
+                .text(`${e('loading') || '⏳'} Generating your image, please wait...`)
+                .build();
+            loadingMsg = await sendMessage(message, [loadingCard]);
+
             const encodedPrompt = encodeURIComponent(prompt);
-            const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true&model=flux`;
+            const seed = Math.floor(Math.random() * 1000000);
+            const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true&model=flux&seed=${seed}`;
 
             // Pre-warm the generation so it's ready when Discord fetches it
             const res = await fetch(url);
@@ -73,12 +82,16 @@ export default {
                 .gallery([{ url }])
                 .build();
 
-            await sendMessage(message, [card]);
+            await loadingMsg.edit({ components: [card] });
         } catch (error) {
             const errCard = new FadeContainer(Colours.DANGER)
                 .text(`${e('error')} The AI system is currently under maintenance. We will be back soon!`)
                 .build();
-            await sendMessage(message, [errCard]);
+            if (loadingMsg) {
+                await loadingMsg.edit({ components: [errCard] }).catch(() => null);
+            } else {
+                await sendMessage(message, [errCard]);
+            }
         }
     }
 } as Command;
