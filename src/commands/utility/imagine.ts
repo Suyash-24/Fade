@@ -35,8 +35,8 @@ export default {
 
             const card = new FadeContainer()
                 .text(`**Prompt:** ${prompt}`)
+                .gallery([{ url: 'attachment://generation.jpg' }])
                 .build();
-            card.setImage('attachment://generation.jpg');
 
             const payload = { components: [card], files: [attachment], flags: 1 << 13 } as any;
             await interaction.editReply(payload);
@@ -76,8 +76,8 @@ export default {
 
             const card = new FadeContainer()
                 .text(`**Prompt:** ${prompt}`)
+                .gallery([{ url: 'attachment://generation.jpg' }])
                 .build();
-            card.setImage('attachment://generation.jpg');
 
             const payload = { components: [card], files: [attachment], flags: 1 << 13 } as any;
             await message.reply(payload);
