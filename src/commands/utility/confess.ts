@@ -61,7 +61,7 @@ async function handleConfession(ctx: any, guild: any, user: any, messageText: st
     }
 
     const [confession] = await db.insert(confessions).values({
-        guildId: guild.id, userId: user.id, message: messageText, banned: false
+        guildId: guild.id, userId: user.id, content: messageText, banned: false
     }).returning();
 
     const confessionChannel = guild.channels.cache.get(cfg.channelId) as any;
