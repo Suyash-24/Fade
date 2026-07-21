@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, MessageFlags, EmbedBuilder } from 'discord.js';
 // This command handles anonymous user confessions
 import type { Command } from '../../types/command.js';
-import { FadeContainer, sendMessage } from '../../components/builders.js';
+import { FadeContainer, sendMessage, sendResponse } from '../../components/builders.js';
 import { e, Colours } from '../../components/emojis.js';
 import { db } from '../../db/index.js';
 import { confessionConfig, confessions } from '../../db/schema.js';
@@ -37,7 +37,7 @@ export default {
 async function handleConfession(ctx: any, guild: any, user: any, messageText: string, isSlash: boolean) {
     const replyFn = async (card: any) => {
         if (isSlash) {
-            await ctx.reply({ components: [card], flags: MessageFlags.Ephemeral });
+            await sendResponse(ctx, [card], true);
         } else {
             const msg = await sendMessage(ctx, [card]);
             // Delete error messages after 5 seconds to keep chat clean
