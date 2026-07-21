@@ -1,4 +1,5 @@
 import { SlashCommandBuilder, MessageFlags, EmbedBuilder } from 'discord.js';
+// This command handles anonymous user confessions
 import type { Command } from '../../types/command.js';
 import { FadeContainer, sendMessage } from '../../components/builders.js';
 import { e, Colours } from '../../components/emojis.js';
