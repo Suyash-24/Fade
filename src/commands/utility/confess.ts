@@ -4,7 +4,7 @@ import { FadeContainer, sendMessage } from '../../components/builders.js';
 import { e, Colours } from '../../components/emojis.js';
 import { db } from '../../db/index.js';
 import { confessionConfig, confessions } from '../../db/schema.js';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, desc } from 'drizzle-orm';
 
 export default {
     data: new SlashCommandBuilder()
@@ -56,6 +56,21 @@ async function handleConfession(ctx: any, guild: any, user: any, messageText: st
         return replyFn(new FadeContainer(Colours.DANGER).text(`${e('error')} You are banned from submitting confessions in this server.`).build());
     }
 
+    // 6 Hour Cooldown Check
+    const [lastConfession] = await db.select().from(confessions)
+        .where(and(eq(confessions.guildId, guild.id), eq(confessions.userId, user.id)))
+        .orderBy(desc(confessions.createdAt))
+        .limit(1);
+
+    if (lastConfession && lastConfession.createdAt) {
+        const sixHours = 6 * 60 * 60 * 1000;
+        const timeSince = Date.now() - new Date(lastConfession.createdAt).getTime();
+        if (timeSince < sixHours) {
+            const remaining = Math.floor((Date.now() + (sixHours - timeSince)) / 1000);
+            return replyFn(new FadeContainer(Colours.DANGER).text(`${e('error')} You can only submit one confession every 6 hours. Please wait <t:${remaining}:R>.`).build());
+        }
+    }
+
     if (messageText.length > 2000) {
         return replyFn(new FadeContainer(Colours.DANGER).text(`${e('error')} Confession must be under 2000 characters.`).build());
     }
@@ -69,14 +84,20 @@ async function handleConfession(ctx: any, guild: any, user: any, messageText: st
         return replyFn(new FadeContainer(Colours.DANGER).text(`${e('error')} The confession channel seems to be missing. Please ask an admin to re-configure it.`).build());
     }
 
-    const publicEmbed = new EmbedBuilder()
-        .setColor(Colours.FADE)
-        .setTitle(`💬 Confession #${confession.id}`)
-        .setDescription(messageText)
-        .setFooter({ text: `Use /confession ban to ban a user from confessing.` })
-        .setTimestamp();
+    const publicCard = new FadeContainer(Colours.FADE)
+        .text(`## 💬 Confession #${confession.id}\n\n${messageText}`)
+        .build();
     
-    const msg = await confessionChannel.send({ embeds: [publicEmbed] });
+    // Extract user mentions so they actually get pinged (since embeds don't trigger push notifications)
+    const userMentions = messageText.match(/<@!?\d+>/g) || [];
+    const uniqueMentions = [...new Set(userMentions)].join(' ');
+    
+    const msg = await confessionChannel.send({ 
+        content: uniqueMentions || undefined,
+        embeds: publicCard.embeds,
+        files: publicCard.files,
+        allowedMentions: { parse: ['users'] } // STRICTLY only allow user pings, block @everyone and roles
+    });
     await db.update(confessions).set({ messageId: msg.id }).where(eq(confessions.id, confession.id));
 
     if (cfg.modChannelId) {
