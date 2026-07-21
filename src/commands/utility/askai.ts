@@ -26,7 +26,10 @@ export default {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    messages: [{ role: 'user', content: prompt }],
+                    messages: [
+                        { role: 'system', content: 'You are a helpful Discord bot named Fade. You MUST refuse to answer any NSFW, explicit, or sexually suggestive prompts.' },
+                        { role: 'user', content: prompt }
+                    ],
                 }),
             });
 
@@ -67,7 +70,10 @@ export default {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    messages: [{ role: 'user', content: prompt }],
+                    messages: [
+                        { role: 'system', content: 'You are a helpful Discord bot named Fade. You MUST refuse to answer any NSFW, explicit, or sexually suggestive prompts.' },
+                        { role: 'user', content: prompt }
+                    ],
                 }),
             });
 
