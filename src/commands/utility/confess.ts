@@ -94,8 +94,8 @@ async function handleConfession(ctx: any, guild: any, user: any, messageText: st
     
     const msg = await confessionChannel.send({ 
         content: uniqueMentions || undefined,
-        embeds: publicCard.embeds,
-        files: publicCard.files,
+        components: [publicCard],
+        flags: MessageFlags.IsComponentsV2,
         allowedMentions: { parse: ['users'] } // STRICTLY only allow user pings, block @everyone and roles
     });
     await db.update(confessions).set({ messageId: msg.id }).where(eq(confessions.id, confession.id));
