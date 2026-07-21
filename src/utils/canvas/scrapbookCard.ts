@@ -164,19 +164,28 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
         ctx.fillStyle = '#DDDDDD';
         
         // Sanitize raw mentions `<@123>` or `<@!123>` to `@User` for aesthetic display
+        // Also strip URLs and collapse multiple spaces to prevent un-spaced spam from overflowing
         const cleanMsg = msg.content
             .replace(/<@!?\d+>/g, '@User')
-            .replace(/<#\d+>/g, '#channel');
+            .replace(/<#\d+>/g, '#channel')
+            .replace(/https?:\/\/[^\s]+/g, '[Link]')
+            .replace(/\s+/g, ' ');
 
         const words = cleanMsg.split(' ');
         let line = '';
         let lineY = y + 160;
         for (let n = 0; n < words.length; n++) {
-            const testLine = line + words[n] + ' ';
+            let word = words[n];
+            // If a single word is insanely long (e.g. spam), force truncate it
+            if (ctx.measureText(word).width > 440) {
+                word = word.substring(0, 35) + '...';
+            }
+            
+            const testLine = line + word + ' ';
             const metrics = ctx.measureText(testLine);
-            if (metrics.width > 460 && n > 0) {
+            if (metrics.width > 460 && line.length > 0) {
                 ctx.fillText(`"${line.trim()}"`, x + 30, lineY);
-                line = words[n] + ' ';
+                line = word + ' ';
                 lineY += 28;
                 if (lineY > y + 230) {
                     line = '... ';
