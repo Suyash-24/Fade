@@ -69,6 +69,7 @@ export default {
         ),
 
     category: 'general',
+    prefixOnly: true,
     cooldown: 5,
 
     async execute(interaction) {

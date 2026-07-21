@@ -76,6 +76,7 @@ export default {
         .setDescription('Display detailed information about this server'),
 
     category: 'general',
+    prefixOnly: true,
     guildOnly: true,
     cooldown:  10,
 

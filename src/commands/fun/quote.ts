@@ -25,6 +25,7 @@ const command: Command = {
         ),
 
     category: 'fun',
+    prefixOnly: true,
     cooldown: 5,
     aliases: [],
 

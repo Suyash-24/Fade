@@ -14,6 +14,7 @@ export default {
         ),
 
     category: 'utility',
+    prefixOnly: true,
     cooldown: 45,
 
     async execute(interaction) {

@@ -11,6 +11,7 @@ export default {
         .setDescription('Bet on a coin flip'),
 
     category: 'economy',
+    prefixOnly: true,
     guildOnly: true,
     // NOTE: 'cf' and 'flip' are used by the existing fun/coinflip.ts.
     // Economy coinflip uses 'ecf' and 'eflip' to avoid conflict.

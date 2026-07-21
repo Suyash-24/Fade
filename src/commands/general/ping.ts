@@ -45,6 +45,7 @@ export default {
         .setDescription("Check Fade's latency and connection status"),
 
     category: 'general',
+    prefixOnly: true,
     cooldown: 5,
 
     async execute(interaction, client) {

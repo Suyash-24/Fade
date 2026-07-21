@@ -30,6 +30,7 @@ export const snipeCommand: Command = {
         ),
 
     category:  'utility',
+    prefixOnly: true,
     guildOnly: true,
     cooldown:  5,
 

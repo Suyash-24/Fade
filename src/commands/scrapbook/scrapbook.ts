@@ -11,6 +11,7 @@ const command: Command = {
         .setDescription('View the Weekly Server Scrapbook (updates every Sunday)'),
 
     category: 'scrapbook',
+    prefixOnly: true,
     cooldown: 10,
 
     async prefixExecute(message) {

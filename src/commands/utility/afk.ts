@@ -74,6 +74,7 @@ export default {
         ),
 
     category: 'utility',
+    prefixOnly: true,
     guildOnly: true,
     cooldown:  5,
 

@@ -55,6 +55,7 @@ export default {
         ),
 
     category:  'fun',
+    prefixOnly: true,
     guildOnly: true,
     cooldown:  5,
 
