@@ -24,7 +24,7 @@ export default {
             // URL Encode the prompt and add a random seed so duplicate prompts generate unique images
             const encodedPrompt = encodeURIComponent(prompt);
             const seed = Math.floor(Math.random() * 1000000);
-            const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true&model=flux&seed=${seed}`;
+            const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true&model=flux&seed=${seed}&safe=true`;
 
             // Pre-warm the generation so it's ready when Discord fetches it
             const res = await fetch(url);
@@ -71,7 +71,7 @@ export default {
 
             const encodedPrompt = encodeURIComponent(prompt);
             const seed = Math.floor(Math.random() * 1000000);
-            const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true&model=flux&seed=${seed}`;
+            const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true&model=flux&seed=${seed}&safe=true`;
 
             // Pre-warm the generation so it's ready when Discord fetches it
             const res = await fetch(url);
