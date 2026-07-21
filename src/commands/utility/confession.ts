@@ -32,11 +32,6 @@ export default {
             .setDescription('Disable confessions')
         )
         .addSubcommand(s => s
-            .setName('send')
-            .setDescription('Send an anonymous confession to this server')
-            .addStringOption(o => o.setName('message').setDescription('Your anonymous confession (no one will know it\'s you)').setRequired(true))
-        )
-        .addSubcommand(s => s
             .setName('ban')
             .setDescription('Ban a user from confessing (mods only, requires the confession ID)')
             .addIntegerOption(o => o.setName('confession_id').setDescription('The confession ID (visible in mod channel)').setRequired(true))
@@ -92,71 +87,71 @@ export default {
             await interaction.reply({ content: `${e('success')} User banned from confessing in this server.`, flags: MessageFlags.Ephemeral });
             return;
         }
-
-        // send
-        const cfg = await getConfig(guild.id);
-        if (!cfg || !cfg.enabled) {
-            await interaction.reply({ content: `${e('error')} Confessions are not enabled in this server.`, flags: MessageFlags.Ephemeral }); return;
-        }
-
-        // Check if user is banned
-        const [existingBan] = await db.select().from(confessions)
-            .where(and(eq(confessions.guildId, guild.id), eq(confessions.userId, interaction.user.id), eq(confessions.banned, true)))
-            .limit(1);
-        if (existingBan) {
-            await interaction.reply({ content: `${e('error')} You are banned from submitting confessions in this server.`, flags: MessageFlags.Ephemeral }); return;
-        }
-
-        const content = interaction.options.getString('message', true);
-        if (content.length > 2000) {
-            await interaction.reply({ content: `${e('error')} Confession must be under 2000 characters.`, flags: MessageFlags.Ephemeral }); return;
-        }
-
-        const [confession] = await db.insert(confessions).values({
-            guildId: guild.id, userId: interaction.user.id, content,
-        }).returning();
-
-        const confessionChannel = guild.channels.cache.get(cfg.channelId) as any;
-        if (!confessionChannel?.isTextBased()) {
-            await interaction.reply({ content: `${e('error')} The confession channel seems to be missing. Please ask an admin to re-configure it.`, flags: MessageFlags.Ephemeral }); return;
-        }
-
-        const publicEmbed = new EmbedBuilder()
-            .setColor(0x8096fe)
-            .setTitle(`💬 Confession #${confession.id}`)
-            .setDescription(content)
-            .setFooter({ text: `Use /confession ban to ban a user from confessing.` })
-            .setTimestamp();
-
-        const msg = await confessionChannel.send({ embeds: [publicEmbed] });
-
-        // Store messageId
-        await db.update(confessions).set({ messageId: msg.id }).where(eq(confessions.id, confession.id));
-
-        // Mod channel: show author
-        if (cfg.modChannelId) {
-            const modChannel = guild.channels.cache.get(cfg.modChannelId) as any;
-            if (modChannel?.isTextBased()) {
-                const modEmbed = new EmbedBuilder()
-                    .setColor(0xff6b6b)
-                    .setTitle(`🔍 Confession #${confession.id} (Mod View)`)
-                    .setDescription(content)
-                    .addFields(
-                        { name: 'Author', value: `<@${interaction.user.id}> (${interaction.user.tag})` },
-                        { name: 'ID', value: `\`${confession.id}\`` },
-                    )
-                    .setTimestamp();
-                await modChannel.send({ embeds: [modEmbed] });
-            }
-        }
-
-        await interaction.reply({ content: `${e('success')} Your confession has been sent anonymously!`, flags: MessageFlags.Ephemeral });
     },
 
     async prefixExecute(message, args, client) {
-        if (!await hasPermission(message.member!, 'manage_messages')) {
-            await message.reply(`${e('error')} You need Manage Messages permission to use prefix commands for confessions.`); return;
+        const sub = args[0]?.toLowerCase();
+        
+        if (sub === 'setup') {
+            if (!message.member?.permissions.has(PermissionFlagsBits.Administrator)) {
+                await sendMessage(message, [new FadeContainer(Colours.DANGER).text(`${e('error')} Administrator permission required.`).build()]);
+                return;
+            }
+            const channel = message.mentions.channels.first();
+            if (!channel) {
+                await sendMessage(message, [new FadeContainer(Colours.DANGER).text(`${e('error')} You must mention a channel. Usage: \`f!confession setup #channel\``).build()]);
+                return;
+            }
+            const modChannel = message.mentions.channels.at(1);
+            
+            await db.insert(confessionConfig)
+                .values({ guildId: message.guild!.id, channelId: channel.id, modChannelId: modChannel?.id ?? null, enabled: true })
+                .onConflictDoUpdate({
+                    target: confessionConfig.guildId,
+                    set: { channelId: channel.id, modChannelId: modChannel?.id ?? null, enabled: true },
+                });
+
+            const card = new FadeContainer(Colours.SUCCESS)
+                .text(`${e('success')} Confession system enabled!\n${channel}${modChannel ? ` · Mod channel: ${modChannel}` : ''}`)
+                .build();
+            await sendMessage(message, [card]);
+            return;
         }
-        await message.reply(`${e('error')} Please use the slash command \`/confession\` for this feature.`);
+
+        if (sub === 'disable') {
+            if (!message.member?.permissions.has(PermissionFlagsBits.Administrator)) {
+                await sendMessage(message, [new FadeContainer(Colours.DANGER).text(`${e('error')} Administrator permission required.`).build()]);
+                return;
+            }
+            await db.update(confessionConfig).set({ enabled: false }).where(eq(confessionConfig.guildId, message.guild!.id));
+            await sendMessage(message, [new FadeContainer(Colours.SUCCESS).text(`${e('success')} Confessions disabled.`).build()]);
+            return;
+        }
+        
+        if (sub === 'ban') {
+            if (!message.member?.permissions.has(PermissionFlagsBits.ManageMessages)) {
+                await sendMessage(message, [new FadeContainer(Colours.DANGER).text(`${e('error')} Manage Messages permission required.`).build()]);
+                return;
+            }
+            const confessionId = parseInt(args[1]);
+            if (isNaN(confessionId)) {
+                await sendMessage(message, [new FadeContainer(Colours.DANGER).text(`${e('error')} Please provide a valid confession ID.`).build()]);
+                return;
+            }
+            const [confession] = await db.select().from(confessions).where(and(eq(confessions.id, confessionId), eq(confessions.guildId, message.guild!.id))).limit(1);
+            if (!confession) {
+                await sendMessage(message, [new FadeContainer(Colours.DANGER).text(`${e('error')} Confession #${confessionId} not found in this server.`).build()]);
+                return;
+            }
+            await db.update(confessions).set({ banned: true }).where(eq(confessions.userId, confession.userId));
+            await sendMessage(message, [new FadeContainer(Colours.SUCCESS).text(`${e('success')} User banned from confessing in this server.`).build()]);
+            return;
+        }
+        
+        // Help text
+        const helpCard = new FadeContainer()
+            .text(`**Confession System**\n\n\`f!confession setup #channel\` - Set up the system\n\`f!confession disable\` - Disable confessions\n\`f!confession ban <id>\` - Ban a user\n\`f!confess <message>\` - Send an anonymous confession`)
+            .build();
+        await sendMessage(message, [helpCard]);
     },
 } satisfies Command;
