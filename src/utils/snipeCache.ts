@@ -26,28 +26,35 @@ interface EditSnipeEntry {
     editedAt:   number;
 }
 
-// channelId → SnipeEntry
-const snipeCache     = new Map<string, SnipeEntry>();
-// channelId → EditSnipeEntry
-const editSnipeCache = new Map<string, EditSnipeEntry>();
+// channelId → SnipeEntry[]
+const snipeCache     = new Map<string, SnipeEntry[]>();
+// channelId → EditSnipeEntry[]
+const editSnipeCache = new Map<string, EditSnipeEntry[]>();
 
-const TTL = 5 * 60 * 1_000; // 5 minutes
+const TTL = 10 * 60 * 1_000; // 10 minutes
 
 // ── Snipe (deleted messages) ──────────────────────────────────────────────────
 
 export function setSnipe(channelId: string, entry: SnipeEntry): void {
-    snipeCache.set(channelId, entry);
-    // Auto-expire
+    if (!snipeCache.has(channelId)) {
+        snipeCache.set(channelId, []);
+    }
+    const arr = snipeCache.get(channelId)!;
+    arr.unshift(entry); // Push to front (newest at index 0)
+    
+    // Auto-expire this specific message after 10 mins
     setTimeout(() => {
-        const current = snipeCache.get(channelId);
-        if (current?.deletedAt === entry.deletedAt) {
-            snipeCache.delete(channelId);
+        const currentArr = snipeCache.get(channelId);
+        if (currentArr) {
+            const idx = currentArr.findIndex(e => e.deletedAt === entry.deletedAt);
+            if (idx !== -1) currentArr.splice(idx, 1);
+            if (currentArr.length === 0) snipeCache.delete(channelId);
         }
     }, TTL);
 }
 
-export function getSnipe(channelId: string): SnipeEntry | null {
-    return snipeCache.get(channelId) ?? null;
+export function getSnipe(channelId: string): SnipeEntry[] {
+    return snipeCache.get(channelId) ?? [];
 }
 
 export function clearSnipe(channelId: string): void {
@@ -55,25 +62,34 @@ export function clearSnipe(channelId: string): void {
 }
 
 export function clearAllSnipes(guildId: string): void {
-    for (const [channelId, entry] of snipeCache) {
-        if (entry.guildId === guildId) snipeCache.delete(channelId);
+    for (const [channelId, arr] of snipeCache) {
+        if (arr.length > 0 && arr[0].guildId === guildId) {
+            snipeCache.delete(channelId);
+        }
     }
 }
 
 // ── Edit snipe (edited messages) ──────────────────────────────────────────────
 
 export function setEditSnipe(channelId: string, entry: EditSnipeEntry): void {
-    editSnipeCache.set(channelId, entry);
+    if (!editSnipeCache.has(channelId)) {
+        editSnipeCache.set(channelId, []);
+    }
+    const arr = editSnipeCache.get(channelId)!;
+    arr.unshift(entry); // Push to front (newest at index 0)
+
     setTimeout(() => {
-        const current = editSnipeCache.get(channelId);
-        if (current?.editedAt === entry.editedAt) {
-            editSnipeCache.delete(channelId);
+        const currentArr = editSnipeCache.get(channelId);
+        if (currentArr) {
+            const idx = currentArr.findIndex(e => e.editedAt === entry.editedAt);
+            if (idx !== -1) currentArr.splice(idx, 1);
+            if (currentArr.length === 0) editSnipeCache.delete(channelId);
         }
     }, TTL);
 }
 
-export function getEditSnipe(channelId: string): EditSnipeEntry | null {
-    return editSnipeCache.get(channelId) ?? null;
+export function getEditSnipe(channelId: string): EditSnipeEntry[] {
+    return editSnipeCache.get(channelId) ?? [];
 }
 
 export function clearEditSnipe(channelId: string): void {

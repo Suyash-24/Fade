@@ -361,6 +361,41 @@ const event: Event<'interactionCreate'> = {
                     await interaction.message.edit(fr([card], false, { parse: [] }) as any).catch(() => null);
                     return;
                 }
+                // Snipe pagination: snipe:<channelId>:<page>
+                if (id.startsWith('snipe:')) {
+                    const parts = id.split(':');
+                    const channelId = parts[1];
+                    const page = Number(parts[2]);
+                    if (isNaN(page) || page < 0) return;
+
+                    await interaction.deferUpdate().catch(() => null);
+
+                    const { buildSnipeCard } = await import('../commands/utility/snipe.js');
+                    const card = buildSnipeCard(channelId, page);
+                    if (!card) return;
+
+                    const { fadeReply: frSnipe } = await import('../components/builders.js');
+                    await interaction.message.edit(frSnipe([card], false, { parse: [] }) as any).catch(() => null);
+                    return;
+                }
+
+                // Edit snipe pagination: editsnipe:<channelId>:<page>
+                if (id.startsWith('editsnipe:')) {
+                    const parts = id.split(':');
+                    const channelId = parts[1];
+                    const page = Number(parts[2]);
+                    if (isNaN(page) || page < 0) return;
+
+                    await interaction.deferUpdate().catch(() => null);
+
+                    const { buildEditSnipeCard } = await import('../commands/utility/snipe.js');
+                    const card = buildEditSnipeCard(channelId, page);
+                    if (!card) return;
+
+                    const { fadeReply: frEditSnipe } = await import('../components/builders.js');
+                    await interaction.message.edit(frEditSnipe([card], false, { parse: [] }) as any).catch(() => null);
+                    return;
+                }
 
                 // Voice leaderboard pagination: vclb:<guildId>:<page>:<timeframe>
                 if (id.startsWith('vclb:')) {

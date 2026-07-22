@@ -19,6 +19,72 @@ import {
 } from '../../utils/snipeCache.js';
 import { e, Colours } from '../../components/emojis.js';
 
+export function buildSnipeCard(channelId: string, page: number) {
+    const entries = getSnipe(channelId);
+    if (!entries || entries.length === 0) return null;
+    
+    // Safety clamp
+    if (page < 0) page = 0;
+    if (page >= entries.length) page = entries.length - 1;
+
+    const entry = entries[page];
+    const ts = Math.floor(entry.deletedAt / 1000);
+    const hasPrev = page > 0;
+    const hasNext = page < entries.length - 1;
+
+    const card = new FadeContainer()
+        .text(`### ${e('detective')} Message Sniped`)
+        .text(`**Author:** <@${entry.authorId}>\n**Channel:** <#${entry.channelId}>\n**Time:** <t:${ts}:R>`)
+        .separator(true)
+        .text(entry.content ? `> ${entry.content.slice(0, 1000).replace(/\n/g, '\n> ')}` : '*No text content*');
+
+    if (entry.imageUrl) {
+        card.gallery([{ url: entry.imageUrl, description: 'Deleted attachment' }]);
+    }
+
+    if (hasPrev || hasNext || entries.length > 1) {
+        const { btn, ButtonStyle } = require('../../components/builders.js');
+        card.actionRow(
+            btn(`snipe:${channelId}:${page - 1}`, '◀ Previous', ButtonStyle.Secondary, !hasPrev),
+            btn(`snipe:${channelId}:${page + 1}`, 'Next ▶', ButtonStyle.Secondary, !hasNext)
+        );
+    }
+
+    return card.build();
+}
+
+export function buildEditSnipeCard(channelId: string, page: number) {
+    const entries = getEditSnipe(channelId);
+    if (!entries || entries.length === 0) return null;
+    
+    // Safety clamp
+    if (page < 0) page = 0;
+    if (page >= entries.length) page = entries.length - 1;
+
+    const entry = entries[page];
+    const ts = Math.floor(entry.editedAt / 1000);
+    const hasPrev = page > 0;
+    const hasNext = page < entries.length - 1;
+
+    const card = new FadeContainer()
+        .text(`### ${e('detective')} Edit Sniped`)
+        .text(`**Author:** <@${entry.authorId}>\n**Time:** <t:${ts}:R>\n**Link:** [Jump to Message](${entry.messageUrl})`)
+        .separator(true)
+        .text(`**Before:**\n> ${entry.before.slice(0, 500).replace(/\n/g, '\n> ')}`)
+        .separator(false)
+        .text(`**After:**\n> ${entry.after.slice(0, 500).replace(/\n/g, '\n> ')}`);
+
+    if (hasPrev || hasNext || entries.length > 1) {
+        const { btn, ButtonStyle } = require('../../components/builders.js');
+        card.actionRow(
+            btn(`editsnipe:${channelId}:${page - 1}`, '◀ Previous', ButtonStyle.Secondary, !hasPrev),
+            btn(`editsnipe:${channelId}:${page + 1}`, 'Next ▶', ButtonStyle.Secondary, !hasNext)
+        );
+    }
+
+    return card.build();
+}
+
 export const snipeCommand: Command = {
     data: new SlashCommandBuilder()
         .setName('snipe')
@@ -37,52 +103,29 @@ export const snipeCommand: Command = {
     async execute(interaction, client) {
         const channel   = interaction.options.getChannel('channel') ?? interaction.channel;
         const channelId = channel?.id ?? interaction.channelId;
-        const entry     = getSnipe(channelId);
+        const card      = buildSnipeCard(channelId, 0);
 
-        if (!entry) {
-            const card = new FadeContainer(Colours.NONE)
+        if (!card) {
+            const noRes = new FadeContainer()
                 .text(`${e('search')} No recently deleted messages in <#${channelId}>.`)
                 .build();
-            await sendResponse(interaction, [card], true);
+            await sendResponse(interaction, [noRes], true);
             return;
         }
 
-        const ts = Math.floor(entry.deletedAt / 1000);
-
-        const c = new FadeContainer(Colours.FADE)
-            .text(`### 🕵️ Message Sniped`)
-            .text(`**Author:** <@${entry.authorId}>\n**Channel:** <#${entry.channelId}>\n**Time:** <t:${ts}:R>`)
-            .separator(true)
-            .text(entry.content ? `> ${entry.content.slice(0, 1000).replace(/\n/g, '\n> ')}` : '*No text content*');
-
-        if (entry.imageUrl) {
-            c.gallery([{ url: entry.imageUrl, description: 'Deleted attachment' }]);
-        }
-
-        await sendResponse(interaction, [c.build()]);
+        await sendResponse(interaction, [card]);
     },
 
     async prefixExecute(message, args, client) {
         const channelId = message.mentions.channels.first()?.id ?? message.channelId;
-        const entry     = getSnipe(channelId);
+        const card      = buildSnipeCard(channelId, 0);
 
-        if (!entry) {
+        if (!card) {
             await message.reply(`${e('search')} No recently deleted messages in <#${channelId}>.`).catch(() => (message.channel as any).send(`${e('search')} No recently deleted messages in <#${channelId}>.`).catch(() => null));
             return;
         }
 
-        const ts   = Math.floor(entry.deletedAt / 1000);
-        const card = new FadeContainer(Colours.FADE)
-            .text(`### 🕵️ Message Sniped`)
-            .text(`**Author:** <@${entry.authorId}>\n**Time:** <t:${ts}:R>`)
-            .separator(true)
-            .text(entry.content ? `> ${entry.content.slice(0, 1000).replace(/\n/g, '\n> ')}` : '*No text content*');
-
-        if (entry.imageUrl) {
-            card.gallery([{ url: entry.imageUrl, description: 'Deleted attachment' }]);
-        }
-
-        await sendMessage(message, [card.build() as any]);
+        await sendMessage(message, [card as any]);
     },
 };
 
@@ -103,48 +146,27 @@ export const editSnipeCommand: Command = {
     async execute(interaction, client) {
         const channel   = interaction.options.getChannel('channel') ?? interaction.channel;
         const channelId = channel?.id ?? interaction.channelId;
-        const entry     = getEditSnipe(channelId);
+        const card      = buildEditSnipeCard(channelId, 0);
 
-        if (!entry) {
-            const card = new FadeContainer(Colours.NONE)
+        if (!card) {
+            const noRes = new FadeContainer()
                 .text(`${e('search')} No recently edited messages in <#${channelId}>.`)
                 .build();
-            await sendResponse(interaction, [card], true);
+            await sendResponse(interaction, [noRes], true);
             return;
         }
-
-        const ts = Math.floor(entry.editedAt / 1000);
-
-        const card = new FadeContainer(Colours.FADE)
-            .text(`### 🕵️ Edit Sniped`)
-            .text(`**Author:** <@${entry.authorId}>\n**Time:** <t:${ts}:R>\n**Link:** [Jump to Message](${entry.messageUrl})`)
-            .separator(true)
-            .text(`**Before:**\n> ${entry.before.slice(0, 500).replace(/\n/g, '\n> ')}`)
-            .separator(false)
-            .text(`**After:**\n> ${entry.after.slice(0, 500).replace(/\n/g, '\n> ')}`)
-            .build();
 
         await sendResponse(interaction, [card]);
     },
 
     async prefixExecute(message, args, client) {
         const channelId = message.mentions.channels.first()?.id ?? message.channelId;
-        const entry     = getEditSnipe(channelId);
+        const card      = buildEditSnipeCard(channelId, 0);
 
-        if (!entry) {
+        if (!card) {
             await message.reply(`${e('search')} No recently edited messages in <#${channelId}>.`);
             return;
         }
-
-        const ts   = Math.floor(entry.editedAt / 1000);
-        const card = new FadeContainer(Colours.FADE)
-            .text(`### 🕵️ Edit Sniped`)
-            .text(`**Author:** <@${entry.authorId}>\n**Time:** <t:${ts}:R>`)
-            .separator(true)
-            .text(`**Before:**\n> ${entry.before.slice(0, 500).replace(/\n/g, '\n> ')}`)
-            .separator(false)
-            .text(`**After:**\n> ${entry.after.slice(0, 500).replace(/\n/g, '\n> ')}`)
-            .build();
 
         await sendMessage(message, [card as any]);
     },
