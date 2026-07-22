@@ -76,8 +76,8 @@ export const providers: AIProvider[] = [
     {
         name: 'OpenRouter',
         generate: async (prompt, systemPrompt) => {
-            const key = process.env.OPENROUTER_API_KEY;
-            if (!key) throw new Error('OPENROUTER_API_KEY is not set');
+            const key = process.env.OPENROUTER_API;
+            if (!key) throw new Error('OPENROUTER_API is not set');
 
             const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
@@ -101,8 +101,8 @@ export const providers: AIProvider[] = [
     {
         name: 'Groq',
         generate: async (prompt, systemPrompt) => {
-            const key = process.env.GROQ_API_KEY;
-            if (!key) throw new Error('GROQ_API_KEY is not set');
+            const key = process.env.GROQ_API;
+            if (!key) throw new Error('GROQ_API is not set');
 
             const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
