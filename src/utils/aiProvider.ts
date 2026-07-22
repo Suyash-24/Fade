@@ -8,7 +8,7 @@ interface AIProvider {
 
 export const providers: AIProvider[] = [
     {
-        name: 'DevToolBox API',
+        name: 'DevToolBox',
         generate: async (prompt, systemPrompt) => {
             const res = await fetch('https://devtoolbox-api.devtoolbox-api.workers.dev/ai/generate', {
                 method: 'POST',
