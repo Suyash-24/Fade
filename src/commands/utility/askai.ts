@@ -45,6 +45,7 @@ export default {
 
             await sendResponse(interaction as any, [card]);
         } catch (error) {
+            console.error('AskAI Error (slash):', error);
             const errCard = new FadeContainer(Colours.DANGER)
                 .text(`${e('error')} The AI system is currently under maintenance. We will be back soon!`)
                 .build();
@@ -97,6 +98,7 @@ export default {
 
             await sendMessage(message, [card]);
         } catch (error) {
+            console.error('AskAI Error (prefix):', error);
             const errCard = new FadeContainer(Colours.DANGER)
                 .text(`${e('error')} The AI system is currently under maintenance. We will be back soon!`)
                 .build();
