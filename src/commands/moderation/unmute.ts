@@ -2,7 +2,7 @@
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { sendResponse, sendMessage, FadeContainer } from '../../components/builders.js';
-import { dmUser } from '../../utils/moderation.js';
+import { dmUser, canModerate } from '../../utils/moderation.js';
 import { createCase } from '../../db/queries/moderation.js';
 import { e, Colours } from '../../components/emojis.js';
 import { sendLog, LogColour } from '../../utils/logsender.js';
