@@ -21,6 +21,15 @@ export const providers: AIProvider[] = [
         },
     },
     {
+        name: 'Hercai',
+        generate: async (prompt, systemPrompt) => {
+            const res = await fetch('https://hercai.onrender.com/v3/hercai?question=' + encodeURIComponent(prompt));
+            if (!res.ok) throw new Error(`Status ${res.status}`);
+            const data = await res.json();
+            return data.reply;
+        },
+    },
+    {
         name: 'Google Gemini',
         generate: async (prompt, systemPrompt) => {
             const key = process.env.GEMINI_API_KEY;
@@ -40,19 +49,19 @@ export const providers: AIProvider[] = [
         },
     },
     {
-        name: 'Groq',
+        name: 'Nvidia',
         generate: async (prompt, systemPrompt) => {
-            const key = process.env.GROQ_API_KEY;
-            if (!key) throw new Error('GROQ_API_KEY is not set');
+            const key = process.env.NVIDIA_API_KEY;
+            if (!key) throw new Error('NVIDIA_API_KEY is not set');
 
-            const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            const res = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${key}`,
                 },
                 body: JSON.stringify({
-                    model: 'llama3-8b-8192',
+                    model: 'meta/llama-3.1-405b-instruct',
                     messages: [
                         { role: 'system', content: systemPrompt },
                         { role: 'user', content: prompt },
@@ -90,19 +99,19 @@ export const providers: AIProvider[] = [
         },
     },
     {
-        name: 'Nvidia',
+        name: 'Groq',
         generate: async (prompt, systemPrompt) => {
-            const key = process.env.NVIDIA_API_KEY;
-            if (!key) throw new Error('NVIDIA_API_KEY is not set');
+            const key = process.env.GROQ_API_KEY;
+            if (!key) throw new Error('GROQ_API_KEY is not set');
 
-            const res = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+            const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${key}`,
                 },
                 body: JSON.stringify({
-                    model: 'meta/llama-3.1-405b-instruct',
+                    model: 'llama3-8b-8192',
                     messages: [
                         { role: 'system', content: systemPrompt },
                         { role: 'user', content: prompt },
@@ -112,15 +121,6 @@ export const providers: AIProvider[] = [
             if (!res.ok) throw new Error(`Status ${res.status}`);
             const data = await res.json();
             return data.choices[0].message.content;
-        },
-    },
-    {
-        name: 'Hercai',
-        generate: async (prompt, systemPrompt) => {
-            const res = await fetch('https://hercai.onrender.com/v3/hercai?question=' + encodeURIComponent(prompt));
-            if (!res.ok) throw new Error(`Status ${res.status}`);
-            const data = await res.json();
-            return data.reply;
         },
     },
     {
