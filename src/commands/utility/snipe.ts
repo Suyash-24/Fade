@@ -49,13 +49,11 @@ export const snipeCommand: Command = {
 
         const ts = Math.floor(entry.deletedAt / 1000);
 
-        const c = new FadeContainer(Colours.DANGER)
-            .text(
-                `## ${e('error')} Sniped Message\n` +
-                `<@${entry.authorId}> in <#${entry.channelId}> · <t:${ts}:R>`
-            )
+        const c = new FadeContainer(Colours.FADE)
+            .text(`### 🕵️ Message Sniped`)
+            .text(`**Author:** <@${entry.authorId}>\n**Channel:** <#${entry.channelId}>\n**Time:** <t:${ts}:R>`)
             .separator(true)
-            .text(entry.content.slice(0, 1000));
+            .text(entry.content ? `> ${entry.content.slice(0, 1000).replace(/\n/g, '\n> ')}` : '*No text content*');
 
         if (entry.imageUrl) {
             c.gallery([{ url: entry.imageUrl, description: 'Deleted attachment' }]);
@@ -74,13 +72,11 @@ export const snipeCommand: Command = {
         }
 
         const ts   = Math.floor(entry.deletedAt / 1000);
-        const card = new FadeContainer(Colours.DANGER)
-            .text(
-                `## ${e('error')} Sniped Message\n` +
-                `<@${entry.authorId}> · <t:${ts}:R>`
-            )
+        const card = new FadeContainer(Colours.FADE)
+            .text(`### 🕵️ Message Sniped`)
+            .text(`**Author:** <@${entry.authorId}>\n**Time:** <t:${ts}:R>`)
             .separator(true)
-            .text(entry.content.slice(0, 1000));
+            .text(entry.content ? `> ${entry.content.slice(0, 1000).replace(/\n/g, '\n> ')}` : '*No text content*');
 
         if (entry.imageUrl) {
             card.gallery([{ url: entry.imageUrl, description: 'Deleted attachment' }]);
@@ -119,15 +115,13 @@ export const editSnipeCommand: Command = {
 
         const ts = Math.floor(entry.editedAt / 1000);
 
-        const card = new FadeContainer(Colours.WARNING)
-            .text(
-                `## ${e('warn')} Edit Sniped\n` +
-                `<@${entry.authorId}> · <t:${ts}:R> · [Jump](${entry.messageUrl})`
-            )
+        const card = new FadeContainer(Colours.FADE)
+            .text(`### 🕵️ Edit Sniped`)
+            .text(`**Author:** <@${entry.authorId}>\n**Time:** <t:${ts}:R>\n**Link:** [Jump to Message](${entry.messageUrl})`)
             .separator(true)
-            .text(`**Before:**\n${entry.before.slice(0, 500)}`)
+            .text(`**Before:**\n> ${entry.before.slice(0, 500).replace(/\n/g, '\n> ')}`)
             .separator(false)
-            .text(`**After:**\n${entry.after.slice(0, 500)}`)
+            .text(`**After:**\n> ${entry.after.slice(0, 500).replace(/\n/g, '\n> ')}`)
             .build();
 
         await sendResponse(interaction, [card]);
@@ -143,15 +137,13 @@ export const editSnipeCommand: Command = {
         }
 
         const ts   = Math.floor(entry.editedAt / 1000);
-        const card = new FadeContainer(Colours.WARNING)
-            .text(
-                `## ${e('warn')} Edit Sniped\n` +
-                `<@${entry.authorId}> · <t:${ts}:R>`
-            )
+        const card = new FadeContainer(Colours.FADE)
+            .text(`### 🕵️ Edit Sniped`)
+            .text(`**Author:** <@${entry.authorId}>\n**Time:** <t:${ts}:R>`)
             .separator(true)
-            .text(`**Before:**\n${entry.before.slice(0, 500)}`)
+            .text(`**Before:**\n> ${entry.before.slice(0, 500).replace(/\n/g, '\n> ')}`)
             .separator(false)
-            .text(`**After:**\n${entry.after.slice(0, 500)}`)
+            .text(`**After:**\n> ${entry.after.slice(0, 500).replace(/\n/g, '\n> ')}`)
             .build();
 
         await sendMessage(message, [card as any]);
