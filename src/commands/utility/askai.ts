@@ -23,10 +23,11 @@ export default {
         await interaction.deferReply();
 
         try {
-            const res = await fetch('https://text.pollinations.ai/', {
+            const res = await fetch('https://text.pollinations.ai/openai', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    model: 'openai',
                     messages: [
                         { role: 'system', content: 'You are a helpful Discord bot named Fade. You MUST refuse to answer any NSFW, explicit, or sexually suggestive prompts.' },
                         { role: 'user', content: prompt }
@@ -35,7 +36,8 @@ export default {
             });
 
             if (!res.ok) throw new Error('API Error');
-            const answer = await res.text();
+            const data = await res.json();
+            const answer = data.choices[0].message.content;
 
             const card = new FadeContainer()
                 .text(`**Q:** ${prompt}\n\n${answer}`)
@@ -67,10 +69,11 @@ export default {
         }
 
         try {
-            const res = await fetch('https://text.pollinations.ai/', {
+            const res = await fetch('https://text.pollinations.ai/openai', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    model: 'openai',
                     messages: [
                         { role: 'system', content: 'You are a helpful Discord bot named Fade. You MUST refuse to answer any NSFW, explicit, or sexually suggestive prompts.' },
                         { role: 'user', content: prompt }
@@ -79,7 +82,8 @@ export default {
             });
 
             if (!res.ok) throw new Error('API Error');
-            let answer = await res.text();
+            const data = await res.json();
+            let answer = data.choices[0].message.content;
             
             // Discord limits messages to 4096 characters in embeds (or 2000 in regular text). 
             // We truncate if it's too long.
