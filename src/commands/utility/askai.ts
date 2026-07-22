@@ -1,8 +1,11 @@
 // src/commands/utility/ask.ts
 import { SlashCommandBuilder } from 'discord.js';
 import type { Command } from '../../types/command.js';
-import { FadeContainer, sendResponse, sendMessage } from '../../components/builders.js';
+import { sendResponse, sendMessage, FadeContainer } from '../../components/builders.js';
 import { e, Colours } from '../../components/emojis.js';
+import { generateAIResponse } from '../../utils/aiProvider.js';
+
+const SYSTEM_PROMPT = 'You are a helpful Discord bot named Fade. You MUST refuse to answer any NSFW, explicit, or sexually suggestive prompts.';
 
 export default {
     data: new SlashCommandBuilder()
@@ -23,24 +26,17 @@ export default {
         await interaction.deferReply();
 
         try {
-            const res = await fetch('https://text.pollinations.ai/openai', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: 'openai',
-                    messages: [
-                        { role: 'system', content: 'You are a helpful Discord bot named Fade. You MUST refuse to answer any NSFW, explicit, or sexually suggestive prompts.' },
-                        { role: 'user', content: prompt }
-                    ],
-                }),
-            });
-
-            if (!res.ok) throw new Error('API Error');
-            const data = await res.json();
-            const answer = data.choices[0].message.content;
+            const { text, provider } = await generateAIResponse(prompt, SYSTEM_PROMPT);
+            let answer = text;
+            
+            // Discord limits messages to 4096 characters in embeds
+            if (answer.length > 3900) {
+                answer = answer.slice(0, 3900) + '... (Response truncated)';
+            }
 
             const card = new FadeContainer()
                 .text(`**Q:** ${prompt}\n\n${answer}`)
+                .footer(`Powered by ${provider}`)
                 .build();
 
             await sendResponse(interaction as any, [card]);
@@ -70,30 +66,17 @@ export default {
         }
 
         try {
-            const res = await fetch('https://text.pollinations.ai/openai', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: 'openai',
-                    messages: [
-                        { role: 'system', content: 'You are a helpful Discord bot named Fade. You MUST refuse to answer any NSFW, explicit, or sexually suggestive prompts.' },
-                        { role: 'user', content: prompt }
-                    ],
-                }),
-            });
-
-            if (!res.ok) throw new Error('API Error');
-            const data = await res.json();
-            let answer = data.choices[0].message.content;
+            const { text, provider } = await generateAIResponse(prompt, SYSTEM_PROMPT);
+            let answer = text;
             
-            // Discord limits messages to 4096 characters in embeds (or 2000 in regular text). 
-            // We truncate if it's too long.
+            // Discord limits messages to 4096 characters in embeds
             if (answer.length > 3900) {
                 answer = answer.slice(0, 3900) + '... (Response truncated)';
             }
 
             const card = new FadeContainer()
                 .text(`**Q:** ${prompt}\n\n${answer}`)
+                .footer(`Powered by ${provider}`)
                 .build();
 
             await sendMessage(message, [card]);
