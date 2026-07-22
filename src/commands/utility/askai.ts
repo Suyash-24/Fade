@@ -35,8 +35,7 @@ export default {
             }
 
             const card = new FadeContainer()
-                .text(`**Q:** ${prompt}\n\n${answer}`)
-                .footer(`Powered by ${provider}`)
+                .text(`**Q:** ${prompt}\n\n${answer}\n\n*(Powered by ${provider})*`)
                 .build();
 
             await sendResponse(interaction as any, [card]);
@@ -75,8 +74,7 @@ export default {
             }
 
             const card = new FadeContainer()
-                .text(`**Q:** ${prompt}\n\n${answer}`)
-                .footer(`Powered by ${provider}`)
+                .text(`**Q:** ${prompt}\n\n${answer}\n\n*(Powered by ${provider})*`)
                 .build();
 
             await sendMessage(message, [card]);

@@ -161,3 +161,28 @@ export async function generateAIResponse(prompt: string, systemPrompt: string): 
     }
     throw new Error('All AI providers failed');
 }
+
+export async function generateAnswer(
+    question: string,
+    memories: string[]
+): Promise<{ text: string; provider: string }> {
+    const context = memories.map((m, i) => `${i + 1}. ${m}`).join('\n');
+    const systemPrompt = `You are Fade — a powerful, all-in-one Discord bot built by Suyash. 
+You have 115+ commands covering moderation, music, leveling, welcome cards, giveaways, tickets, economy, and much more.
+You also have a server memory system: admins teach you facts about their server and you recall them to answer questions.
+Answer questions based ONLY on the facts provided to you. Keep answers short (2-3 sentences max), conversational and friendly.
+If the facts don't fully answer the question, say you're not sure but share what you know.
+Never make up information that isn't in the provided facts.
+Speak with confidence and personality — you're Fade, not a generic chatbot.
+
+Server facts:
+${context}`;
+
+    try {
+        return await generateAIResponse(question, systemPrompt);
+    } catch (e: any) {
+        logger.warn('[AI] All providers failed, using raw fallback');
+        if (memories.length === 0) return { text: "I don't have any information about that yet.", provider: 'Memory' };
+        return { text: `Here's what I remember:\n\n${memories.slice(0, 3).map((m, i) => `• ${m}`).join('\n')}`, provider: 'Memory' };
+    }
+}
