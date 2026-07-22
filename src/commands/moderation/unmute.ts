@@ -32,8 +32,16 @@ export default {
             return;
         }
 
+        const check = canModerate(interaction.member, targetMember, 'unmute');
+        if (!check.ok) {
+            await interaction.reply({ content: `${e('error')} ${check.reason}`, flags: MessageFlags.Ephemeral });
+            return;
+        }
+
+        await interaction.deferReply();
+
         if (!targetMember.isCommunicationDisabled()) {
-            await interaction.reply({ content: `${e('error')} That member is not muted.`, flags: MessageFlags.Ephemeral });
+            await interaction.editReply({ content: `${e('error')} That member is not muted.` });
             return;
         }
 

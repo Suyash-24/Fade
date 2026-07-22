@@ -12,7 +12,14 @@ export async function getAntiraidConfig(guildId: string) {
     if (!config) {
         [config] = await db.insert(antiraidConfig)
             .values({ guildId })
+            .onConflictDoNothing()
             .returning();
+            
+        if (!config) {
+            config = (await db.query.antiraidConfig.findFirst({
+                where: eq(antiraidConfig.guildId, guildId),
+            }))!;
+        }
     }
     return config;
 }

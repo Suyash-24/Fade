@@ -50,6 +50,8 @@ export default {
             return;
         }
 
+        await interaction.deferReply();
+
         const newCase = await createCase({
             guildId:      guild.id,
             type:         'warn',

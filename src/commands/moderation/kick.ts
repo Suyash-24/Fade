@@ -49,6 +49,8 @@ export default {
             return;
         }
 
+        await interaction.deferReply();
+
         const dmSent = await dmUser(targetUser, guild, 'kick', reason, 0);
         await targetMember.kick(`[Fade] ${reason} | Moderator: ${interaction.user.tag}`);
 

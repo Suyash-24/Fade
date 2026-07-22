@@ -14,7 +14,14 @@ export async function getAntinukeConfig(guildId: string) {
     if (!config) {
         [config] = await db.insert(antinukeConfig)
             .values({ guildId })
+            .onConflictDoNothing()
             .returning();
+            
+        if (!config) {
+            config = (await db.query.antinukeConfig.findFirst({
+                where: eq(antinukeConfig.guildId, guildId),
+            }))!;
+        }
     }
     return config;
 }

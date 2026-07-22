@@ -66,9 +66,11 @@ export default {
         }
 
         if (duration > MAX_TIMEOUT) {
-            await interaction.reply({ content: `${e('error')} Maximum timeout duration is 28 days.`, flags: MessageFlags.Ephemeral });
+            await interaction.reply({ content: `${e('error')} Timeout duration cannot exceed 28 days.`, flags: MessageFlags.Ephemeral });
             return;
         }
+
+        await interaction.deferReply();
 
         const expiresAt = new Date(Date.now() + duration * 1000);
         await targetMember.timeout(duration * 1000, `[Fade] ${reason} | Moderator: ${interaction.user.tag}`);
