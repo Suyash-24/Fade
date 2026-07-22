@@ -32,7 +32,7 @@ export default {
             return;
         }
 
-        const check = canModerate(interaction.member, targetMember, 'unmute');
+        const check = canModerate(interaction.member as any, targetMember, 'unmute');
         if (!check.ok) {
             await interaction.reply({ content: `${e('error')} ${check.reason}`, flags: MessageFlags.Ephemeral });
             return;
