@@ -145,8 +145,12 @@ export const providers: AIProvider[] = [
     },
 ];
 
-export async function generateAIResponse(prompt: string, systemPrompt: string): Promise<{ text: string; provider: string }> {
-    for (const provider of providers) {
+export async function generateAIResponse(
+    prompt: string, 
+    systemPrompt: string,
+    customProviders: AIProvider[] = providers
+): Promise<{ text: string; provider: string }> {
+    for (const provider of customProviders) {
         try {
             logger.debug(`[AskAI] Attempting provider: ${provider.name}`);
             const text = await provider.generate(prompt, systemPrompt);
@@ -179,7 +183,14 @@ Server facts:
 ${context}`;
 
     try {
-        return await generateAIResponse(question, systemPrompt);
+        // For memory AI, Groq and OpenRouter are preferred for their speed and logic
+        const memoryProviders = [
+            providers.find(p => p.name === 'Groq')!,
+            providers.find(p => p.name === 'OpenRouter')!,
+            providers.find(p => p.name === 'Google Gemini')!,
+            ...providers.filter(p => !['Groq', 'OpenRouter', 'Google Gemini'].includes(p.name))
+        ];
+        return await generateAIResponse(question, systemPrompt, memoryProviders);
     } catch (e: any) {
         logger.warn('[AI] All providers failed, using raw fallback');
         if (memories.length === 0) return { text: "I don't have any information about that yet.", provider: 'Memory' };
