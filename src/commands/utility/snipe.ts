@@ -9,6 +9,8 @@ import {
     FadeContainer,
     sendResponse,
     sendMessage,
+    btn,
+    ButtonStyle,
 } from '../../components/builders.js';
 import {
     getSnipe,
@@ -43,7 +45,6 @@ export function buildSnipeCard(channelId: string, page: number) {
     }
 
     if (hasPrev || hasNext || entries.length > 1) {
-        const { btn, ButtonStyle } = require('../../components/builders.js');
         card.actionRow(
             btn(`snipe:${channelId}:${page - 1}`, '◀ Previous', ButtonStyle.Secondary, !hasPrev),
             btn(`snipe:${channelId}:${page + 1}`, 'Next ▶', ButtonStyle.Secondary, !hasNext)
@@ -75,7 +76,6 @@ export function buildEditSnipeCard(channelId: string, page: number) {
         .text(`**After:**\n> ${entry.after.slice(0, 500).replace(/\n/g, '\n> ')}`);
 
     if (hasPrev || hasNext || entries.length > 1) {
-        const { btn, ButtonStyle } = require('../../components/builders.js');
         card.actionRow(
             btn(`editsnipe:${channelId}:${page - 1}`, '◀ Previous', ButtonStyle.Secondary, !hasPrev),
             btn(`editsnipe:${channelId}:${page + 1}`, 'Next ▶', ButtonStyle.Secondary, !hasNext)
