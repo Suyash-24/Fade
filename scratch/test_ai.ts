@@ -1,14 +1,10 @@
 async function test() {
     try {
-        const res = await fetch('https://text.pollinations.ai/openai', {
+        const prompt = 'Hello';
+        const res = await fetch('https://devtoolbox-api.devtoolbox-api.workers.dev/ai/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: 'openai',
-                messages: [
-                    { role: 'user', content: 'Hello!' }
-                ],
-            }),
+            body: JSON.stringify({ prompt })
         });
 
         if (!res.ok) {
@@ -17,8 +13,8 @@ async function test() {
             return;
         }
         
-        const data = await res.json();
-        console.log('Success:', data.choices[0].message.content);
+        const answer = await res.text();
+        console.log('Success:', answer);
     } catch (e) {
         console.error('Fetch failed:', e);
     }

@@ -7,17 +7,31 @@ import { getVanityConfig, getVanityRoles } from '../db/queries/vanityRoles.js';
 import { Colours, e } from '../components/emojis.js';
 import { logger } from '../utils/logger.js';
 
-// Cache per guild to avoid DB hit on every presence update
-const cache = new Map<string, { config: any; roles: any[]; expiresAt: number }>();
+// Cache per guild to avoid DB hit on every presence update.
+// We store Promises to prevent Cache Stampede on high-frequency concurrent events.
+const cache = new Map<string, Promise<{ config: any; roles: any[]; expiresAt: number }>>();
 const TTL   = 2 * 60 * 1_000;
 
-async function getCached(guildId: string) {
+function getCached(guildId: string) {
     const hit = cache.get(guildId);
-    if (hit && hit.expiresAt > Date.now()) return hit;
-    const [config, roles] = await Promise.all([getVanityConfig(guildId), getVanityRoles(guildId)]);
-    const entry = { config, roles, expiresAt: Date.now() + TTL };
-    cache.set(guildId, entry);
-    return entry;
+    if (hit) {
+        return hit.then(entry => {
+            if (entry.expiresAt > Date.now()) return entry;
+            return fetchAndCache(guildId);
+        });
+    }
+    return fetchAndCache(guildId);
+}
+
+function fetchAndCache(guildId: string) {
+    const promise = Promise.all([getVanityConfig(guildId), getVanityRoles(guildId)]).then(([config, roles]) => {
+        return { config, roles, expiresAt: Date.now() + TTL };
+    }).catch(err => {
+        cache.delete(guildId); // clear cache on failure so it can retry
+        throw err;
+    });
+    cache.set(guildId, promise);
+    return promise;
 }
 
 export function invalidateVanityCache(guildId: string) {

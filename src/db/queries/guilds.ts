@@ -8,42 +8,47 @@ import { logger } from '../../utils/logger.js';
 
 type Guild = typeof guilds.$inferSelect;
 
-// Simple in-process cache: guildId → { data, expiresAt }
-const cache = new Map<string, { data: Guild; expiresAt: number }>();
+// Simple in-process cache: guildId → Promise<{ data, expiresAt }>
+const cache = new Map<string, Promise<{ data: Guild; expiresAt: number }>>();
 const TTL = 5 * 60 * 1_000; // 5 minutes
 
 // Get guild config, creating it if it doesn't exist
-export async function getGuild(guildId: string): Promise<Guild> {
-    // Check cache first
-    const cached = cache.get(guildId);
-    if (cached && cached.expiresAt > Date.now()) {
-        return cached.data;
+export function getGuild(guildId: string): Promise<Guild> {
+    const hit = cache.get(guildId);
+    if (hit) {
+        return hit.then(entry => {
+            if (entry.expiresAt > Date.now()) return entry.data;
+            return fetchAndCacheGuild(guildId);
+        });
     }
+    return fetchAndCacheGuild(guildId);
+}
 
-    // Try to fetch from DB
-    let guild = await db.query.guilds.findFirst({
-        where: eq(guilds.guildId, guildId),
-    });
-
-    // Auto-create on first encounter
-    if (!guild) {
-        [guild] = await db.insert(guilds)
-            .values({ guildId })
-            .onConflictDoNothing()
-            .returning();
+async function fetchAndCacheGuild(guildId: string): Promise<Guild> {
+    const promise = (async () => {
+        let guild = await db.query.guilds.findFirst({
+            where: eq(guilds.guildId, guildId),
+        });
 
         if (!guild) {
-            guild = (await db.query.guilds.findFirst({
-                where: eq(guilds.guildId, guildId),
-            }))!;
+            [guild] = await db.insert(guilds)
+                .values({ guildId })
+                .onConflictDoNothing()
+                .returning();
+
+            if (!guild) {
+                guild = (await db.query.guilds.findFirst({
+                    where: eq(guilds.guildId, guildId),
+                }))!;
+            }
+            logger.debug('Created guild config', { guildId });
         }
+        return { data: guild, expiresAt: Date.now() + TTL };
+    })();
 
-        logger.debug('Created guild config', { guildId });
-    }
-
-    // Store in cache
-    cache.set(guildId, { data: guild, expiresAt: Date.now() + TTL });
-    return guild;
+    promise.catch(err => cache.delete(guildId));
+    cache.set(guildId, promise);
+    return (await promise).data;
 }
 
 // Update guild config and invalidate cache

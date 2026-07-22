@@ -8,15 +8,28 @@ import { logger } from '../utils/logger.js';
 
 // Cache responders per guild to avoid DB hit on every message
 // Cache invalidates every 5 minutes
-const cache = new Map<string, { data: any[]; expiresAt: number }>();
-const TTL   = 5 * 60 * 1_000;
+const cache = new Map<string, Promise<{ data: any[]; expiresAt: number }>>();
+const TTL   = 2 * 60 * 1_000;
 
-async function getCachedResponders(guildId: string) {
-    const cached = cache.get(guildId);
-    if (cached && cached.expiresAt > Date.now()) return cached.data;
-    const data = await getResponders(guildId);
-    cache.set(guildId, { data, expiresAt: Date.now() + TTL });
-    return data;
+function getCachedResponders(guildId: string) {
+    const hit = cache.get(guildId);
+    if (hit) {
+        return hit.then(entry => {
+            if (entry.expiresAt > Date.now()) return entry.data;
+            return fetchAndCache(guildId);
+        });
+    }
+    return fetchAndCache(guildId);
+}
+
+async function fetchAndCache(guildId: string) {
+    const promise = (async () => {
+        const data = await getResponders(guildId);
+        return { data, expiresAt: Date.now() + TTL };
+    })();
+    promise.catch(err => cache.delete(guildId));
+    cache.set(guildId, promise);
+    return (await promise).data;
 }
 
 export function invalidateResponderCache(guildId: string) {
