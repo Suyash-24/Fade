@@ -73,7 +73,7 @@ export default {
     },
 
     async prefixExecute(message, args, client) {
-        const hasPerm = await hasPermission(message.member!, 'drag', [PermissionFlagsBits.MoveMembers]);
+        const hasPerm = message.member!.permissions.has(PermissionFlagsBits.MoveMembers);
         if (!hasPerm) {
             const missing = new FadeContainer(Colours.DANGER)
                 .text(`${e('error')} You are missing the \`MoveMembers\` permission to run this command.`)
