@@ -4,6 +4,8 @@ import type { Command } from '../../types/command.js';
 import { sendResponse, sendMessage, FadeContainer } from '../../components/builders.js';
 import { canModerate } from '../../utils/moderation.js';
 import { e, Colours } from '../../components/emojis.js';
+import { createCase } from '../../db/queries/moderation.js';
+import { sendLog, LogColour } from '../../utils/logsender.js';
 
 export default {
     data: { name: 'vundeafen', description: 'Remove server deafen from a member in voice channels' },
@@ -57,6 +59,30 @@ export default {
         try {
             await targetMember.voice.setDeaf(false, `Voice undeafened by ${message.author.tag}`);
             
+            const newCase = await createCase({
+                guildId:      guild.id,
+                type:         'vundeafen',
+                userId:       targetMember.id,
+                userTag:      targetMember.user.tag,
+                moderatorId:  moderator.id,
+                moderatorTag: message.author.tag,
+                reason:       'No reason provided',
+            });
+
+            await sendLog({
+                guild,
+                category: 'mod',
+                event:    'memberVoiceUndeafen',
+                color:    LogColour.MOD,
+                title:    `${e('voice')} Member Voice Undeafened`,
+                fields: [
+                    { name: 'User',      value: `<@${targetMember.id}> (${targetMember.user.tag})` },
+                    { name: 'Moderator', value: `<@${moderator.id}>` },
+                    { name: 'Case',      value: `\`#${newCase.caseNumber}\`` },
+                ],
+                footer: `ID: ${targetMember.id}`,
+            });
+
             const c = new FadeContainer(Colours.SUCCESS)
                 .text(`### 🎙️ Voice Undeafen`)
                 .text(`**Target:** <@${targetMember.id}>\n**Moderator:** <@${moderator.id}>`)

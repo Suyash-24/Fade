@@ -96,6 +96,13 @@ const ACTION_LABELS: Record<CaseType, string> = {
     timeout: 'Timed out',
     softban: 'Softbanned',
     strip:   'Roles stripped',
+    vmute:       'Voice Muted',
+    vunmute:     'Voice Unmuted',
+    vdeafen:     'Voice Deafened',
+    vundeafen:   'Voice Undeafened',
+    vdisconnect: 'Voice Disconnected',
+    vmove:       'Voice Moved',
+    drag:        'Voice Dragged',
 };
 
 export async function dmUser(

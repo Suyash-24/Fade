@@ -1,6 +1,6 @@
 {
   "name": "fade",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Fade — Everything. Free.",
   "type": "module",
   "main": "index.js",

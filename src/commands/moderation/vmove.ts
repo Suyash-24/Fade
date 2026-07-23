@@ -4,6 +4,8 @@ import type { Command } from '../../types/command.js';
 import { sendResponse, sendMessage, FadeContainer } from '../../components/builders.js';
 import { canModerate } from '../../utils/moderation.js';
 import { e, Colours } from '../../components/emojis.js';
+import { createCase } from '../../db/queries/moderation.js';
+import { sendLog, LogColour } from '../../utils/logsender.js';
 
 export default {
     data: { name: 'vmove', description: 'Move a user or all members from one voice channel to another' },
@@ -74,6 +76,32 @@ export default {
 
             try {
                 await targetMember.voice.setChannel(destChannel as VoiceChannel, `Moved by ${message.author.tag}`);
+                
+                const newCase = await createCase({
+                    guildId:      guild.id,
+                    type:         'vmove',
+                    userId:       targetMember.id,
+                    userTag:      targetMember.user.tag,
+                    moderatorId:  moderator.id,
+                    moderatorTag: message.author.tag,
+                    reason:       'No reason provided',
+                });
+
+                await sendLog({
+                    guild,
+                    category: 'mod',
+                    event:    'memberVoiceMove',
+                    color:    LogColour.MOD,
+                    title:    `${e('voice')} Member Voice Moved`,
+                    fields: [
+                        { name: 'User',      value: `<@${targetMember.id}> (${targetMember.user.tag})` },
+                        { name: 'Moderator', value: `<@${moderator.id}>` },
+                        { name: 'Destination', value: `<#${destChannel.id}>` },
+                        { name: 'Case',      value: `\`#${newCase.caseNumber}\`` },
+                    ],
+                    footer: `ID: ${targetMember.id}`,
+                });
+
                 const c = new FadeContainer(Colours.SUCCESS)
                     .text(`### 🎙️ Voice Move`)
                     .text(`**Target:** <@${targetMember.id}>\n**Moved To:** <#${destChannel.id}>\n**Moderator:** <@${moderator.id}>`)
@@ -122,6 +150,23 @@ export default {
                 .text(`**Source:** <#${sourceChannel.id}>\n**Destination:** <#${destChannel.id}>\n**Moved:** \`${movedCount}\` members\n**Failed:** \`${failedCount}\` members\n**Moderator:** <@${moderator.id}>`)
                 .build();
             await sendMessage(message, [c]);
+
+            if (movedCount > 0) {
+                await sendLog({
+                    guild,
+                    category: 'mod',
+                    event:    'memberVoiceMove',
+                    color:    LogColour.MOD,
+                    title:    `${e('voice')} Mass Voice Move`,
+                    fields: [
+                        { name: 'Moderator', value: `<@${moderator.id}>` },
+                        { name: 'Source', value: `<#${sourceChannel.id}>` },
+                        { name: 'Destination', value: `<#${destChannel.id}>` },
+                        { name: 'Moved', value: `${movedCount} members` },
+                    ],
+                    footer: `ID: ${moderator.id}`,
+                });
+            }
         }
     },
 } as Command;

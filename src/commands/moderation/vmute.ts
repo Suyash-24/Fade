@@ -4,6 +4,8 @@ import type { Command } from '../../types/command.js';
 import { sendResponse, sendMessage, FadeContainer } from '../../components/builders.js';
 import { canModerate } from '../../utils/moderation.js';
 import { e, Colours } from '../../components/emojis.js';
+import { createCase } from '../../db/queries/moderation.js';
+import { sendLog, LogColour } from '../../utils/logsender.js';
 
 export default {
     data: { name: 'vmute', description: 'Server mute a member in voice channels' },
@@ -57,6 +59,30 @@ export default {
         try {
             await targetMember.voice.setMute(true, `Voice muted by ${message.author.tag}`);
             
+            const newCase = await createCase({
+                guildId:      guild.id,
+                type:         'vmute',
+                userId:       targetMember.id,
+                userTag:      targetMember.user.tag,
+                moderatorId:  moderator.id,
+                moderatorTag: message.author.tag,
+                reason:       'No reason provided',
+            });
+
+            await sendLog({
+                guild,
+                category: 'mod',
+                event:    'memberVoiceMute',
+                color:    LogColour.MOD,
+                title:    `${e('mute')} Member Voice Muted`,
+                fields: [
+                    { name: 'User',      value: `<@${targetMember.id}> (${targetMember.user.tag})` },
+                    { name: 'Moderator', value: `<@${moderator.id}>` },
+                    { name: 'Case',      value: `\`#${newCase.caseNumber}\`` },
+                ],
+                footer: `ID: ${targetMember.id}`,
+            });
+
             const c = new FadeContainer(Colours.SUCCESS)
                 .text(`### 🎙️ Voice Mute`)
                 .text(`**Target:** <@${targetMember.id}>\n**Moderator:** <@${moderator.id}>`)

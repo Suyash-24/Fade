@@ -4,7 +4,7 @@ import { db } from '../index.js';
 import { cases, guilds } from '../schema.js';
 import { ensureGuild } from './guilds.js';
 
-export type CaseType = 'ban' | 'kick' | 'warn' | 'mute' | 'unmute' | 'unban' | 'timeout' | 'softban' | 'strip';
+export type CaseType = 'ban' | 'kick' | 'warn' | 'mute' | 'unmute' | 'unban' | 'timeout' | 'softban' | 'strip' | 'vmute' | 'vunmute' | 'vdeafen' | 'vundeafen' | 'vdisconnect' | 'vmove' | 'drag';
 
 export interface CreateCaseOptions {
     guildId:      string;

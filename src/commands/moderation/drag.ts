@@ -4,6 +4,8 @@ import type { Command } from '../../types/command.js';
 import { sendResponse, sendMessage, FadeContainer } from '../../components/builders.js';
 import { canModerate } from '../../utils/moderation.js';
 import { e, Colours } from '../../components/emojis.js';
+import { createCase } from '../../db/queries/moderation.js';
+import { sendLog, LogColour } from '../../utils/logsender.js';
 import { hasPermission } from '../../utils/fakePerms.js';
 
 export default {
@@ -73,6 +75,31 @@ export default {
         try {
             await targetMember.voice.setChannel(moderator.voice.channelId, `Dragged by ${message.author.tag}`);
             
+            const newCase = await createCase({
+                guildId:      guild.id,
+                type:         'drag',
+                userId:       targetMember.id,
+                userTag:      targetMember.user.tag,
+                moderatorId:  moderator.id,
+                moderatorTag: message.author.tag,
+                reason:       'No reason provided',
+            });
+
+            await sendLog({
+                guild,
+                category: 'mod',
+                event:    'memberVoiceDrag',
+                color:    LogColour.MOD,
+                title:    `${e('voice')} Member Voice Dragged`,
+                fields: [
+                    { name: 'User',      value: `<@${targetMember.id}> (${targetMember.user.tag})` },
+                    { name: 'Moderator', value: `<@${moderator.id}>` },
+                    { name: 'Destination', value: `<#${moderator.voice.channelId}>` },
+                    { name: 'Case',      value: `\`#${newCase.caseNumber}\`` },
+                ],
+                footer: `ID: ${targetMember.id}`,
+            });
+
             const c = new FadeContainer(Colours.SUCCESS)
                 .text(`${e('success')} Successfully dragged <@${targetMember.id}> to <#${moderator.voice.channelId}>.`)
                 .build();
