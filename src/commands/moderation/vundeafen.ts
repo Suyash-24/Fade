@@ -1,35 +1,34 @@
-// src/commands/moderation/drag.ts
+// src/commands/moderation/vundeafen.ts
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags, GuildMember } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { sendResponse, sendMessage, FadeContainer } from '../../components/builders.js';
 import { canModerate } from '../../utils/moderation.js';
 import { e, Colours } from '../../components/emojis.js';
-import { hasPermission } from '../../utils/fakePerms.js';
 
 export default {
-    data: { name: 'drag', description: 'Drag a member into your current voice channel' },
+    data: { name: 'vundeafen', description: 'Remove server deafen from a member in voice channels' },
     prefixOnly:      true,
 
     category:        'moderation',
     guildOnly:       true,
-    userPermissions: [PermissionFlagsBits.MoveMembers],
-    botPermissions:  [PermissionFlagsBits.MoveMembers],
+    userPermissions: [PermissionFlagsBits.DeafenMembers],
+    botPermissions:  [PermissionFlagsBits.DeafenMembers],
     cooldown:        3,
 
 
 
     async prefixExecute(message, args, client) {
-        const hasPerm = message.member!.permissions.has(PermissionFlagsBits.MoveMembers);
+        const hasPerm = message.member!.permissions.has(PermissionFlagsBits.DeafenMembers);
         if (!hasPerm) {
             const missing = new FadeContainer(Colours.DANGER)
-                .text(`${e('error')} You are missing the \`MoveMembers\` permission to run this command.`)
+                .text(`${e('error')} You are missing the \`DeafenMembers\` permission to run this command.`)
                 .build();
             await sendMessage(message, [missing]);
             return;
         }
 
         if (!args[0]) {
-            await message.reply(`${e('error')} Please specify a member to drag.`);
+            await message.reply(`${e('error')} Please specify a member to server undeafen.`);
             return;
         }
 
@@ -49,37 +48,23 @@ export default {
             return;
         }
 
-        if (!moderator.voice.channelId) {
-            await message.reply(`${e('error')} You must be in a voice channel to drag someone.`);
-            return;
-        }
-
-        if (!targetMember.voice.channelId) {
-            await message.reply(`${e('error')} That user is not currently in a voice channel.`);
-            return;
-        }
-
-        if (moderator.voice.channelId === targetMember.voice.channelId) {
-            await message.reply(`${e('error')} That user is already in your voice channel.`);
-            return;
-        }
-
-        const check = canModerate(moderator, targetMember, 'drag');
+        const check = canModerate(moderator, targetMember, 'vundeafen');
         if (!check.ok) {
             await message.reply(`${e('error')} ${check.reason}`);
             return;
         }
 
         try {
-            await targetMember.voice.setChannel(moderator.voice.channelId, `Dragged by ${message.author.tag}`);
+            await targetMember.voice.setDeaf(false, `Voice undeafened by ${message.author.tag}`);
             
             const c = new FadeContainer(Colours.SUCCESS)
-                .text(`${e('success')} Successfully dragged <@${targetMember.id}> to <#${moderator.voice.channelId}>.`)
+                .text(`### 🎙️ Voice Undeafen`)
+                .text(`**Target:** <@${targetMember.id}>\n**Moderator:** <@${moderator.id}>`)
                 .build();
             await sendMessage(message, [c]);
         } catch (error) {
             const c = new FadeContainer(Colours.DANGER)
-                .text(`${e('error')} Failed to drag the user. Check my permissions or channel limits.`)
+                .text(`${e('error')} Failed to server undeafen the user. They might not be in a voice channel, or my roles are too low.`)
                 .build();
             await sendMessage(message, [c]);
         }
