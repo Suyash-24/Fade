@@ -101,8 +101,6 @@ const ACTION_LABELS: Record<CaseType, string> = {
     vdeafen:     'Voice Deafened',
     vundeafen:   'Voice Undeafened',
     vdisconnect: 'Voice Disconnected',
-    vmove:       'Voice Moved',
-    drag:        'Voice Dragged',
 };
 
 export async function dmUser(
