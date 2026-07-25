@@ -67,13 +67,12 @@ const event: Event<'clientReady'> = {
                 // Safely read version from package.json using fs
                 const fs = await import('node:fs');
                 const path = await import('node:path');
-                const url = await import('node:url');
-                const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
-                const pkgPath = path.resolve(__dirname, '../../package.json');
+                // Use process.cwd() since the bot is always started from the project root
+                const pkgPath = path.resolve(process.cwd(), 'package.json');
                 const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
                 version = `v${pkg.version}`;
-            } catch {
-                // Fallback
+            } catch (err) {
+                console.error('[Status] Failed to read version from package.json:', err);
             }
 
             const statusText = toggle ? `🔗 ${version}` : 'f!imagine to generate images';
