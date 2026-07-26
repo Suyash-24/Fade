@@ -18,6 +18,8 @@ import {
     clearSnipe,
     clearEditSnipe,
     clearAllSnipes,
+    getReactionSnipe,
+    clearReactionSnipe,
 } from '../../utils/snipeCache.js';
 import { e, Colours } from '../../components/emojis.js';
 
@@ -79,6 +81,39 @@ export function buildEditSnipeCard(channelId: string, page: number) {
         card.actionRow(
             btn(`editsnipe:${channelId}:${page - 1}`, '◀ Previous', ButtonStyle.Secondary, !hasPrev),
             btn(`editsnipe:${channelId}:${page + 1}`, 'Next ▶', ButtonStyle.Secondary, !hasNext)
+        );
+    }
+
+    return card.build();
+}
+
+export function buildReactionSnipeCard(channelId: string, page: number) {
+    const entries = getReactionSnipe(channelId);
+    if (!entries || entries.length === 0) return null;
+    
+    // Safety clamp
+    if (page < 0) page = 0;
+    if (page >= entries.length) page = entries.length - 1;
+
+    const entry = entries[page];
+    const ts = Math.floor(entry.removedAt / 1000);
+    const hasPrev = page > 0;
+    const hasNext = page < entries.length - 1;
+
+    const card = new FadeContainer()
+        .text(`### ${e('detective')} Reaction Sniped`)
+        .text(`**Author:** <@${entry.authorId}>\n**Time:** <t:${ts}:R>\n**Link:** [Jump to Message](${entry.messageUrl})`)
+        .separator(true)
+        .text(`**Reaction:** ${entry.emojiUrl ? `[Link to Emoji](${entry.emojiUrl})` : entry.emojiName}`);
+
+    if (entry.emojiUrl) {
+        card.gallery([{ url: entry.emojiUrl, description: 'Removed reaction' }]);
+    }
+
+    if (hasPrev || hasNext || entries.length > 1) {
+        card.actionRow(
+            btn(`rsnipe:${channelId}:${page - 1}`, '◀ Previous', ButtonStyle.Secondary, !hasPrev),
+            btn(`rsnipe:${channelId}:${page + 1}`, 'Next ▶', ButtonStyle.Secondary, !hasNext)
         );
     }
 
@@ -204,6 +239,7 @@ export const clearSnipeCommand: Command = {
         } else {
             clearSnipe(interaction.channelId);
             clearEditSnipe(interaction.channelId);
+            clearReactionSnipe(interaction.channelId);
             const card = new FadeContainer(Colours.SUCCESS)
                 .text(`${e('success')}  Snipe cache cleared for <#${interaction.channelId}>`)
                 .build();
@@ -223,10 +259,54 @@ export const clearSnipeCommand: Command = {
         } else {
             clearSnipe(message.channelId);
             clearEditSnipe(message.channelId);
+            clearReactionSnipe(message.channelId);
             await message.reply(`${e('success')} Snipe cache cleared for this channel.`);
         }
     },
 };
 
-// Export all three as default array so command handler loads them all
-export default [snipeCommand, editSnipeCommand, clearSnipeCommand];
+export const reactionSnipeCommand: Command = {
+    data: new SlashCommandBuilder()
+        .setName('reactionsnipe')
+        .setDescription('Show the last removed reaction in this channel')
+        .addChannelOption(o => o
+            .setName('channel')
+            .setDescription('Channel to snipe (default: current)')
+            .setRequired(false)
+        ),
+
+    category:  'utility',
+    guildOnly: true,
+    cooldown:  5,
+
+    async execute(interaction, client) {
+        const channel   = interaction.options.getChannel('channel') ?? interaction.channel;
+        const channelId = channel?.id ?? interaction.channelId;
+        const card      = buildReactionSnipeCard(channelId, 0);
+
+        if (!card) {
+            const noRes = new FadeContainer()
+                .text(`${e('search')} No recently removed reactions in <#${channelId}>.`)
+                .build();
+            await sendResponse(interaction, [noRes], true);
+            return;
+        }
+
+        await sendResponse(interaction, [card]);
+    },
+
+    async prefixExecute(message, args, client) {
+        const channelId = message.mentions.channels.first()?.id ?? message.channelId;
+        const card      = buildReactionSnipeCard(channelId, 0);
+
+        if (!card) {
+            await message.reply(`${e('search')} No recently removed reactions in <#${channelId}>.`);
+            return;
+        }
+
+        await sendMessage(message, [card as any]);
+    },
+};
+
+// Export all four as default array so command handler loads them all
+export default [snipeCommand, editSnipeCommand, reactionSnipeCommand, clearSnipeCommand];

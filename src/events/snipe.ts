@@ -5,6 +5,7 @@ import type { Event } from '../types/event.js';
 import {
     setSnipe,
     setEditSnipe,
+    setReactionSnipe,
 } from '../utils/snipeCache.js';
 
 export const messageDeleteSnipe: Event<'messageDelete'> = {
@@ -54,4 +55,27 @@ export const messageUpdateSnipe: Event<'messageUpdate'> = {
     },
 };
 
-export default [messageDeleteSnipe, messageUpdateSnipe];
+export const messageReactionRemoveSnipe: Event<'messageReactionRemove'> = {
+    name: 'messageReactionRemove',
+    async execute(client, reaction, user) {
+        if (user.bot) return;
+        if (!reaction.message.guild) return;
+
+        const emojiUrl = reaction.emoji.imageURL();
+        const emojiName = reaction.emoji.id ? `<:${reaction.emoji.name}:${reaction.emoji.id}>` : reaction.emoji.name;
+
+        setReactionSnipe(reaction.message.channelId, {
+            emojiName:    emojiName ?? 'unknown',
+            emojiUrl:     emojiUrl ?? null,
+            authorId:     user.id,
+            authorTag:    user.tag ?? 'Unknown User',
+            authorAvatar: user.displayAvatarURL({ size: 256 }) ?? null,
+            channelId:    reaction.message.channelId,
+            guildId:      reaction.message.guild.id,
+            messageUrl:   reaction.message.url,
+            removedAt:    Date.now(),
+        });
+    },
+};
+
+export default [messageDeleteSnipe, messageUpdateSnipe, messageReactionRemoveSnipe];
