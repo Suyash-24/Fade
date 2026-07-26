@@ -17,7 +17,9 @@ import {
 } from 'discord.js';
 import { e, Colours } from '../components/emojis.js';
 import { FadeContainer, btn } from '../components/builders.js';
-import type { CaseType } from '../db/queries/moderation.js';
+import { createCase, type CaseType } from '../db/queries/moderation.js';
+import { sendLog, LogColour } from './logsender.js';
+import { logger } from './logger.js';
 
 // ── Permission checks ─────────────────────────────────────────────────────────
 
@@ -189,4 +191,90 @@ export function buildCaseCard(opts: {
     return new FadeContainer(color)
         .text(lines.join('\n'))
         .build();
+}
+
+// ── Inline Flag Parser ────────────────────────────────────────────────────────
+
+export function extractFlags(reason: string) {
+    const regex = /--do\s+(kick|ban|mute|timeout|softban|strip|stripstaff)(?:\s+(\w+))?/i;
+    const match = reason.match(regex);
+    if (!match) return { reason };
+
+    const doAction = match[1].toLowerCase();
+    const doDurationStr = match[2];
+    const cleanedReason = reason.replace(regex, '').trim() || 'No reason provided';
+    const doDuration = doDurationStr ? parseDuration(doDurationStr) : null;
+
+    return {
+        reason: cleanedReason,
+        doAction,
+        doDuration,
+        doDurationStr
+    };
+}
+
+// ── Auto Action Executor ──────────────────────────────────────────────────────
+
+export async function executeAutoAction(
+    guild: Guild,
+    targetUser: User,
+    targetMember: GuildMember | null,
+    moderator: GuildMember | null,
+    action: string,
+    duration: number | null,
+    reason: string,
+    botUser: User
+) {
+    if (moderator && targetMember) {
+        const check = canModerate(moderator, targetMember, action);
+        if (!check.ok) return false;
+    }
+
+    try {
+        if (action === 'kick' && targetMember) {
+            await dmUser(targetUser, guild, 'kick', reason, 0);
+            await targetMember.kick(`[Fade Auto] ${reason}`);
+            await createCase({ guildId: guild.id, type: 'kick', userId: targetUser.id, userTag: targetUser.tag, moderatorId: moderator?.id ?? botUser.id, moderatorTag: moderator?.user.tag ?? botUser.tag, reason });
+        } else if (action === 'ban') {
+            await dmUser(targetUser, guild, 'ban', reason, 0);
+            await guild.bans.create(targetUser.id, { reason: `[Fade Auto] ${reason}` });
+            await createCase({ guildId: guild.id, type: 'ban', userId: targetUser.id, userTag: targetUser.tag, moderatorId: moderator?.id ?? botUser.id, moderatorTag: moderator?.user.tag ?? botUser.tag, reason });
+        } else if (action === 'softban') {
+            await dmUser(targetUser, guild, 'softban', reason, 0);
+            await guild.bans.create(targetUser.id, { reason: `[Fade Auto] ${reason}`, deleteMessageSeconds: 604800 });
+            await guild.bans.remove(targetUser.id, `[Fade Auto Softban]`);
+            await createCase({ guildId: guild.id, type: 'softban', userId: targetUser.id, userTag: targetUser.tag, moderatorId: moderator?.id ?? botUser.id, moderatorTag: moderator?.user.tag ?? botUser.tag, reason });
+        } else if ((action === 'mute' || action === 'timeout') && duration && targetMember) {
+            const ms = duration * 1000;
+            await targetMember.timeout(ms, `[Fade Auto] ${reason}`);
+            await dmUser(targetUser, guild, 'timeout', reason, 0, duration);
+            await createCase({ guildId: guild.id, type: 'timeout', userId: targetUser.id, userTag: targetUser.tag, moderatorId: moderator?.id ?? botUser.id, moderatorTag: moderator?.user.tag ?? botUser.tag, reason, duration });
+        } else if (action === 'strip' && targetMember) {
+            const rolesToRemove = targetMember.roles.cache.filter(r => r.id !== guild.id && r.rawPosition < guild.members.me!.roles.highest.position && !r.managed);
+            await targetMember.roles.remove(rolesToRemove, `[Fade Auto] ${reason}`);
+            await createCase({ guildId: guild.id, type: 'strip', userId: targetUser.id, userTag: targetUser.tag, moderatorId: moderator?.id ?? botUser.id, moderatorTag: moderator?.user.tag ?? botUser.tag, reason });
+        } else if (action === 'stripstaff' && targetMember) {
+            const elevatedRoles = targetMember.roles.cache.filter(r => r.id !== guild.id && (r.permissions.has('Administrator') || r.permissions.has('ManageGuild') || r.permissions.has('ManageRoles') || r.permissions.has('ModerateMembers') || r.permissions.has('KickMembers') || r.permissions.has('BanMembers') || r.permissions.has('ManageMessages')) && r.rawPosition < guild.members.me!.roles.highest.position && !r.managed);
+            await targetMember.roles.remove(elevatedRoles, `[Fade Auto] ${reason}`);
+            await createCase({ guildId: guild.id, type: 'stripstaff', userId: targetUser.id, userTag: targetUser.tag, moderatorId: moderator?.id ?? botUser.id, moderatorTag: moderator?.user.tag ?? botUser.tag, reason });
+        } else {
+            return false;
+        }
+
+        await sendLog({
+            guild, category: 'mod', event: 'memberWarn', color: LogColour.DELETE,
+            title: `${e('warn')} Auto-Action Executed`,
+            fields: [
+                { name: 'User', value: `<@${targetUser.id}>` },
+                { name: 'Action', value: `\`${action}\`` },
+                { name: 'Reason', value: reason },
+            ],
+            footer: `ID: ${targetUser.id}`,
+        });
+
+        return true;
+    } catch (err) {
+        logger.error('executeAutoAction failed', err);
+        return false;
+    }
 }

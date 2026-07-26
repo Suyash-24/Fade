@@ -2,7 +2,7 @@
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { sendResponse, sendMessage, FadeContainer } from '../../components/builders.js';
-import { canModerate, dmUser, parseDuration } from '../../utils/moderation.js';
+import { canModerate, dmUser, parseDuration, extractFlags, executeAutoAction } from '../../utils/moderation.js';
 import { createCase, getWarningCount } from '../../db/queries/moderation.js';
 import { getTriggeredThreshold } from '../../db/queries/warnThresholds.js';
 import { e, Colours } from '../../components/emojis.js';
@@ -34,7 +34,7 @@ export default {
 
     async execute(interaction, client) {
         const targetUser   = interaction.options.getUser('user', true);
-        const reason       = interaction.options.getString('reason', true);
+        const { reason, doAction, doDuration } = extractFlags(interaction.options.getString('reason', true));
         const guild        = interaction.guild!;
         const moderator    = interaction.member as any;
         const targetMember = await guild.members.fetch(targetUser.id).catch(() => null);
@@ -69,34 +69,13 @@ export default {
         const threshold = await getTriggeredThreshold(guild.id, warnCount);
         if (threshold && targetMember) {
             const thresholdReason = threshold.reason ?? 'Automatic action: warning threshold reached';
-            try {
-                if (threshold.action === 'kick') {
-                    await dmUser(targetUser, guild, 'kick', thresholdReason, 0);
-                    await targetMember.kick(`[Fade Auto] ${thresholdReason}`);
-                    await createCase({ guildId: guild.id, type: 'kick', userId: targetUser.id, userTag: targetUser.tag, moderatorId: client.user!.id, moderatorTag: client.user!.tag, reason: thresholdReason });
-                } else if (threshold.action === 'ban') {
-                    await dmUser(targetUser, guild, 'ban', thresholdReason, 0);
-                    await guild.bans.create(targetUser.id, { reason: `[Fade Auto] ${thresholdReason}` });
-                    await createCase({ guildId: guild.id, type: 'ban', userId: targetUser.id, userTag: targetUser.tag, moderatorId: client.user!.id, moderatorTag: client.user!.tag, reason: thresholdReason });
-                } else if ((threshold.action === 'mute' || threshold.action === 'timeout') && threshold.duration) {
-                    const ms = threshold.duration * 1000;
-                    await targetMember.timeout(ms, `[Fade Auto] ${thresholdReason}`);
-                    await createCase({ guildId: guild.id, type: 'timeout', userId: targetUser.id, userTag: targetUser.tag, moderatorId: client.user!.id, moderatorTag: client.user!.tag, reason: thresholdReason, duration: threshold.duration });
-                }
-                await sendLog({
-                    guild, category: 'mod', event: 'memberWarn', color: LogColour.DELETE,
-                    title: `${e('warn')} Auto-Action Triggered`,
-                    fields: [
-                        { name: 'User', value: `<@${targetUser.id}>` },
-                        { name: 'Action', value: `\`${threshold.action}\`` },
-                        { name: 'Trigger', value: `\`${warnCount}\` warnings` },
-                        { name: 'Reason', value: thresholdReason },
-                    ],
-                    footer: `ID: ${targetUser.id}`,
-                });
-            } catch (err) {
-                logger.error('Warn threshold auto-action failed', err);
-            }
+            await executeAutoAction(guild, targetUser, targetMember, null, threshold.action, threshold.duration ?? null, thresholdReason, client.user!);
+        }
+
+        // ── Inline Flag Auto-Action ───────────────────────────────────────────
+        if (doAction && targetMember) {
+            const inlineReason = `Inline flag action from case #${newCase.caseNumber}`;
+            await executeAutoAction(guild, targetUser, targetMember, moderator, doAction, doDuration, inlineReason, client.user!);
         }
 
         await sendLog({
@@ -140,7 +119,7 @@ export default {
             await message.reply(`${e('error')} You don't have permission to warn members.`); return;
         }
 
-        const reason = args.slice(1).join(' ') || 'No reason provided';
+        const { reason, doAction, doDuration } = extractFlags(args.slice(1).join(' ') || 'No reason provided');
         const check  = canModerate(message.member!, target, 'warn');
         if (!check.ok) { await message.reply(`${e('error')} ${check.reason}`); return; }
 
@@ -161,34 +140,13 @@ export default {
         const threshold = await getTriggeredThreshold(message.guild!.id, warnCount);
         if (threshold) {
             const thresholdReason = threshold.reason ?? 'Automatic action: warning threshold reached';
-            try {
-                if (threshold.action === 'kick') {
-                    await dmUser(target.user, message.guild!, 'kick', thresholdReason, 0);
-                    await target.kick(`[Fade Auto] ${thresholdReason}`);
-                    await createCase({ guildId: message.guild!.id, type: 'kick', userId: target.id, userTag: target.user.tag, moderatorId: client.user!.id, moderatorTag: client.user!.tag, reason: thresholdReason });
-                } else if (threshold.action === 'ban') {
-                    await dmUser(target.user, message.guild!, 'ban', thresholdReason, 0);
-                    await message.guild!.bans.create(target.id, { reason: `[Fade Auto] ${thresholdReason}` });
-                    await createCase({ guildId: message.guild!.id, type: 'ban', userId: target.id, userTag: target.user.tag, moderatorId: client.user!.id, moderatorTag: client.user!.tag, reason: thresholdReason });
-                } else if ((threshold.action === 'mute' || threshold.action === 'timeout') && threshold.duration) {
-                    const ms = threshold.duration * 1000;
-                    await target.timeout(ms, `[Fade Auto] ${thresholdReason}`);
-                    await createCase({ guildId: message.guild!.id, type: 'timeout', userId: target.id, userTag: target.user.tag, moderatorId: client.user!.id, moderatorTag: client.user!.tag, reason: thresholdReason, duration: threshold.duration });
-                }
-                await sendLog({
-                    guild: message.guild!, category: 'mod', event: 'memberWarn', color: LogColour.DELETE,
-                    title: `${e('warn')} Auto-Action Triggered`,
-                    fields: [
-                        { name: 'User',    value: `<@${target.id}>` },
-                        { name: 'Action',  value: `\`${threshold.action}\`` },
-                        { name: 'Trigger', value: `\`${warnCount}\` warnings` },
-                        { name: 'Reason',  value: thresholdReason },
-                    ],
-                    footer: `ID: ${target.id}`,
-                });
-            } catch (err) {
-                logger.error('Warn threshold auto-action failed', err);
-            }
+            await executeAutoAction(message.guild!, target.user, target, null, threshold.action, threshold.duration ?? null, thresholdReason, client.user!);
+        }
+
+        // ── Inline Flag Auto-Action ───────────────────────────────────────────
+        if (doAction) {
+            const inlineReason = `Inline flag action from case #${newCase.caseNumber}`;
+            await executeAutoAction(message.guild!, target.user, target, message.member, doAction, doDuration, inlineReason, client.user!);
         }
 
         await sendLog({

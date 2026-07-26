@@ -6,7 +6,7 @@ import {
 } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { fadeReply, sendMessage, FadeContainer } from '../../components/builders.js';
-import { canModerate, dmUser, parseDuration } from '../../utils/moderation.js';
+import { canModerate, dmUser, parseDuration, extractFlags, executeAutoAction } from '../../utils/moderation.js';
 import { createCase } from '../../db/queries/moderation.js';
 import { e, Colours } from '../../components/emojis.js';
 import { sendLog, LogColour } from '../../utils/logsender.js';
@@ -55,7 +55,7 @@ export default {
         await interaction.deferReply();
 
         const targetUser  = interaction.options.getUser('user', true);
-        const reason      = interaction.options.getString('reason') ?? 'No reason provided';
+        const { reason, doAction, doDuration } = extractFlags(interaction.options.getString('reason') ?? 'No reason provided');
         const durationStr = interaction.options.getString('duration');
         const deleteDays  = interaction.options.getInteger('delete_messages') ?? 0;
         const guild       = interaction.guild!;
@@ -129,6 +129,11 @@ export default {
             )
             .build();
 
+        if (doAction && targetMember) {
+            const inlineReason = `Inline flag action from case #${newCase.caseNumber}`;
+            await executeAutoAction(guild, targetUser, targetMember, moderator, doAction, doDuration, inlineReason, client.user!);
+        }
+
         // Invoke message override
         const invoke = await getInvokeResponse(guild.id, 'ban', {
             user:      `<@${targetUser.id}>`,
@@ -154,7 +159,7 @@ export default {
             return;
         }
 
-        const reason      = args.slice(1).join(' ') || 'No reason provided';
+        const { reason, doAction, doDuration } = extractFlags(args.slice(1).join(' ') || 'No reason provided');
         const guild       = message.guild!;
         const moderator   = message.member!;
         const targetMember = await guild.members.fetch(target.id).catch(() => null);
@@ -215,6 +220,12 @@ export default {
                 (dmSent === false ? ` · Could not DM user` : '')
             )
             .build();
+
+        if (doAction && targetMember) {
+            const inlineReason = `Inline flag action from case #${newCase.caseNumber}`;
+            await executeAutoAction(message.guild!, target, targetMember, message.member, doAction, doDuration, inlineReason, client.user!);
+        }
+
         await sendMessage(message, [card]);
     },
 } satisfies Command;

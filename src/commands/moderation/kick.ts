@@ -2,7 +2,7 @@
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { sendResponse, sendMessage, FadeContainer } from '../../components/builders.js';
-import { canModerate, dmUser } from '../../utils/moderation.js';
+import { canModerate, dmUser, extractFlags, executeAutoAction } from '../../utils/moderation.js';
 import { createCase } from '../../db/queries/moderation.js';
 import { e, Colours } from '../../components/emojis.js';
 import { sendLog, LogColour } from '../../utils/logsender.js';
@@ -33,7 +33,7 @@ export default {
 
     async execute(interaction, client) {
         const targetUser   = interaction.options.getUser('user', true);
-        const reason       = interaction.options.getString('reason') ?? 'No reason provided';
+        const { reason, doAction, doDuration } = extractFlags(interaction.options.getString('reason') ?? 'No reason provided');
         const guild        = interaction.guild!;
         const moderator    = interaction.member as any;
         const targetMember = await guild.members.fetch(targetUser.id).catch(() => null);
@@ -87,6 +87,11 @@ export default {
             )
             .build();
 
+        if (doAction && targetMember) {
+            const inlineReason = `Inline flag action from case #${newCase.caseNumber}`;
+            await executeAutoAction(guild, targetUser, targetMember, moderator, doAction, doDuration, inlineReason, client.user!);
+        }
+
         const invoke = await getInvokeResponse(guild.id, 'kick', {
             user: `<@${targetUser.id}>`, reason,
             moderator: `<@${interaction.user.id}>`, server: guild.name, caseNum: newCase.caseNumber,
@@ -109,7 +114,7 @@ export default {
             return;
         }
 
-        const reason = args.slice(1).join(' ') || 'No reason provided';
+        const { reason, doAction, doDuration } = extractFlags(args.slice(1).join(' ') || 'No reason provided');
         const check  = canModerate(message.member!, target, 'kick');
         if (!check.ok) { await message.reply(`${e('error')} ${check.reason}`); return; }
 
@@ -148,6 +153,12 @@ export default {
                 (dmSent === false ? ` · Could not DM user` : '')
             )
             .build();
+
+        if (doAction) {
+            const inlineReason = `Inline flag action from case #${newCase.caseNumber}`;
+            await executeAutoAction(message.guild!, target.user, target, message.member, doAction, doDuration, inlineReason, client.user!);
+        }
+
         await sendMessage(message, [card]);
     },
 } satisfies Command;

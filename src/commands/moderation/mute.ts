@@ -2,7 +2,7 @@
 import { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import type { Command } from '../../types/command.js';
 import { fadeReply, sendMessage, FadeContainer } from '../../components/builders.js';
-import { canModerate, dmUser, parseDuration, formatDuration } from '../../utils/moderation.js';
+import { canModerate, dmUser, parseDuration, formatDuration, extractFlags, executeAutoAction } from '../../utils/moderation.js';
 import { createCase } from '../../db/queries/moderation.js';
 import { e, Colours } from '../../components/emojis.js';
 import { sendLog, LogColour } from '../../utils/logsender.js';
@@ -43,7 +43,7 @@ export default {
     async execute(interaction, client) {
         const targetUser   = interaction.options.getUser('user', true);
         const durationStr  = interaction.options.getString('duration', true);
-        const reason       = interaction.options.getString('reason') ?? 'No reason provided';
+        const { reason, doAction, doDuration } = extractFlags(interaction.options.getString('reason') ?? 'No reason provided');
         const guild        = interaction.guild!;
         const moderator    = interaction.member as any;
         const targetMember = await guild.members.fetch(targetUser.id).catch(() => null);
@@ -115,6 +115,11 @@ export default {
             )
             .build();
 
+        if (doAction) {
+            const inlineReason = `Inline flag action from case #${newCase.caseNumber}`;
+            await executeAutoAction(guild, targetUser, targetMember, moderator, doAction, doDuration, inlineReason, client.user!);
+        }
+
         const invoke = await getInvokeResponse(guild.id, 'mute', {
             user: `<@${targetUser.id}>`, reason,
             moderator: `<@${interaction.user.id}>`, server: guild.name, caseNum: newCase.caseNumber,
@@ -147,7 +152,7 @@ export default {
         if (!duration) { await message.reply(`${e('error')} Please provide a duration. Example: \`10m\`, \`1h\``); return; }
         if (duration > MAX_TIMEOUT) { await message.reply(`${e('error')} Maximum timeout duration is 28 days.`); return; }
 
-        const reason = args.slice(2).join(' ') || 'No reason provided';
+        const { reason, doAction, doDuration } = extractFlags(args.slice(2).join(' ') || 'No reason provided');
         const check  = canModerate(message.member!, target, 'mute');
         if (!check.ok) { await message.reply(`${e('error')} ${check.reason}`); return; }
 
@@ -192,6 +197,12 @@ export default {
                 (dmSent === false ? ` · Could not DM user` : '')
             )
             .build();
+            
+        if (doAction) {
+            const inlineReason = `Inline flag action from case #${newCase.caseNumber}`;
+            await executeAutoAction(message.guild!, target.user, target, message.member, doAction, doDuration, inlineReason, client.user!);
+        }
+
         await sendMessage(message, [shortCard]);
     },
 } satisfies Command;
