@@ -108,6 +108,7 @@ export default {
 
     category: 'general',
     prefixOnly: true,
+    aliases: ['av'],
     cooldown: 5,
 
     async execute(interaction, client) {
