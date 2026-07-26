@@ -410,6 +410,7 @@ export const automodConfig = pgTable('automod_config', {
     antiMassMention:boolean('anti_mass_mention').default(false).notNull(),
     antiCaps:       boolean('anti_caps').default(false).notNull(),
     antiSlurs:      boolean('anti_slurs').default(false).notNull(),
+    antiZalgo:      boolean('anti_zalgo').default(false).notNull(),
     // Per-rule punishments
     spamPunishment:    varchar('spam_punishment', { length: 10 }).default('mute').notNull(),
     linksPunishment:   varchar('links_punishment', { length: 10 }).default('delete').notNull(),
@@ -417,6 +418,7 @@ export const automodConfig = pgTable('automod_config', {
     mentionsPunishment:varchar('mentions_punishment', { length: 10 }).default('delete').notNull(),
     capsPunishment:    varchar('caps_punishment', { length: 10 }).default('delete').notNull(),
     slursPunishment:   varchar('slurs_punishment', { length: 10 }).default('ban').notNull(),
+    zalgoPunishment:   varchar('zalgo_punishment', { length: 10 }).default('delete').notNull(),
     whitelistedDomains:jsonb('whitelisted_domains').$type<string[]>().default([]),
     spamPerChannel:    boolean('spam_per_channel').default(false).notNull(),
     // Thresholds

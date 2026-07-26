@@ -17,6 +17,7 @@ const RULE_FIELDS: Record<string, string> = {
     mentions: 'antiMassMention',
     caps:     'antiCaps',
     slurs:    'antiSlurs',
+    zalgo:    'antiZalgo',
 };
 
 const RULE_LABELS: Record<string, string> = {
@@ -26,6 +27,7 @@ const RULE_LABELS: Record<string, string> = {
     mentions: 'Anti-Mass-Mention',
     caps:     'Anti-Caps',
     slurs:    'Anti-Slurs',
+    zalgo:    'Anti-Zalgo',
 };
 
 const PUNISHMENT_FIELD: Record<string, string> = {
@@ -35,6 +37,7 @@ const PUNISHMENT_FIELD: Record<string, string> = {
     mentions: 'mentionsPunishment',
     caps:     'capsPunishment',
     slurs:    'slursPunishment',
+    zalgo:    'zalgoPunishment',
 };
 
 const RULE_CHOICES = [
@@ -44,6 +47,7 @@ const RULE_CHOICES = [
     { name: 'Anti-Mentions',    value: 'mentions' },
     { name: 'Anti-Caps',        value: 'caps'     },
     { name: 'Anti-Slurs',       value: 'slurs'    },
+    { name: 'Anti-Zalgo',       value: 'zalgo'    },
 ];
 
 const PUNISHMENT_CHOICES = [
@@ -196,6 +200,7 @@ export default {
                     `${rs(config.antiMassMention)}  **Anti-Mentions** — \`${config.mentionLimit}\` max → \`${c.mentionsPunishment ?? 'delete'}\``,
                     `${rs(config.antiCaps)}  **Anti-Caps** — \`${config.capsPercent}%\` → \`${c.capsPunishment ?? 'delete'}\``,
                     `${rs(config.antiSlurs)}  **Anti-Slurs** — \`${(c.blacklist as string[] ?? []).length}\` words → \`${c.slursPunishment ?? 'ban'}\``,
+                    `${rs(config.antiZalgo)}  **Anti-Zalgo** → \`${c.zalgoPunishment ?? 'delete'}\``,
                 ].join('\n'))
                 .separator(true)
                 .text([

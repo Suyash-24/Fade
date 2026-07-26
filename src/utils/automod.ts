@@ -62,6 +62,7 @@ const INVITE_REGEX = new RegExp(
 
 const URL_REGEX     = /https?:\/\/([^\s/]+)/gi;
 const MENTION_REGEX = /<@[!&]?\d+>|@everyone|@here/g;
+const ZALGO_REGEX   = /[\u0300-\u036F\u0483-\u0489\u1DC0-\u1DFF\u20D0-\u20FF\u2DE0-\u2DFF\uA640-\uA69F\uFE20-\uFE2F]/g;
 
 // ── Rules ─────────────────────────────────────────────────────────────────────
 
@@ -163,6 +164,19 @@ function checkSlurs(message: Message, config: any): Violation | null {
             rule:       'Anti-Slurs',
             reason:     'Message contains a blacklisted word',
             baseAction: (config.slursPunishment ?? 'ban') as AutomodPunishment,
+        };
+    }
+    return null;
+}
+
+function checkZalgo(message: Message, config: any): Violation | null {
+    if (!config.antiZalgo) return null;
+    const matches = message.content.match(ZALGO_REGEX);
+    if (matches && matches.length > 10) {
+        return {
+            rule:       'Anti-Zalgo',
+            reason:     `Excessive combining characters (${matches.length})`,
+            baseAction: (config.zalgoPunishment ?? 'delete') as AutomodPunishment,
         };
     }
     return null;
@@ -348,6 +362,7 @@ export async function runAutomod(message: Message): Promise<void> {
             { key: 'mentions', fn: checkMassMention },
             { key: 'caps', fn: checkCaps },
             { key: 'slurs', fn: checkSlurs },
+            { key: 'zalgo', fn: checkZalgo },
         ];
 
         for (const rule of rules) {
