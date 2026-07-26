@@ -96,6 +96,7 @@ const ACTION_LABELS: Record<CaseType, string> = {
     timeout: 'Timed out',
     softban: 'Softbanned',
     strip:   'Roles stripped',
+    stripstaff: 'Staff roles stripped',
     vmute:       'Voice Muted',
     vunmute:     'Voice Unmuted',
     vdeafen:     'Voice Deafened',
