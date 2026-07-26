@@ -156,7 +156,10 @@ export const snipeCommand: Command = {
         const card      = buildSnipeCard(channelId, 0);
 
         if (!card) {
-            await message.reply(`${e('search')} No recently deleted messages in <#${channelId}>.`).catch(() => (message.channel as any).send(`${e('search')} No recently deleted messages in <#${channelId}>.`).catch(() => null));
+            const noRes = new FadeContainer()
+                .text(`${e('search')} No recently deleted messages in <#${channelId}>.`)
+                .build();
+            await sendMessage(message, [noRes]);
             return;
         }
 
@@ -199,7 +202,10 @@ export const editSnipeCommand: Command = {
         const card      = buildEditSnipeCard(channelId, 0);
 
         if (!card) {
-            await message.reply(`${e('search')} No recently edited messages in <#${channelId}>.`);
+            const noRes = new FadeContainer()
+                .text(`${e('search')} No recently edited messages in <#${channelId}>.`)
+                .build();
+            await sendMessage(message, [noRes]);
             return;
         }
 
@@ -249,18 +255,27 @@ export const clearSnipeCommand: Command = {
 
     async prefixExecute(message, args, client) {
         if (!message.member?.permissions.has(PermissionFlagsBits.ManageMessages)) {
-            await message.reply(`${e('error')} You need Manage Messages permission.`);
+            const noPerm = new FadeContainer(Colours.DANGER)
+                .text(`${e('error')} You need Manage Messages permission.`)
+                .build();
+            await sendMessage(message, [noPerm]);
             return;
         }
 
         if (args[0]?.toLowerCase() === 'all') {
             clearAllSnipes(message.guild!.id);
-            await message.reply(`${e('success')} Snipe cache cleared for the entire server.`);
+            const success = new FadeContainer(Colours.SUCCESS)
+                .text(`${e('success')} Snipe cache cleared for the entire server.`)
+                .build();
+            await sendMessage(message, [success]);
         } else {
             clearSnipe(message.channelId);
             clearEditSnipe(message.channelId);
             clearReactionSnipe(message.channelId);
-            await message.reply(`${e('success')} Snipe cache cleared for this channel.`);
+            const success = new FadeContainer(Colours.SUCCESS)
+                .text(`${e('success')} Snipe cache cleared for this channel.`)
+                .build();
+            await sendMessage(message, [success]);
         }
     },
 };
@@ -300,7 +315,10 @@ export const reactionSnipeCommand: Command = {
         const card      = buildReactionSnipeCard(channelId, 0);
 
         if (!card) {
-            await message.reply(`${e('search')} No recently removed reactions in <#${channelId}>.`);
+            const noRes = new FadeContainer()
+                .text(`${e('search')} No recently removed reactions in <#${channelId}>.`)
+                .build();
+            await sendMessage(message, [noRes]);
             return;
         }
 
