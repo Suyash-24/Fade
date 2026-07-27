@@ -2,79 +2,8 @@
 import { AttachmentBuilder, Message, ChatInputCommandInteraction } from 'discord.js';
 import { e, Colours } from '../components/emojis.js';
 import { FadeContainer, sendMessage } from '../components/builders.js';
-
-interface CobaltResponse {
-    status: 'error' | 'redirect' | 'stream' | 'success' | 'rate-limit' | 'picker';
-    url?: string;
-    text?: string;
-}
-
-let cachedInstances: string[] = [];
-let lastFetch = 0;
-
-async function getInstances(): Promise<string[]> {
-    if (cachedInstances.length > 0 && Date.now() - lastFetch < 3600000) {
-        return cachedInstances;
-    }
-    try {
-        const res = await fetch('https://instances.cobalt.best/api/instances');
-        if (res.ok) {
-            const data = await res.json() as any[];
-            // Filter instances that are online, have score > 0, and support API
-            const valid = data.filter(d => d.api_online && d.score > 0).map(d => d.api || d.endpoint);
-            if (valid.length > 0) {
-                cachedInstances = valid;
-                lastFetch = Date.now();
-                return valid;
-            }
-        }
-    } catch (e) {
-        // Fallback gracefully
-    }
-    // Hardcoded fallbacks if tracker fails
-    return [
-        'https://cobalt.casi.ooo',
-        'https://cobalt.q0.wtf',
-        'https://cobalt.kwiatekit.com',
-        'https://cobalt.wuk.sh'
-    ];
-}
-
-export async function fetchCobalt(url: string): Promise<CobaltResponse> {
-    const instances = await getInstances();
-    let lastError = 'Failed to contact download server';
-
-    for (const instance of instances) {
-        try {
-            // Ensure endpoint does not end with /api/json, v10 uses base URL /
-            const baseUrl = instance.replace(/\/api\/json\/?$/, '');
-            const response = await fetch(baseUrl, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    url,
-                    videoQuality: '720',
-                    filenamePattern: 'nerdy'
-                })
-            });
-            
-            if (!response.ok) {
-                const text = await response.text().catch(() => '');
-                lastError = `API ${response.status}: ${text}`;
-                continue; // Try next instance
-            }
-            
-            return await response.json() as CobaltResponse;
-        } catch (err) {
-            console.error(`[Media] Cobalt error on ${instance}:`, err);
-            continue; // Try next instance
-        }
-    }
-    return { status: 'error', text: lastError };
-}
+import { Downloader } from '@tobyg74/tiktok-api-dl';
+import play from 'play-dl';
 
 export async function handleMediaDownload(
     context: Message | ChatInputCommandInteraction,
@@ -99,21 +28,62 @@ export async function handleMediaDownload(
         if ((context.channel as any)?.sendTyping) await (context.channel as any).sendTyping().catch(() => null);
     }
 
-    const data = await fetchCobalt(url);
+    let mediaUrl: string | undefined = undefined;
 
-    if (data.status === 'error' || data.status === 'rate-limit') {
-        return replyFn(`${e('error')} ${data.text || 'Failed to fetch media from this URL.'}`);
+    try {
+        if (platformName === 'TikTok') {
+            const result = await Downloader(url, { version: 'v1' });
+            if (result.status === 'success' && result.result?.video?.playAddr?.length) {
+                mediaUrl = result.result.video.playAddr[0]; // First element is usually highest quality no-watermark
+            } else {
+                return replyFn(`${e('error')} Failed to extract TikTok video. The video might be private or deleted.`);
+            }
+        } 
+        else if (platformName === 'YouTube') {
+            const info = await play.video_info(url);
+            // YouTube separates audio and video on high qualities. We need a combined format for standard MP4 playback.
+            const combinedFormats = info.format.filter(f => (f as any).hasVideo && (f as any).hasAudio);
+            if (combinedFormats.length > 0) {
+                // Get the best combined format
+                const best = combinedFormats.sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0))[0];
+                mediaUrl = best.url;
+            } else {
+                return replyFn(`${e('error')} Could not find a suitable combined video/audio format for this YouTube link.`);
+            }
+        }
+        else {
+            // Generic Fallback API for IG, Twitter, Pinterest
+            // Using a highly available Indonesian REST API that aggregates scrapers
+            let endpoint = 'igdl';
+            if (platformName === 'Twitter') endpoint = 'twitter';
+            if (platformName === 'Pinterest') endpoint = 'pinterest';
+            
+            const apiRes = await fetch(`https://api.vreden.my.id/api/dowloader/${endpoint}?url=${encodeURIComponent(url)}`);
+            if (!apiRes.ok) throw new Error('API down');
+            const data = await apiRes.json();
+            
+            if (platformName === 'Instagram') {
+                mediaUrl = data?.result?.[0]?.url || data?.result?.url;
+            } else if (platformName === 'Twitter') {
+                mediaUrl = data?.result?.video;
+            } else if (platformName === 'Pinterest') {
+                mediaUrl = data?.result?.video;
+            }
+            
+            if (!mediaUrl) {
+                throw new Error('No media extracted');
+            }
+        }
+    } catch (err) {
+        console.error(`[MediaDownloader] Error for ${platformName}:`, err);
+        return replyFn(`${e('error')} Failed to extract media. The link might be private, unsupported, or the platform blocked the request.`);
     }
 
-    if (data.status === 'picker') {
-        return replyFn(`${e('error')} This URL contains a gallery/slideshow, which is currently unsupported.`);
-    }
-
-    const mediaUrl = data.url;
     if (!mediaUrl) {
         return replyFn(`${e('error')} Received an empty response from the download server.`);
     }
 
+    // Try to attach natively (25MB limit)
     try {
         const attachment = new AttachmentBuilder(mediaUrl, { name: `${platformName.toLowerCase()}_video.mp4` });
         
@@ -123,6 +93,7 @@ export async function handleMediaDownload(
             await (context as Message).reply({ files: [attachment] });
         }
     } catch (err) {
+        // Fallback to sending the raw link if Discord rejects the upload
         const card = new FadeContainer(Colours.SUCCESS)
             .text(`${e('success')} Video successfully downloaded, but it is too large to attach natively!\n\n🔗 **[Download ${platformName} Video](${mediaUrl})**`)
             .build();
