@@ -1,0 +1,2 @@
+# Required by Heroku to validate the Python buildpack.
+# This app does not have native Python dependencies; we just need the Python runtime for yt-dlp.
