@@ -17,7 +17,7 @@ export default {
     cooldown: 5,
     async execute(interaction) {
         const url = interaction.options.getString('url', true);
-        if (!url.includes('pinterest.')) {
+        if (!url.includes('pinterest.') && !url.includes('pin.it')) {
             return interaction.reply({ content: `${e('error')} Please provide a valid Pinterest URL.`, ephemeral: true });
         }
         await handleMediaDownload(interaction, url, 'Pinterest');
@@ -27,7 +27,7 @@ export default {
         if (!url) {
             return message.reply(`${e('error')} Please provide a Pinterest URL to download.`);
         }
-        if (!url.includes('pinterest.')) {
+        if (!url.includes('pinterest.') && !url.includes('pin.it')) {
             return message.reply(`${e('error')} Please provide a valid Pinterest URL.`);
         }
         await handleMediaDownload(message, url, 'Pinterest');

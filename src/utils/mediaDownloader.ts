@@ -32,7 +32,13 @@ export async function handleMediaDownload(
         if (platformName === 'TikTok') parsedUrl.hostname = 'vxtiktok.com';
         else if (platformName === 'Twitter' || platformName === 'X') parsedUrl.hostname = 'vxtwitter.com';
         else if (platformName === 'Instagram') parsedUrl.hostname = 'ddinstagram.com';
-        fixupUrl = parsedUrl.toString();
+        
+        // Strip query parameters for fixup links (except YouTube where ?v= matters)
+        if (platformName !== 'YouTube') {
+            fixupUrl = parsedUrl.toString().split('?')[0];
+        } else {
+            fixupUrl = parsedUrl.toString();
+        }
     } catch (e) {}
 
     try {
