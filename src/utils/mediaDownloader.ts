@@ -1,7 +1,6 @@
-// src/utils/mediaDownloader.ts
-import { Message, ChatInputCommandInteraction } from 'discord.js';
+import { AttachmentBuilder, Message, ChatInputCommandInteraction } from 'discord.js';
 import { e, Colours } from '../components/emojis.js';
-import { FadeContainer, sendMessage } from '../components/builders.js';
+import youtubedl from 'youtube-dl-exec';
 
 export async function handleMediaDownload(
     context: Message | ChatInputCommandInteraction,
@@ -9,14 +8,15 @@ export async function handleMediaDownload(
     platformName: string
 ) {
     const isInteraction = 'reply' in context && !('content' in context);
-    const replyFn = async (content: string, ephemeral = false) => {
+    const replyFn = async (content: string, ephemeral = false, files: AttachmentBuilder[] = []) => {
+        const payload: any = { content, files };
         if (isInteraction) {
             if ((context as ChatInputCommandInteraction).deferred) {
-                return (context as ChatInputCommandInteraction).editReply({ content });
+                return (context as ChatInputCommandInteraction).editReply(payload);
             }
-            return (context as ChatInputCommandInteraction).reply({ content, ephemeral });
+            return (context as ChatInputCommandInteraction).reply({ ...payload, ephemeral });
         } else {
-            return (context as Message).reply({ content });
+            return (context as Message).reply(payload);
         }
     };
 
@@ -26,42 +26,42 @@ export async function handleMediaDownload(
         if ((context.channel as any)?.sendTyping) await (context.channel as any).sendTyping().catch(() => null);
     }
 
-    let fixupUrl = url;
-
     try {
-        const parsedUrl = new URL(url);
+        // Use youtube-dl-exec to extract the direct MP4 stream URL
+        const youtubedlAny = (youtubedl as any).default || youtubedl;
+        const output = await youtubedlAny(url, {
+            dumpJson: true,
+            noWarnings: true,
+            preferFreeFormats: true,
+            format: 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
+        }) as any;
 
-        if (platformName === 'TikTok') {
-            parsedUrl.hostname = 'vxtiktok.com';
-            fixupUrl = parsedUrl.toString();
-        } else if (platformName === 'Twitter' || platformName === 'X') {
-            parsedUrl.hostname = 'vxtwitter.com';
-            fixupUrl = parsedUrl.toString();
-        } else if (platformName === 'Instagram') {
-            parsedUrl.hostname = 'ddinstagram.com';
-            fixupUrl = parsedUrl.toString();
-        } else if (platformName === 'YouTube') {
-            // YouTube already embeds perfectly natively, no fixup needed
-            fixupUrl = url;
-        } else {
-            // Unhandled or Pinterest (which also has some native embedding)
-            fixupUrl = url;
+        const mediaUrl = output.url || output.requested_downloads?.[0]?.url;
+
+        if (!mediaUrl) {
+            throw new Error("No download URL returned from yt-dlp.");
         }
 
-        // Clean query parameters to keep links neat (except YouTube which needs ?v=)
-        if (platformName !== 'YouTube') {
-            const cleanUrl = fixupUrl.split('?')[0];
-            fixupUrl = cleanUrl;
-        }
+        // Try to attach the video directly as a file upload
+        try {
+            const attachment = new AttachmentBuilder(mediaUrl, { name: `${platformName.toLowerCase()}_video.mp4` });
+            return await replyFn(`🎥 **${platformName} Media**\nRequested by ${isInteraction ? (context as ChatInputCommandInteraction).user : (context as Message).author}`, false, [attachment]);
+        } catch (attachErr: any) {
+            // Discord API error (usually if file exceeds 25MB limits or timeout)
+            // Fallback to sending the raw link or a fixup link if it fails to attach
+            let fixupUrl = url;
+            try {
+                const parsedUrl = new URL(url);
+                if (platformName === 'TikTok') parsedUrl.hostname = 'vxtiktok.com';
+                else if (platformName === 'Twitter' || platformName === 'X') parsedUrl.hostname = 'vxtwitter.com';
+                else if (platformName === 'Instagram') parsedUrl.hostname = 'ddinstagram.com';
+                fixupUrl = parsedUrl.toString();
+            } catch (e) {}
 
-    } catch (err) {
+            return await replyFn(`🎥 **${platformName} Media**\n*(Video was too large to attach, sending embed link instead)*\n${fixupUrl}`);
+        }
+    } catch (err: any) {
         console.error(`[MediaDownloader] Error parsing URL for ${platformName}:`, err);
-        return replyFn(`${e('error')} Invalid URL provided.`);
+        return await replyFn(`${e('error')} Failed to download media. The video might be private, deleted, or requires login.`);
     }
-
-    // Since we are using fixup URLs, we don't attach files. We just send the URL and let Discord embed it.
-    // If it's a message, we reply without an embed so Discord can unfurl the media.
-    const messageContent = `🎥 **${platformName} Media**\n${fixupUrl}`;
-    
-    return replyFn(messageContent);
 }
