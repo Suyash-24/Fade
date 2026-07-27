@@ -20,6 +20,7 @@
     "@huggingface/transformers": "^3.5.2",
     "@kamipl/kick-api-lite": "^1.0.1",
     "@napi-rs/canvas": "^1.0.0",
+    "@tobyg74/tiktok-api-dl": "^1.3.7",
     "discord.js": "^14.15.3",
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.10",
@@ -30,8 +31,7 @@
     "postgres": "^3.4.9",
     "shoukaku": "^4.3.0",
     "tsx": "^4.22.3",
-    "typescript": "^6.0.3",
-    "youtube-dl-exec": "^3.1.9"
+    "typescript": "^6.0.3"
   },
   "devDependencies": {
     "@types/node": "^25.9.1"
