@@ -97,6 +97,7 @@ const ACTION_LABELS: Record<CaseType, string> = {
     unban:   'Unbanned',
     timeout: 'Timed out',
     softban: 'Softbanned',
+    hardban: 'Hardbanned',
     strip:   'Roles stripped',
     stripstaff: 'Staff roles stripped',
     vmute:       'Voice Muted',
@@ -196,7 +197,7 @@ export function buildCaseCard(opts: {
 // ── Inline Flag Parser ────────────────────────────────────────────────────────
 
 export function extractFlags(reason: string) {
-    const regex = /--do\s+(kick|ban|mute|timeout|softban|strip|stripstaff)(?:\s+(\w+))?/i;
+    const regex = /--do\s+(kick|ban|mute|timeout|softban|hardban|strip|stripstaff)(?:\s+(\w+))?/i;
     const match = reason.match(regex);
     if (!match) return { reason };
 
@@ -244,6 +245,10 @@ export async function executeAutoAction(
             await guild.bans.create(targetUser.id, { reason: `[Fade Auto] ${reason}`, deleteMessageSeconds: 604800 });
             await guild.bans.remove(targetUser.id, `[Fade Auto Softban]`);
             await createCase({ guildId: guild.id, type: 'softban', userId: targetUser.id, userTag: targetUser.tag, moderatorId: moderator?.id ?? botUser.id, moderatorTag: moderator?.user.tag ?? botUser.tag, reason });
+        } else if (action === 'hardban') {
+            await dmUser(targetUser, guild, 'hardban', reason, 0);
+            await guild.bans.create(targetUser.id, { reason: `[Fade Auto] ${reason}`, deleteMessageSeconds: 604800 });
+            await createCase({ guildId: guild.id, type: 'hardban', userId: targetUser.id, userTag: targetUser.tag, moderatorId: moderator?.id ?? botUser.id, moderatorTag: moderator?.user.tag ?? botUser.tag, reason });
         } else if ((action === 'mute' || action === 'timeout') && duration && targetMember) {
             const ms = duration * 1000;
             await targetMember.timeout(ms, `[Fade Auto] ${reason}`);
