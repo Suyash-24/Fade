@@ -26,6 +26,15 @@ export async function handleMediaDownload(
         if ((context.channel as any)?.sendTyping) await (context.channel as any).sendTyping().catch(() => null);
     }
 
+    let fixupUrl = url;
+    try {
+        const parsedUrl = new URL(url);
+        if (platformName === 'TikTok') parsedUrl.hostname = 'vxtiktok.com';
+        else if (platformName === 'Twitter' || platformName === 'X') parsedUrl.hostname = 'vxtwitter.com';
+        else if (platformName === 'Instagram') parsedUrl.hostname = 'ddinstagram.com';
+        fixupUrl = parsedUrl.toString();
+    } catch (e) {}
+
     try {
         // Use youtube-dl-exec to extract the direct MP4 stream URL
         const youtubedlAny = (youtubedl as any).default || youtubedl;
@@ -43,25 +52,14 @@ export async function handleMediaDownload(
         }
 
         // Try to attach the video directly as a file upload
-        try {
-            const attachment = new AttachmentBuilder(mediaUrl, { name: `${platformName.toLowerCase()}_video.mp4` });
-            return await replyFn(`🎥 **${platformName} Media**\nRequested by ${isInteraction ? (context as ChatInputCommandInteraction).user : (context as Message).author}`, false, [attachment]);
-        } catch (attachErr: any) {
-            // Discord API error (usually if file exceeds 25MB limits or timeout)
-            // Fallback to sending the raw link or a fixup link if it fails to attach
-            let fixupUrl = url;
-            try {
-                const parsedUrl = new URL(url);
-                if (platformName === 'TikTok') parsedUrl.hostname = 'vxtiktok.com';
-                else if (platformName === 'Twitter' || platformName === 'X') parsedUrl.hostname = 'vxtwitter.com';
-                else if (platformName === 'Instagram') parsedUrl.hostname = 'ddinstagram.com';
-                fixupUrl = parsedUrl.toString();
-            } catch (e) {}
-
-            return await replyFn(`🎥 **${platformName} Media**\n*(Video was too large to attach, sending embed link instead)*\n${fixupUrl}`);
-        }
+        const attachment = new AttachmentBuilder(mediaUrl, { name: `${platformName.toLowerCase()}_video.mp4` });
+        return await replyFn(`🎥 **${platformName} Media**\nRequested by ${isInteraction ? (context as ChatInputCommandInteraction).user : (context as Message).author}`, false, [attachment]);
+        
     } catch (err: any) {
-        console.error(`[MediaDownloader] Error parsing URL for ${platformName}:`, err);
-        return await replyFn(`${e('error')} Failed to download media. The video might be private, deleted, or requires login.`);
+        // yt-dlp failed (e.g. YouTube bot detection block on Heroku IP) OR file size > 25MB
+        console.error(`[MediaDownloader] Error parsing URL for ${platformName}:`, err.message || err);
+        
+        // Fallback to sending the raw link / fixup link
+        return await replyFn(`🎥 **${platformName} Media**\n*(Direct download blocked by platform, sending embed link instead)*\n${fixupUrl}`);
     }
 }
