@@ -9,32 +9,71 @@ interface CobaltResponse {
     text?: string;
 }
 
-export async function fetchCobalt(url: string): Promise<CobaltResponse> {
-    try {
-        const response = await fetch('https://api.cobalt.tools/api/json', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                url,
-                vCodec: 'h264',
-                vQuality: '720',
-                isNoTTWatermark: true,
-                filenamePattern: 'nerdy'
-            })
-        });
-        
-        if (!response.ok) {
-            return { status: 'error', text: `API returned ${response.status}` };
-        }
-        
-        return await response.json() as CobaltResponse;
-    } catch (err) {
-        console.error('[Media] Cobalt error:', err);
-        return { status: 'error', text: 'Failed to contact download server' };
+let cachedInstances: string[] = [];
+let lastFetch = 0;
+
+async function getInstances(): Promise<string[]> {
+    if (cachedInstances.length > 0 && Date.now() - lastFetch < 3600000) {
+        return cachedInstances;
     }
+    try {
+        const res = await fetch('https://instances.cobalt.best/api/instances');
+        if (res.ok) {
+            const data = await res.json() as any[];
+            // Filter instances that are online, have score > 0, and support API
+            const valid = data.filter(d => d.api_online && d.score > 0).map(d => d.api || d.endpoint);
+            if (valid.length > 0) {
+                cachedInstances = valid;
+                lastFetch = Date.now();
+                return valid;
+            }
+        }
+    } catch (e) {
+        // Fallback gracefully
+    }
+    // Hardcoded fallbacks if tracker fails
+    return [
+        'https://cobalt.casi.ooo',
+        'https://cobalt.q0.wtf',
+        'https://cobalt.kwiatekit.com',
+        'https://cobalt.wuk.sh'
+    ];
+}
+
+export async function fetchCobalt(url: string): Promise<CobaltResponse> {
+    const instances = await getInstances();
+    let lastError = 'Failed to contact download server';
+
+    for (const instance of instances) {
+        try {
+            // Ensure endpoint does not end with /api/json, v10 uses base URL /
+            const baseUrl = instance.replace(/\/api\/json\/?$/, '');
+            const response = await fetch(baseUrl, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    url,
+                    videoQuality: '720',
+                    filenamePattern: 'nerdy'
+                })
+            });
+            
+            if (!response.ok) {
+                const text = await response.text().catch(() => '');
+                lastError = `API ${response.status}: ${text}`;
+                continue; // Try next instance
+            }
+            
+            return await response.json() as CobaltResponse;
+        } catch (err) {
+            console.error(`[Media] Cobalt error on ${instance}:`, err);
+            continue; // Try next instance
+        }
+    }
+    return { status: 'error', text: lastError };
 }
 
 export async function handleMediaDownload(
