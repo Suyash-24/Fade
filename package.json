@@ -29,6 +29,7 @@
     "play-dl": "^1.9.7",
     "postgres": "^3.4.9",
     "shoukaku": "^4.3.0",
+    "tio.js": "^4.1.0",
     "tsx": "^4.22.3",
     "typescript": "^6.0.3"
   },
