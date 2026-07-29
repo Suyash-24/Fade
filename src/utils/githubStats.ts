@@ -8,6 +8,7 @@ const FILE_PATH = 'stats.json';
 const INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
 
 let lastCount = -1;
+let isFirstRun = true;
 
 export function startGithubStatsSync(client: FadeClient) {
     if (!process.env.GITHUB_TOKEN) {
@@ -48,7 +49,7 @@ export function startGithubStatsSync(client: FadeClient) {
                 try {
                     const contentStr = Buffer.from(getData.content, 'base64').toString('utf8');
                     const existingData = JSON.parse(contentStr);
-                    if (existingData.servers === currentCount) {
+                    if (existingData.servers === currentCount && !isFirstRun) {
                         lastCount = currentCount; // Sync local cache
                         return; // Already accurate
                     }
@@ -81,6 +82,7 @@ export function startGithubStatsSync(client: FadeClient) {
             if (putRes.ok) {
                 logger.success(`Successfully updated GitHub stats.json to ${currentCount} servers`);
                 lastCount = currentCount;
+                isFirstRun = false;
             } else {
                 const errData = await putRes.json().catch(() => ({}));
                 logger.error(`Failed to update GitHub stats.json: ${putRes.statusText}`, errData as any);
