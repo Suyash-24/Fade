@@ -45,7 +45,7 @@ export default {
     cooldown: 5,
 
     async prefixExecute(message: Message, args: string[]) {
-        if (!args.length) {
+        if (args.length < 2) {
             const usageCard = new FadeContainer(Colours.DANGER)
                 .text(`${e('error')} **Usage:**\n\`!runcode <language>\`\n\`\`\`<your code here>\n\`\`\``)
                 .build();
@@ -54,7 +54,10 @@ export default {
         }
 
         const rawLanguage = args[0].toLowerCase();
-        let code = args.slice(1).join(' ');
+        
+        // args.slice(1).join(' ') destroys newlines. Extract directly from raw message content.
+        const matchFull = message.content.match(/^\S+\s+\S+\s+([\s\S]+)$/);
+        let code = matchFull ? matchFull[1].trim() : '';
 
         // Parse code blocks if the user used them (e.g., ```python ... ```)
         const codeBlockRegex = /^```(?:[a-z0-9+#]*\n)?([\s\S]*?)```$/i;
@@ -107,9 +110,9 @@ export default {
         } catch (error: any) {
             console.error('RunCode Error:', error);
             
-            // Typically means invalid language or API unreachable
+            // Usually occurs when TIO returns an unexpected response string for syntax errors or unknown languages
             const failCard = new FadeContainer(Colours.DANGER)
-                .text(`${e('error')} Execution failed: ${error.message || "Invalid language or TIO is down."}`)
+                .text(`${e('error')} **Execution failed**\n\nThe code contains syntax errors or the selected language (\`${language}\`) is unsupported.`)
                 .build();
             await sendMessage(message, [failCard]);
         }
