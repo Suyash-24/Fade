@@ -170,7 +170,8 @@ export default {
         }
 
         if (sub === 'messageplain') {
-            const text = interaction.options.getString('text', true);
+            let text = interaction.options.getString('text', true);
+            text = text.replace(/\\n/g, '\n');
             // Prefix with a sentinel so xpgain knows it's plain text
             const stored = `__plain__${text}`;
             await updateLevelConfig(guild.id, { announceMessage: stored });
