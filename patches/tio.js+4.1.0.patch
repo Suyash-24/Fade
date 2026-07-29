@@ -1,0 +1,22 @@
+diff --git a/node_modules/tio.js/dist/index.js b/node_modules/tio.js/dist/index.js
+index fa8eb7f..aad0f5f 100644
+--- a/node_modules/tio.js/dist/index.js
++++ b/node_modules/tio.js/dist/index.js
+@@ -58,7 +58,7 @@ async function evaluate(code, options, ab, tm) {
+     try {
+         const response = await request(`/cgi-bin/static/${runURL}/${randomBytes(16).toString('hex')}`, {
+             method: 'POST',
+-            body: new Uint8Array(await deflateRawAsync(`Vargs\0${options.argv.length}\0${argv}Vlang\0\x31\0${options.language}\0VTIO_CFLAGS\0${options.cflags.length}\0${cflags}VTIO_OPTIONS\0\x30\0F.code.tio\0${code.length}\0${code}F.input.tio\0\x30\0R`, { level: 9 })),
++            body: new Uint8Array(await deflateRawAsync(`Vargs\0${options.argv.length}\0${argv}Vlang\0\x31\0${options.language}\0VTIO_CFLAGS\0${options.cflags.length}\0${cflags}VTIO_OPTIONS\0\x30\0F.code.tio\0${Buffer.byteLength(code)}\0${code}F.input.tio\0\x30\0R`, { level: 9 })),
+             signal: ab.signal
+         });
+         const reader = response.body?.getReader();
+@@ -165,7 +165,7 @@ const tio = (async (code, options) => {
+             exitCode: 124
+         });
+     }
+-    const s = result.substring(16).split(result.substring(0, 16));
++    console.log("TIO RAW", result); const s = result.substring(16).split(result.substring(0, 16));
+     const [debug, realTime, userTime, sysTime, CPUshare, exitCode] = s[1]
+         .match(DEBUG_REGEX)
+         .slice(1);
