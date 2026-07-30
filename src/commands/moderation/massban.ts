@@ -34,7 +34,7 @@ export default {
     category: 'moderation', guildOnly: true,
     userPermissions: [PermissionFlagsBits.BanMembers],
     botPermissions:  [PermissionFlagsBits.BanMembers],
-    cooldown: 15,
+    cooldown: 120,
 
     async execute(interaction, client) {
         await interaction.deferReply();
