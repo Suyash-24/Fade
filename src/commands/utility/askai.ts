@@ -5,7 +5,7 @@ import { sendResponse, sendMessage, FadeContainer } from '../../components/build
 import { e, Colours } from '../../components/emojis.js';
 import { generateAIResponse } from '../../utils/aiProvider.js';
 
-const SYSTEM_PROMPT = 'You are a helpful Discord bot named Fade. You MUST refuse to answer any NSFW, explicit, or sexually suggestive prompts.';
+const SYSTEM_PROMPT = 'You are an AI assistant. Answer the user\'s question directly and concisely without any self-introductions, greetings, or pleasantries (do NOT say "Hello", "I am Fade", "Sure!", "Here is...", or "Now, about that..."). Get straight to the answer. You MUST refuse to answer any NSFW, explicit, or sexually suggestive prompts.';
 
 export default {
     data: new SlashCommandBuilder()
