@@ -59,7 +59,7 @@ export function buildNowPlayingCard(player: KazagumoPlayer, track: KazagumoTrack
     const loopIcon  = player.loop === 'track' ? '🔂' : player.loop === 'queue' ? '🔁' : '';
     const volIcon   = player.volume <= 30 ? '🔈' : player.volume <= 70 ? '🔉' : '🔊';
 
-    const container = new ContainerBuilder().setAccentColor(Colours.FADE);
+    const container = new ContainerBuilder();
 
     // Header
     container.addTextDisplayComponents(
@@ -122,7 +122,11 @@ export function buildNowPlayingCard(player: KazagumoPlayer, track: KazagumoTrack
         .setStyle(player.loop !== 'none' ? ButtonStyle.Success : ButtonStyle.Secondary);
 
     container.addActionRowComponents(
-        new ActionRowBuilder<ButtonBuilder>().addComponents(pauseBtn, skipBtn, stopBtn, queueBtn, loopBtn)
+        new ActionRowBuilder<ButtonBuilder>().addComponents(pauseBtn, skipBtn, stopBtn)
+    );
+
+    container.addActionRowComponents(
+        new ActionRowBuilder<ButtonBuilder>().addComponents(queueBtn, loopBtn)
     );
 
     return container;
