@@ -86,7 +86,7 @@ export function buildNowPlayingCard(player: KazagumoPlayer, track: KazagumoTrack
     );
 
     if (thumbnail) {
-        section.addAccessoryComponents(new ThumbnailBuilder().setURL(thumbnail));
+        section.setThumbnailAccessory(new ThumbnailBuilder().setURL(thumbnail));
     }
 
     container.addSectionComponents(section);
