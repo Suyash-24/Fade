@@ -191,6 +191,7 @@ export const editSnipeCommand: Command = {
         ),
 
     category:  'utility',
+    prefixOnly: true,
     guildOnly: true,
     userPermissions: [PermissionFlagsBits.ManageMessages],
     cooldown:  5,
@@ -251,6 +252,7 @@ export const clearSnipeCommand: Command = {
         ),
 
     category:        'utility',
+    prefixOnly:      true,
     guildOnly:       true,
     userPermissions: [PermissionFlagsBits.ManageMessages],
     cooldown:        5,
@@ -314,6 +316,7 @@ export const reactionSnipeCommand: Command = {
         ),
 
     category:  'utility',
+    prefixOnly: true,
     guildOnly: true,
     userPermissions: [PermissionFlagsBits.ManageMessages],
     cooldown:  5,
