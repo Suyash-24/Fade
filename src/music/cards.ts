@@ -4,6 +4,8 @@ import {
     ContainerBuilder,
     TextDisplayBuilder,
     SeparatorBuilder,
+    SectionBuilder,
+    ThumbnailBuilder,
     SeparatorSpacingSize,
     ActionRowBuilder,
     ButtonBuilder,
@@ -70,37 +72,24 @@ export function buildNowPlayingCard(player: KazagumoPlayer, track: KazagumoTrack
         new SeparatorBuilder().setDivider(true).setSpacing(SeparatorSpacingSize.Small)
     );
 
-    // Track info
-    container.addTextDisplayComponents(
+    // Main section with thumbnail
+    const requester = track.requester ? `<@${(track.requester as any).id ?? track.requester}>` : 'Unknown';
+    const thumbnail = track.thumbnail ?? undefined;
+    
+    const section = new SectionBuilder().addTextDisplayComponents(
         new TextDisplayBuilder().setContent(
-            `### [${trunc(track.title, 55)}](${track.uri ?? 'https://discord.com'})\n` +
-            `-# by **${trunc(track.author ?? 'Unknown Artist', 40)}**`
+            `${sourceEmoji(track.uri)} **[${trunc(track.title, 50)}](${track.uri ?? 'https://discord.com'})**\n` +
+            `**via ➔ ${trunc(track.author ?? 'Unknown Artist', 30)}**\n` +
+            `${e('timer')} ${timeLabel}  ${e('rating')} 4.8\n` +
+            `Requested by ${requester}`
         )
     );
 
-    container.addSeparatorComponents(
-        new SeparatorBuilder().setDivider(false).setSpacing(SeparatorSpacingSize.Small)
-    );
+    if (thumbnail) {
+        section.addAccessoryComponents(new ThumbnailBuilder().setURL(thumbnail));
+    }
 
-    // Progress bar
-    container.addTextDisplayComponents(
-        new TextDisplayBuilder().setContent(
-            `${bar}\n` +
-            `-# ${timeLabel}`
-        )
-    );
-
-    container.addSeparatorComponents(
-        new SeparatorBuilder().setDivider(false).setSpacing(SeparatorSpacingSize.Small)
-    );
-
-    // Stats row
-    container.addTextDisplayComponents(
-        new TextDisplayBuilder().setContent(
-            `${volIcon} \`${player.volume}%\`` +
-            (track.requester ? `  ·  Requested by <@${(track.requester as any).id ?? track.requester}>` : '')
-        )
-    );
+    container.addSectionComponents(section);
 
     container.addSeparatorComponents(
         new SeparatorBuilder().setDivider(true).setSpacing(SeparatorSpacingSize.Small)
