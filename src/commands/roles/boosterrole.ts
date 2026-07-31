@@ -62,7 +62,47 @@ export default {
             )
         )
 
-        // ── User: create ──────────────────────────────────────────────────────
+        // ── Admin: announce ───────────────────────────────────────────────────
+        .addSubcommandGroup(g => g
+            .setName('announce')
+            .setDescription('Configure server boost announcements')
+            .addSubcommand(s => s
+                .setName('channel')
+                .setDescription('Set the channel for boost announcements')
+                .addChannelOption(o => o.setName('channel').setDescription('Channel to announce boosts in').setRequired(true))
+            )
+            .addSubcommand(s => s
+                .setName('message')
+                .setDescription('Set boost card message. Paste a script or leave blank to open builder')
+                .addStringOption(o => o
+                    .setName('script')
+                    .setDescription('Paste your card script here')
+                    .setRequired(false)
+                )
+            )
+            .addSubcommand(s => s
+                .setName('messageembed')
+                .setDescription('Set boost embed message. Paste a script or leave blank to open builder')
+                .addStringOption(o => o
+                    .setName('script')
+                    .setDescription('Paste your embed script here')
+                    .setRequired(false)
+                )
+            )
+            .addSubcommand(s => s
+                .setName('messageplain')
+                .setDescription('Set a plain text boost message')
+                .addStringOption(o => o
+                    .setName('text')
+                    .setDescription('Plain message. Use {user}, {server}')
+                    .setRequired(true)
+                )
+            )
+            .addSubcommand(s => s
+                .setName('remove')
+                .setDescription('Disable boost announcements')
+            )
+        )
         .addSubcommand(s => s
             .setName('create')
             .setDescription('Create your custom booster role')
@@ -140,6 +180,70 @@ export default {
         const sub    = interaction.options.getSubcommand();
         const guild  = interaction.guild!;
         const member = interaction.member as any;
+
+        // ── announce ──────────────────────────────────────────────────────────
+        if (group === 'announce') {
+            if (!member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+                await interaction.reply({ content: `${e('error')} You need **Manage Server** to configure booster roles.`, flags: MessageFlags.Ephemeral });
+                return;
+            }
+
+            if (sub === 'channel') {
+                const chan = interaction.options.getChannel('channel', true);
+                await upsertBoosterConfig(guild.id, { announceChannelId: chan.id });
+                const card = new FadeContainer(Colours.SUCCESS)
+                    .text(`${e('success')}  Boost announcements set to <#${chan.id}>`)
+                    .build();
+                await sendResponse(interaction, [card]);
+            } else if (sub === 'message') {
+                const script = interaction.options.getString('script');
+                if (script) {
+                    await upsertBoosterConfig(guild.id, { announceMessage: script });
+                    const card = new FadeContainer(Colours.SUCCESS)
+                        .text(`${e('success')}  Boost card script saved!\n-# Use \`/boosterrole announce message\` again (without script) to open the builder and verify fields`)
+                        .build();
+                    await sendResponse(interaction, [card]);
+                } else {
+                    const config = await getBoosterConfig(guild.id);
+                    const { buildCardBuilderPanel } = await import('../../utils/welcomecard.js');
+                    const panel = buildCardBuilderPanel(config?.announceMessage ?? undefined, 'boost' as any);
+                    await sendResponse(interaction, [panel], true);
+                }
+            } else if (sub === 'messageembed') {
+                const script = interaction.options.getString('script');
+                if (script) {
+                    await upsertBoosterConfig(guild.id, { announceMessage: script });
+                    const card = new FadeContainer(Colours.SUCCESS)
+                        .text(`${e('success')}  Boost embed script saved!\n-# Use \`/boosterrole announce messageembed\` again (without script) to open the builder and verify fields`)
+                        .build();
+                    await sendResponse(interaction, [card]);
+                } else {
+                    const config = await getBoosterConfig(guild.id);
+                    const { buildEmbedBuilderPanel } = await import('../../utils/welcomecard.js');
+                    const panel = buildEmbedBuilderPanel(config?.announceMessage ?? undefined, 'boost' as any);
+                    await sendResponse(interaction, [panel], true);
+                }
+            } else if (sub === 'messageplain') {
+                let text = interaction.options.getString('text', true);
+                text = text.replace(/\\n/g, '\n');
+                const stored = `__plain__${text}`;
+                await upsertBoosterConfig(guild.id, { announceMessage: stored });
+                const preview = text
+                    .replace(/{user}/g,   interaction.user.toString())
+                    .replace(/{server}/g, guild.name);
+                const card = new FadeContainer(Colours.SUCCESS)
+                    .text(`${e('success')}  Plain boost message set\n-# Preview: ${preview}`)
+                    .build();
+                await sendResponse(interaction, [card], false, { parse: [] });
+            } else if (sub === 'remove') {
+                await upsertBoosterConfig(guild.id, { announceChannelId: null, announceMessage: null });
+                const card = new FadeContainer(Colours.SUCCESS)
+                    .text(`${e('success')}  Boost announcements disabled`)
+                    .build();
+                await sendResponse(interaction, [card]);
+            }
+            return;
+        }
 
         // ── base set / remove ─────────────────────────────────────────────────
         if (group === 'base') {

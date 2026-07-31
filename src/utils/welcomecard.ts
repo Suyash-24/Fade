@@ -285,7 +285,7 @@ export function buildScriptedCard(
 
 // ── Embed builder panel (interactive wizard) ──────────────────────────────────
 
-export function buildEmbedBuilderPanel(script: string | null | undefined, type: 'welcome' | 'goodbye' | 'levelup' = 'welcome'): ReturnType<FadeContainer['build']> {
+export function buildEmbedBuilderPanel(script: string | null | undefined, type: 'welcome' | 'goodbye' | 'levelup' | 'boost' = 'welcome'): ReturnType<FadeContainer['build']> {
     const get = (key: string) => {
         if (!script) return '`Not set`';
         const p = parseScript(script).find(x => x.key === key);
@@ -315,8 +315,11 @@ export function buildEmbedBuilderPanel(script: string | null | undefined, type: 
     };
 
     const isLevelup = type === 'levelup';
-    const title = isLevelup ? 'Level-Up Embed Builder' : type === 'goodbye' ? 'Goodbye Embed Builder' : 'Welcome Embed Builder';
-    const vars  = isLevelup
+    const isBoost = type === 'boost';
+    const title = isBoost ? 'Boost Embed Builder' : isLevelup ? 'Level-Up Embed Builder' : type === 'goodbye' ? 'Goodbye Embed Builder' : 'Welcome Embed Builder';
+    const vars  = isBoost
+        ? '`{user}` `{user.mention}` `{user.username}` `{user.name}` `{user.avatar}` `{user.icon}` `{usericon}` `{server}` `{id}` `{servericon}`'
+        : isLevelup
         ? '`{user}` `{user.mention}` `{user.username}` `{user.name}` `{user.avatar}` `{user.icon}` `{usericon}` `{server}` `{level}` `{id}` `{servericon}`'
         : '`{user}` `{user.mention}` `{user.username}` `{user.name}` `{user.avatar}` `{user.icon}` `{usericon}` `{server}` `{count}` `{ordinal}` `{id}` `{servericon}` `{created}`';
     const example = isLevelup
@@ -386,7 +389,7 @@ export function updateEmbedScriptField(
 
 // ── Card builder panel (interactive wizard) ───────────────────────────────────
 
-export function buildCardBuilderPanel(script: string | null | undefined, type: 'welcome' | 'goodbye' | 'levelup' = 'welcome'): ReturnType<FadeContainer['build']> {
+export function buildCardBuilderPanel(script: string | null | undefined, type: 'welcome' | 'goodbye' | 'levelup' | 'boost' = 'welcome'): ReturnType<FadeContainer['build']> {
     const get = (key: string) => {
         if (!script) return '`Not set`';
         const p = parseScript(script).find(x => x.key === key);
@@ -400,8 +403,11 @@ export function buildCardBuilderPanel(script: string | null | undefined, type: '
     };
 
     const isLevelup = type === 'levelup';
-    const title = isLevelup ? 'Level-Up Card Builder' : type === 'goodbye' ? 'Goodbye Card Builder' : 'Welcome Card Builder';
-    const vars  = isLevelup
+    const isBoost = type === 'boost';
+    const title = isBoost ? 'Boost Card Builder' : isLevelup ? 'Level-Up Card Builder' : type === 'goodbye' ? 'Goodbye Card Builder' : 'Welcome Card Builder';
+    const vars  = isBoost
+        ? '`{user}` `{user.mention}` `{user.username}` `{user.name}` `{user.avatar}` `{user.icon}` `{usericon}` `{server}` `{id}` `{servericon}`'
+        : isLevelup
         ? '`{user}` `{user.mention}` `{user.username}` `{user.name}` `{user.avatar}` `{user.icon}` `{usericon}` `{server}` `{level}` `{id}` `{servericon}`'
         : '`{user}` `{user.mention}` `{user.username}` `{user.name}` `{user.avatar}` `{user.icon}` `{usericon}` `{server}` `{count}` `{ordinal}` `{id}` `{servericon}` `{created}`';
     const example = isLevelup

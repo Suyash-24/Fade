@@ -492,10 +492,12 @@ export const boosterRoles = pgTable('booster_roles', {
 
 // Guild-level config for the booster role system
 export const boosterRoleConfig = pgTable('booster_role_config', {
-    guildId:    snowflake('guild_id').primaryKey().references(() => guilds.guildId, { onDelete: 'cascade' }),
-    baseRoleId: snowflake('base_role_id'),   // custom roles are placed below this
-    awardRoleId:snowflake('award_role_id'),  // role auto-granted on boost
-    updatedAt:  updatedAt(),
+    guildId:           snowflake('guild_id').primaryKey().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    baseRoleId:        snowflake('base_role_id'),   // custom roles are placed below this
+    awardRoleId:       snowflake('award_role_id'),  // role auto-granted on boost
+    announceChannelId: snowflake('announce_channel_id'), // channel to announce boosts
+    announceMessage:   text('announce_message'),    // custom message script for boost announcement
+    updatedAt:         updatedAt(),
 });
 
 export const tempRoles = pgTable('temp_roles', {

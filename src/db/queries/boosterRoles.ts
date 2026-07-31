@@ -15,6 +15,8 @@ export async function getBoosterConfig(guildId: string) {
 export async function upsertBoosterConfig(guildId: string, values: {
     baseRoleId?:  string | null;
     awardRoleId?: string | null;
+    announceChannelId?: string | null;
+    announceMessage?: string | null;
 }) {
     await ensureGuild(guildId);
     await db.insert(boosterRoleConfig)
