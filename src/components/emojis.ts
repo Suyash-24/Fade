@@ -98,7 +98,9 @@ const EMOJI_IDS: Record<string, string> = {
     loading: '<a:loading:1527670885647908875>',
     pinkarrow: '<a:pinkarrow:1527708995769466962>',
     statistics:'<:statistics:1527745278063677651>',
-    detective:'<:detective:1529500367421964359>'
+    detective:'<:detective:1529500367421964359>',
+    timer:"<:timer:1532814041741922325>",
+    rating:"<:rating:1532814078530293790>",
 };
 
 // Unicode fallbacks — aesthetic, minimal, consistent
@@ -186,7 +188,9 @@ const UNICODE = {
     loading: '',
     pinkarrow: '',
     statistics: '',
-    detective:''
+    detective:'',
+    timer:"",
+    rating:''
 };
 
 type EmojiKey = keyof typeof UNICODE;
