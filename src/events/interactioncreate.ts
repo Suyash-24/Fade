@@ -363,6 +363,11 @@ const event: Event<'interactionCreate'> = {
                 }
                 // Snipe pagination: snipe:<channelId>:<page>
                 if (id.startsWith('snipe:')) {
+                    const { hasPermission } = await import('../utils/fakePerms.js');
+                    if (!interaction.member || !(await hasPermission(interaction.member as any, 'manage_messages'))) {
+                        await interaction.reply({ content: '❌ You need **Manage Messages** permission to use snipe buttons.', flags: MessageFlags.Ephemeral }).catch(() => null);
+                        return;
+                    }
                     const parts = id.split(':');
                     const channelId = parts[1];
                     const page = Number(parts[2]);
@@ -381,6 +386,11 @@ const event: Event<'interactionCreate'> = {
 
                 // Edit snipe pagination: editsnipe:<channelId>:<page>
                 if (id.startsWith('editsnipe:')) {
+                    const { hasPermission } = await import('../utils/fakePerms.js');
+                    if (!interaction.member || !(await hasPermission(interaction.member as any, 'manage_messages'))) {
+                        await interaction.reply({ content: '❌ You need **Manage Messages** permission to use snipe buttons.', flags: MessageFlags.Ephemeral }).catch(() => null);
+                        return;
+                    }
                     const parts = id.split(':');
                     const channelId = parts[1];
                     const page = Number(parts[2]);
@@ -394,6 +404,29 @@ const event: Event<'interactionCreate'> = {
 
                     const { fadeReply: frEditSnipe } = await import('../components/builders.js');
                     await interaction.message.edit(frEditSnipe([card], false, { parse: [] }) as any).catch(() => null);
+                    return;
+                }
+
+                // Reaction snipe pagination: rsnipe:<channelId>:<page>
+                if (id.startsWith('rsnipe:')) {
+                    const { hasPermission } = await import('../utils/fakePerms.js');
+                    if (!interaction.member || !(await hasPermission(interaction.member as any, 'manage_messages'))) {
+                        await interaction.reply({ content: '❌ You need **Manage Messages** permission to use snipe buttons.', flags: MessageFlags.Ephemeral }).catch(() => null);
+                        return;
+                    }
+                    const parts = id.split(':');
+                    const channelId = parts[1];
+                    const page = Number(parts[2]);
+                    if (isNaN(page) || page < 0) return;
+
+                    await interaction.deferUpdate().catch(() => null);
+
+                    const { buildReactionSnipeCard } = await import('../commands/utility/snipe.js');
+                    const card = buildReactionSnipeCard(channelId, page);
+                    if (!card) return;
+
+                    const { fadeReply: frReactionSnipe } = await import('../components/builders.js');
+                    await interaction.message.edit(frReactionSnipe([card], false, { parse: [] }) as any).catch(() => null);
                     return;
                 }
 

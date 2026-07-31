@@ -23,6 +23,8 @@ import {
 } from '../../utils/snipeCache.js';
 import { e, Colours } from '../../components/emojis.js';
 
+import { hasPermission } from '../../utils/fakePerms.js';
+
 export function buildSnipeCard(channelId: string, page: number) {
     const entries = getSnipe(channelId);
     if (!entries || entries.length === 0) return null;
@@ -124,6 +126,7 @@ export const snipeCommand: Command = {
     data: new SlashCommandBuilder()
         .setName('snipe')
         .setDescription('Show the last deleted message in this channel')
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
         .addChannelOption(o => o
             .setName('channel')
             .setDescription('Channel to snipe (default: current)')
@@ -133,6 +136,7 @@ export const snipeCommand: Command = {
     category:  'utility',
     prefixOnly: true,
     guildOnly: true,
+    userPermissions: [PermissionFlagsBits.ManageMessages],
     cooldown:  5,
 
     async execute(interaction, client) {
@@ -152,6 +156,14 @@ export const snipeCommand: Command = {
     },
 
     async prefixExecute(message, args, client) {
+        if (!message.member || !(await hasPermission(message.member, 'manage_messages'))) {
+            const noPerm = new FadeContainer(Colours.DANGER)
+                .text(`${e('error')} You need **Manage Messages** permission to use this command.`)
+                .build();
+            await sendMessage(message, [noPerm]);
+            return;
+        }
+
         const channelId = message.mentions.channels.first()?.id ?? message.channelId;
         const card      = buildSnipeCard(channelId, 0);
 
@@ -171,6 +183,7 @@ export const editSnipeCommand: Command = {
     data: new SlashCommandBuilder()
         .setName('editsnipe')
         .setDescription('Show the last edited message in this channel')
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
         .addChannelOption(o => o
             .setName('channel')
             .setDescription('Channel to snipe (default: current)')
@@ -179,6 +192,7 @@ export const editSnipeCommand: Command = {
 
     category:  'utility',
     guildOnly: true,
+    userPermissions: [PermissionFlagsBits.ManageMessages],
     cooldown:  5,
 
     async execute(interaction, client) {
@@ -198,6 +212,14 @@ export const editSnipeCommand: Command = {
     },
 
     async prefixExecute(message, args, client) {
+        if (!message.member || !(await hasPermission(message.member, 'manage_messages'))) {
+            const noPerm = new FadeContainer(Colours.DANGER)
+                .text(`${e('error')} You need **Manage Messages** permission to use this command.`)
+                .build();
+            await sendMessage(message, [noPerm]);
+            return;
+        }
+
         const channelId = message.mentions.channels.first()?.id ?? message.channelId;
         const card      = buildEditSnipeCard(channelId, 0);
 
@@ -254,9 +276,9 @@ export const clearSnipeCommand: Command = {
     },
 
     async prefixExecute(message, args, client) {
-        if (!message.member?.permissions.has(PermissionFlagsBits.ManageMessages)) {
+        if (!message.member || !(await hasPermission(message.member, 'manage_messages'))) {
             const noPerm = new FadeContainer(Colours.DANGER)
-                .text(`${e('error')} You need Manage Messages permission.`)
+                .text(`${e('error')} You need **Manage Messages** permission to use this command.`)
                 .build();
             await sendMessage(message, [noPerm]);
             return;
@@ -284,6 +306,7 @@ export const reactionSnipeCommand: Command = {
     data: new SlashCommandBuilder()
         .setName('reactionsnipe')
         .setDescription('Show the last removed reaction in this channel')
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
         .addChannelOption(o => o
             .setName('channel')
             .setDescription('Channel to snipe (default: current)')
@@ -292,6 +315,7 @@ export const reactionSnipeCommand: Command = {
 
     category:  'utility',
     guildOnly: true,
+    userPermissions: [PermissionFlagsBits.ManageMessages],
     cooldown:  5,
 
     async execute(interaction, client) {
@@ -311,6 +335,14 @@ export const reactionSnipeCommand: Command = {
     },
 
     async prefixExecute(message, args, client) {
+        if (!message.member || !(await hasPermission(message.member, 'manage_messages'))) {
+            const noPerm = new FadeContainer(Colours.DANGER)
+                .text(`${e('error')} You need **Manage Messages** permission to use this command.`)
+                .build();
+            await sendMessage(message, [noPerm]);
+            return;
+        }
+
         const channelId = message.mentions.channels.first()?.id ?? message.channelId;
         const card      = buildReactionSnipeCard(channelId, 0);
 
