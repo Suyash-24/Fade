@@ -73,7 +73,7 @@ export function buildNowPlayingCard(player: KazagumoPlayer, track: KazagumoTrack
     );
 
     // Main section with thumbnail
-    const requester = track.requester ? `<@${(track.requester as any).id ?? track.requester}>` : 'Unknown';
+    const requesterText = track.requester ? `Requested by <@${(track.requester as any).id ?? track.requester}>` : 'Added by Autoplay ✨';
     const thumbnail = track.thumbnail ?? undefined;
     
     const section = new SectionBuilder().addTextDisplayComponents(
@@ -81,7 +81,7 @@ export function buildNowPlayingCard(player: KazagumoPlayer, track: KazagumoTrack
             `${sourceEmoji(track.uri)} **[${trunc(track.title, 50)}](${track.uri ?? 'https://discord.com'})**\n` +
             `**via ➔ ${trunc(track.author ?? 'Unknown Artist', 30)}**\n` +
             `${e('timer')} ${timeLabel}  ${e('rating')} 4.8\n` +
-            `Requested by ${requester}`
+            `${requesterText}`
         )
     );
 
