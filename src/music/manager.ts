@@ -206,9 +206,11 @@ export function setupMusic(client: FadeClient): void {
         if (channel) {
             try {
                 const { FadeContainer } = await import('../components/builders.js');
-                const { Colours }       = await import('../components/emojis.js');
-                const card = new FadeContainer(Colours.VOID)
-                    .text(`## 🎵 Queue Finished\n-# No more tracks — use \`f!play\` to add more.`)
+                const { e }             = await import('../components/emojis.js');
+                const card = new FadeContainer(null)
+                    .text(`## ${e('music')} Queue Finished`)
+                    .separator(true)
+                    .text(`-# There are no more songs left in the queue.\n-# Use \`f!play <song>\` to add some more music!`)
                     .build();
                 await channel.send({ components: [card], flags: (1 << 15) } as any);
             } catch { /* ignore */ }
