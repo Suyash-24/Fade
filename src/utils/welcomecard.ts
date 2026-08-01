@@ -27,14 +27,15 @@ function ordinal(n: number): string {
 export function resolveVars(template: string, member: GuildMember, executor?: any): string {
     const createdTs = Math.floor(member.user.createdTimestamp / 1000);
     const user = member.user;
-    const avatarUrl = user.displayAvatarURL({ size: 256 });
+    const avatarUrl = user.displayAvatarURL({ size: 256, extension: user.avatar?.startsWith('a_') ? 'gif' : 'png' });
 
     // Command executor details (fallback to the joining member if no command context)
     const execUser = executor ? (executor.user ?? executor) : member.user;
     const execMember = (executor && executor.guild) ? executor : member;
     const execMention = execMember.toString();
     const execName = execUser.username;
-    const execAvatar = execUser.displayAvatarURL({ size: 256 });
+    const execAvatar = execUser.displayAvatarURL({ size: 256, extension: execUser.avatar?.startsWith('a_') ? 'gif' : 'png' });
+    const serverIcon = member.guild.iconURL({ size: 256, extension: member.guild.icon?.startsWith('a_') ? 'gif' : 'png' }) ?? '';
 
     return template
         .replace(/{user}/g,               member.toString())
@@ -50,7 +51,7 @@ export function resolveVars(template: string, member: GuildMember, executor?: an
         .replace(/{ordinal}/g,            ordinal(member.guild.memberCount))
         .replace(/{id}/g,                 member.id)
         .replace(/{avatar}/g,             avatarUrl)
-        .replace(/{servericon}/g,         member.guild.iconURL({ size: 256 }) ?? '')
+        .replace(/{servericon}/g,         serverIcon)
         .replace(/{created}/g,            createdTs.toString())
         
         // Command User (Executor/Author) Variables

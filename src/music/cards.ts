@@ -72,7 +72,7 @@ export function buildNowPlayingCard(player: KazagumoPlayer, track: KazagumoTrack
         new SeparatorBuilder().setDivider(true).setSpacing(SeparatorSpacingSize.Small)
     );
 
-    // Main section with thumbnail
+   
     const requesterText = track.requester ? `Requested by <@${(track.requester as any).id ?? track.requester}>` : 'Added by Autoplay ✨';
     const thumbnail = track.thumbnail ?? undefined;
     
