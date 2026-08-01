@@ -14,24 +14,21 @@ function buildInvitesCard(
 ) {
     const total = getTotalInvites(stats);
 
-    return new FadeContainer()
-        .section(
-            [
-                `## ${e('statistics')} Invite Stats`,
-                `-# ${user.username}`,
-            ],
-            thumb(user.displayAvatarURL({ size: 128 })),
+    return new FadeContainer(null)
+        .text(
+            `## ${e('statistics')} Invite Stats\n` +
+            `-# ${user.username}`
         )
         .separator(true)
-        .text(
+        .section([
             `${e('pinkarrow')} **Total Invites** — \`${total}\`\n` +
             `${e('pinkarrow')} **Regular** — \`${stats.regular}\`\n` +
             `${e('pinkarrow')} **Left** — \`${stats.left}\`\n` +
             `${e('pinkarrow')} **Fake** — \`${stats.fake}\`\n` +
             `${e('pinkarrow')} **Bonus** — \`${stats.bonus}\``
-        )
+        ], thumb(user.displayAvatarURL({ size: 128 })))
         .separator(true)
-        .text(`-# ${e('server')} ${guildName}`)
+        .text(`-# 📊 Invite Tracking System`)
         .build();
 }
 
