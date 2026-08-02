@@ -221,6 +221,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
-    syntax: "/hardban <user> [reason] [duration]",
-    example: "/hardban user:value"
+    syntax: "/hardban <user> [reason]",
+    example: "/hardban user:@raider reason:Raid",
 } satisfies Command;

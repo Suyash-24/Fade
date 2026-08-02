@@ -117,6 +117,6 @@ export default {
 
         await sendMessage(message, [invoke.message ? new FadeContainer(Colours.DANGER).text(invoke.message).build() : card]);
     },
-    syntax: "f!softban",
-    example: "f!softban"
+    syntax: "/softban <user> [reason]",
+    example: "/softban user:@spammer reason:Spam",
 } as Command;

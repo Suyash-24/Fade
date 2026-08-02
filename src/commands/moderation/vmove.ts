@@ -158,6 +158,6 @@ export default {
             }
         }
     },
-    syntax: "f!vmove",
-    example: "f!vmove"
+    syntax: "/vmove <user> <channel> [reason]",
+    example: "/vmove user:@member channel:#new-vc",
 } as Command;

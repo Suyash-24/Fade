@@ -179,6 +179,6 @@ export default {
             .build();
         await sendMessage(message, [card]);
     },
-    syntax: "/massban <user_ids> [reason] [delete_messages]",
-    example: "/massban user_ids:value"
+    syntax: "/massban <users> [reason] [duration] [delete_messages]",
+    example: "/massban users:@user1 @user2 reason:Botting",
 } satisfies Command;

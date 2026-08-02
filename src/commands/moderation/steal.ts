@@ -111,6 +111,6 @@ export default {
             } as any);
         }
     },
-    syntax: "f!steal",
-    example: "f!steal"
+    syntax: "f!steal <emoji> [name]",
+    example: "f!steal :emote: newname",
 } satisfies Command;

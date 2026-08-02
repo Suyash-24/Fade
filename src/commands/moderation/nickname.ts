@@ -138,5 +138,5 @@ export default {
         }
     },
     syntax: "/nickname <subcommand> [args]",
-    example: "/nickname set"
+    example: "/nickname set user:@member nick:CoolGuy",
 } satisfies Command;

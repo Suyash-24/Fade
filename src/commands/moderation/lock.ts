@@ -106,6 +106,6 @@ export default {
             .build();
         await sendMessage(message, [card]);
     },
-    syntax: "/lock [target] [channel] [reason]",
-    example: "/lock target:value"
+    syntax: "/lock [channel] [reason]",
+    example: "/lock channel:#general reason:Raid",
 } satisfies Command;

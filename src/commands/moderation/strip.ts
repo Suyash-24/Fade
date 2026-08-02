@@ -180,6 +180,6 @@ export default {
             .build();
         await sendMessage(message, [card]);
     },
-    syntax: "/strip <user> [reason]",
-    example: "/strip user:value"
+    syntax: "/strip <user> <roles>",
+    example: "/strip user:@member roles:@Role1 @Role2",
 } satisfies Command;

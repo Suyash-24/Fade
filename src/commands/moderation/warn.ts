@@ -175,5 +175,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/warn <user> <reason>",
-    example: "/warn user:value reason:value"
+    example: "/warn user:@member reason:Swearing",
 } satisfies Command;

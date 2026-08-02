@@ -97,6 +97,6 @@ export default {
             .build();
         await sendMessage(message, [success]);
     },
-    syntax: "f!slowmode",
-    example: "f!slowmode"
+    syntax: "/slowmode <channel> <duration> [reason]",
+    example: "/slowmode channel:#general duration:10s",
 } as Command;

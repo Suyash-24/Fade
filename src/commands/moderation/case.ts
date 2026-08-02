@@ -136,5 +136,5 @@ export default {
         await sendMessage(message, [buildCaseView(c)]);
     },
     syntax: "/case <subcommand> [args]",
-    example: "/case view"
+    example: "/case view id:123",
 } satisfies Command;

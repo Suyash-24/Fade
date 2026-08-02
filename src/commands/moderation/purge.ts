@@ -172,6 +172,6 @@ export default {
             channelId: channel.id,
         });
     },
-    syntax: "f!purge",
-    example: "f!purge"
+    syntax: "f!purge <amount> [user]",
+    example: "f!purge 100 @spammer",
 } satisfies Command;

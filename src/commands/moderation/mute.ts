@@ -206,5 +206,5 @@ export default {
         await sendMessage(message, [shortCard]);
     },
     syntax: "/mute <user> <duration> [reason]",
-    example: "/mute user:value duration:value"
+    example: "/mute user:@spammer duration:1h reason:Spam",
 } satisfies Command;

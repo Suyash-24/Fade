@@ -152,6 +152,6 @@ export default {
             `\`f!emoji remove <emoji|name|id>\``
         );
     },
-    syntax: "f!emoji",
-    example: "f!emoji"
+    syntax: "f!emoji <add/remove/rename> [args]",
+    example: "f!emoji add :smile: happy",
 } satisfies Command;

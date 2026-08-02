@@ -95,6 +95,6 @@ export default {
             await sendMessage(message, [c]);
         }
     },
-    syntax: "f!vdisconnect",
-    example: "f!vdisconnect"
+    syntax: "/vdisconnect <user> [reason]",
+    example: "/vdisconnect user:@member",
 } as Command;

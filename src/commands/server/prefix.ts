@@ -127,6 +127,6 @@ export default {
             `Please use \`${current}prefix set <new>\` or \`${current}prefix reset\`.`
         ));
     },
-    syntax: "f!prefix",
-    example: "f!prefix"
+    syntax: "f!prefix <set/remove> [prefix]",
+    example: "f!prefix set !",
 } satisfies Command;

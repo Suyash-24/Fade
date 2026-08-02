@@ -229,5 +229,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/ban <user> [reason] [duration] [delete_messages]",
-    example: "/ban user:value"
+    example: "/ban user:@spammer reason:Breaking rules duration:1h delete_messages:true",
 } satisfies Command;

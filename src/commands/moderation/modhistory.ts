@@ -94,6 +94,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
-    syntax: "/modhistory <user>",
-    example: "/modhistory user:value"
+    syntax: "/modhistory [user]",
+    example: "/modhistory user:@member",
 } satisfies Command;

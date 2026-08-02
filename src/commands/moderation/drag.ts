@@ -100,6 +100,6 @@ export default {
             await sendMessage(message, [c]);
         }
     },
-    syntax: "f!drag",
-    example: "f!drag"
+    syntax: "/drag <user> <channel>",
+    example: "/drag user:@member channel:#general-vc",
 } as Command;

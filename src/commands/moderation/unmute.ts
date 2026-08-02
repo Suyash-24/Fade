@@ -126,5 +126,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/unmute <user> [reason]",
-    example: "/unmute user:value"
+    example: "/unmute user:@member reason:Appealed",
 } satisfies Command;

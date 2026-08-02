@@ -119,5 +119,5 @@ export default {
         }
     },
     syntax: "/fakeperms <subcommand> [args]",
-    example: "/fakeperms grant"
+    example: "/fakeperms grant user:@admin permission:Administrator",
 } satisfies Command;

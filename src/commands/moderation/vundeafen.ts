@@ -95,6 +95,6 @@ export default {
             await sendMessage(message, [c]);
         }
     },
-    syntax: "f!vundeafen",
-    example: "f!vundeafen"
+    syntax: "/vundeafen <user> [reason]",
+    example: "/vundeafen user:@member",
 } as Command;

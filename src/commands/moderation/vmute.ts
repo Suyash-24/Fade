@@ -95,6 +95,6 @@ export default {
             await sendMessage(message, [c]);
         }
     },
-    syntax: "f!vmute",
-    example: "f!vmute"
+    syntax: "/vmute <user> [reason]",
+    example: "/vmute user:@member reason:Loud",
 } as Command;

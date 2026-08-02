@@ -95,6 +95,6 @@ export default {
             await sendMessage(message, [c]);
         }
     },
-    syntax: "f!vunmute",
-    example: "f!vunmute"
+    syntax: "/vunmute <user> [reason]",
+    example: "/vunmute user:@member",
 } as Command;

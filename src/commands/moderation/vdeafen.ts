@@ -95,6 +95,6 @@ export default {
             await sendMessage(message, [c]);
         }
     },
-    syntax: "f!vdeafen",
-    example: "f!vdeafen"
+    syntax: "/vdeafen <user> [reason]",
+    example: "/vdeafen user:@member reason:Loud",
 } as Command;

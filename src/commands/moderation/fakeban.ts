@@ -100,5 +100,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/fakeban <user> [reason]",
-    example: "/fakeban user:value"
+    example: "/fakeban user:@friend reason:Trolling",
 } satisfies Command;

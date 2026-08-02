@@ -162,5 +162,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/kick <user> [reason]",
-    example: "/kick user:value"
+    example: "/kick user:@spammer reason:Spamming",
 } satisfies Command;

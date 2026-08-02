@@ -10,8 +10,8 @@ export default {
     data: { name: 'rolealias', description: 'Manage custom role aliases.' },
     prefixOnly: true,
     category: 'server',
-    syntax: "f!rolealias",
-    example: "f!rolealias",
+    syntax: "f!rolealias <subcommand> [args]",
+    example: "f!rolealias add admin @AdminRole",
     subcommands: [
         { name: 'list', description: 'List all custom role aliases.' },
         { name: 'add', description: 'Add a new custom role alias.' },

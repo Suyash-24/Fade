@@ -218,6 +218,6 @@ export default {
             ).build()
         );
     },
-    syntax: "f!botprofile",
-    example: "f!botprofile"
+    syntax: "f!botprofile <setname/setavatar/setbanner/setabout> [args]",
+    example: "f!botprofile setname FadeBot",
 } satisfies Command;

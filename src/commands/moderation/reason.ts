@@ -63,6 +63,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
-    syntax: "/reason <case> <reason>",
-    example: "/reason case:value reason:value"
+    syntax: "/reason <id> <reason>",
+    example: "/reason id:123 reason:Spamming",
 } satisfies Command;
