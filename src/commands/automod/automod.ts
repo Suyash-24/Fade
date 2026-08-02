@@ -433,6 +433,6 @@ export default {
             return;
         }
     },
-    syntax: "/automod",
-    example: "/automod"
+    syntax: "/automod <subcommand> [args]",
+    example: "/automod view"
 } satisfies Command;

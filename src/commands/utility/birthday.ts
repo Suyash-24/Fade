@@ -309,6 +309,6 @@ export default {
     },
 
     aliases: ['bday', 'bd'],
-    syntax: "/birthday",
-    example: "/birthday"
+    syntax: "/birthday <subcommand> [args]",
+    example: "/birthday set"
 } satisfies Command;

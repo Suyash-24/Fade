@@ -231,6 +231,6 @@ export default {
     },
 
     aliases: ['notify', 'notifications'],
-    syntax: "/social",
-    example: "/social"
+    syntax: "/social <subcommand> [args]",
+    example: "/social add"
 } satisfies Command;

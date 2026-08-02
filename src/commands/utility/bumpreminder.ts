@@ -122,6 +122,6 @@ export default {
             return;
         }
     },
-    syntax: "/bumpreminder",
-    example: "/bumpreminder"
+    syntax: "/bumpreminder <subcommand> [args]",
+    example: "/bumpreminder view"
 } satisfies Command;

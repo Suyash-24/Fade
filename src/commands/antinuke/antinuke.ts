@@ -485,6 +485,6 @@ export default {
             return;
         }
     },
-    syntax: "/antinuke",
-    example: "/antinuke"
+    syntax: "/antinuke <subcommand> [args]",
+    example: "/antinuke view"
 } satisfies Command;

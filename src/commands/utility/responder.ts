@@ -294,6 +294,6 @@ export default {
 
         await message.reply(`${e('error')} Usage: \`f!responder list\` · \`f!responder add <trigger> | <response>\` · \`f!responder delete <id>\``);
     },
-    syntax: "/responder",
-    example: "/responder"
+    syntax: "/responder <subcommand> [args]",
+    example: "/responder add"
 } satisfies Command;

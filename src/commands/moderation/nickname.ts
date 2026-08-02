@@ -137,6 +137,6 @@ export default {
             await message.reply(`${e('error')} I don't have permission to change that member's nickname.`);
         }
     },
-    syntax: "/nickname",
-    example: "/nickname"
+    syntax: "/nickname <subcommand> [args]",
+    example: "/nickname set"
 } satisfies Command;

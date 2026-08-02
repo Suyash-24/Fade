@@ -345,6 +345,6 @@ export default {
             return;
         }
     },
-    syntax: "/welcome",
-    example: "/welcome"
+    syntax: "/welcome <subcommand> [args]",
+    example: "/welcome view"
 } satisfies Command;

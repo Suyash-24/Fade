@@ -286,6 +286,6 @@ export default {
             return;
         }
     },
-    syntax: "/logs",
-    example: "/logs"
+    syntax: "/logs <subcommand> [args]",
+    example: "/logs view"
 } satisfies Command;

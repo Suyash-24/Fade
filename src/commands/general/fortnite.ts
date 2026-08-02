@@ -236,6 +236,6 @@ export default {
     },
 
     aliases: ['fn'],
-    syntax: "/fortnite",
-    example: "/fortnite"
+    syntax: "/fortnite <subcommand> [args]",
+    example: "/fortnite item"
 } satisfies Command;

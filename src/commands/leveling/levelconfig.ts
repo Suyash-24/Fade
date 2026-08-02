@@ -186,6 +186,6 @@ export default {
             return;
         }
     },
-    syntax: "/levelconfig",
-    example: "/levelconfig"
+    syntax: "/levelconfig <subcommand> [args]",
+    example: "/levelconfig view"
 } satisfies Command;

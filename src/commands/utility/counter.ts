@@ -248,6 +248,6 @@ export default {
             return;
         }
     },
-    syntax: "/counter",
-    example: "/counter"
+    syntax: "/counter <subcommand> [args]",
+    example: "/counter create"
 } satisfies Command;

@@ -223,6 +223,6 @@ export default {
     },
 
     aliases: ['val', 'valo'],
-    syntax: "/valorant",
-    example: "/valorant"
+    syntax: "/valorant <subcommand> [args]",
+    example: "/valorant agent"
 } satisfies Command;

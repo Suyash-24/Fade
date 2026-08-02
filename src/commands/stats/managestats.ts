@@ -249,6 +249,6 @@ export default {
             .build();
         await sendMessage(message, [card]);
     },
-    syntax: "/managestats",
-    example: "/managestats"
+    syntax: "/managestats <subcommand> [args]",
+    example: "/managestats addmessages"
 } satisfies Command;

@@ -182,6 +182,6 @@ export default {
             return;
         }
     },
-    syntax: "/tempvoice",
-    example: "/tempvoice"
+    syntax: "/tempvoice <subcommand> [args]",
+    example: "/tempvoice view"
 } satisfies Command;

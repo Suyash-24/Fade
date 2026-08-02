@@ -188,6 +188,6 @@ export default {
             await sendResponse(interaction, [card]);
         }
     },
-    syntax: "/vanity",
-    example: "/vanity"
+    syntax: "/vanity <subcommand> [args]",
+    example: "/vanity set"
 } satisfies Command;

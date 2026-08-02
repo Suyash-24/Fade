@@ -342,6 +342,6 @@ export default {
             return;
         }
     },
-    syntax: "/starboard",
-    example: "/starboard"
+    syntax: "/starboard <subcommand> [args]",
+    example: "/starboard view"
 } satisfies Command;

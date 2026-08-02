@@ -135,6 +135,6 @@ export default {
         if (!c) { await message.reply(`${e('error')} Case #${num} not found.`); return; }
         await sendMessage(message, [buildCaseView(c)]);
     },
-    syntax: "/case",
-    example: "/case"
+    syntax: "/case <subcommand> [args]",
+    example: "/case view"
 } satisfies Command;

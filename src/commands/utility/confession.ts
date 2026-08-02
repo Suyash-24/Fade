@@ -154,6 +154,6 @@ export default {
             .build();
         await sendMessage(message, [helpCard]);
     },
-    syntax: "/confession",
-    example: "/confession"
+    syntax: "/confession <subcommand> [args]",
+    example: "/confession setup"
 } satisfies Command;

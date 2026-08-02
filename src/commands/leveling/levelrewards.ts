@@ -88,6 +88,6 @@ export default {
             return;
         }
     },
-    syntax: "/levelrewards",
-    example: "/levelrewards"
+    syntax: "/levelrewards <subcommand> [args]",
+    example: "/levelrewards list"
 } satisfies Command;

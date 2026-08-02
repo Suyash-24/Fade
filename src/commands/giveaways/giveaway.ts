@@ -482,6 +482,6 @@ export default {
             return;
         }
     },
-    syntax: "/giveaway",
-    example: "/giveaway"
+    syntax: "/giveaway <subcommand> [args]",
+    example: "/giveaway start"
 } satisfies Command;

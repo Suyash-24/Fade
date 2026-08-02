@@ -368,6 +368,6 @@ export default {
             return;
         }
     },
-    syntax: "/antiraid",
-    example: "/antiraid"
+    syntax: "/antiraid <subcommand> [args]",
+    example: "/antiraid view"
 } satisfies Command;

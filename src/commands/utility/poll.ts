@@ -197,6 +197,6 @@ export default {
         const msg = await (message.channel as any).send({ embeds: [embed], components });
         await db.update(polls).set({ messageId: msg.id }).where(eq(polls.id, poll.id));
     },
-    syntax: "/poll",
-    example: "/poll"
+    syntax: "/poll <subcommand> [args]",
+    example: "/poll create"
 } satisfies Command;

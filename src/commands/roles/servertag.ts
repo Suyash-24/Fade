@@ -172,6 +172,6 @@ export default {
             return;
         }
     },
-    syntax: "/servertag",
-    example: "/servertag"
+    syntax: "/servertag <subcommand> [args]",
+    example: "/servertag role"
 } satisfies Command;

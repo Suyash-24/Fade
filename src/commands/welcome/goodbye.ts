@@ -279,6 +279,6 @@ export default {
             return;
         }
     },
-    syntax: "/goodbye",
-    example: "/goodbye"
+    syntax: "/goodbye <subcommand> [args]",
+    example: "/goodbye view"
 } satisfies Command;

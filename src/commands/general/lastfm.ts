@@ -646,6 +646,6 @@ export default {
     },
 
     aliases: ['fm', 'lfm'],
-    syntax: "/lastfm",
-    example: "/lastfm"
+    syntax: "/lastfm <subcommand> [args]",
+    example: "/lastfm login"
 } satisfies Command;

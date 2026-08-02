@@ -359,6 +359,6 @@ export default {
             return;
         }
     },
-    syntax: "/vc",
-    example: "/vc"
+    syntax: "/vc <subcommand> [args]",
+    example: "/vc name"
 } satisfies Command;
