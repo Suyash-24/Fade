@@ -75,8 +75,12 @@ const buildCategoryInfo = (client: any, category: string) => {
 
 const buildCommandInfo = (cmd: any, subName?: string) => {
     const prefix = cmd.prefixOnly ? 'f!' : '/';
-    let title = `## ${e('search')} \`${prefix}${cmd.data.name}\``;
-    let desc = cmd.data.description;
+    const cmdName = cmd.data.name;
+    
+    let title = `## ${cmdName}`;
+    let desc = `> ${cmd.data.description}`;
+    
+    let subStr = '';
     
     // Subcommand matching
     if (subName) {
@@ -84,8 +88,9 @@ const buildCommandInfo = (cmd: any, subName?: string) => {
         if (cmd.subcommands) {
             const sub = cmd.subcommands.find((s: any) => s.name.toLowerCase() === subName);
             if (sub) {
-                title = `## ${e('search')} \`${prefix}${cmd.data.name} ${sub.name}\``;
-                desc = sub.description;
+                title = `## ${cmdName} ${sub.name}`;
+                desc = `> ${sub.description}`;
+                subStr = ` ${sub.name}`;
                 foundSub = true;
             }
         }
@@ -93,8 +98,9 @@ const buildCommandInfo = (cmd: any, subName?: string) => {
             const subOpt = cmd.data.options.find((o: any) => (o.toJSON().type === 1 || o.toJSON().type === 2) && o.toJSON().name === subName);
             if (subOpt) {
                 const subJson = subOpt.toJSON();
-                title = `## ${e('search')} \`${prefix}${cmd.data.name} ${subJson.name}\``;
-                desc = subJson.description;
+                title = `## ${cmdName} ${subJson.name}`;
+                desc = `> ${subJson.description}`;
+                subStr = ` ${subJson.name}`;
                 foundSub = true;
             }
         }
@@ -103,10 +109,30 @@ const buildCommandInfo = (cmd: any, subName?: string) => {
         }
     }
 
+    const aliases = cmd.aliases?.length ? cmd.aliases.join(', ') : 'n/a';
+    
+    // Auto-extract parameters if not defined
+    let params = cmd.parameters;
+    if (!params) {
+        if (cmd.data.options) {
+            params = cmd.data.options.map((o: any) => o.toJSON().name).join(', ');
+        }
+        if (!params || params.length === 0) params = 'n/a';
+    }
+    
+    const info = cmd.information || 'n/a';
+    
+    const syntax = cmd.syntax || `${prefix}${cmdName}${subStr} ${params !== 'n/a' ? `[${params}]` : ''}`.trim();
+    const example = cmd.example || `${prefix}${cmdName}${subStr}`;
+
     const lines = [
         title,
         desc,
         '',
+        `**Aliases** \`${aliases}\` ｜ **Parameters** \`${params}\` ｜ **Information** \`${info}\``,
+        '',
+        `**Usage**`,
+        `\`\`\`\nSyntax:  ${syntax}\nExample: ${example}\n\`\`\``
     ];
 
     if (!subName) {
@@ -124,12 +150,16 @@ const buildCommandInfo = (cmd: any, subName?: string) => {
         }
     }
 
-    lines.push(cmd.cooldown ? `${e('uptime')}  **Cooldown** — \`${cmd.cooldown}s\`` : '');
-    lines.push(cmd.aliases?.length ? `**Aliases** — ${cmd.aliases.map((a: string) => `\`${a}\``).join(', ')}` : '');
-    lines.push(cmd.guildOnly ? `${e('server')}  Server only` : '');
-    lines.push(cmd.ownerOnly ? `${e('crown')}  Owner only` : '');
+    const meta = [];
+    if (cmd.cooldown) meta.push(`⏱️ Cooldown: ${cmd.cooldown}s`);
+    if (cmd.guildOnly) meta.push(`🔒 Server only`);
+    if (cmd.ownerOnly) meta.push(`👑 Owner only`);
+    
+    if (meta.length > 0) {
+        lines.push(`-# ${meta.join(' · ')}`);
+    }
 
-    return new FadeContainer(Colours.FADE)
+    return new FadeContainer(null)
         .text(lines.filter(Boolean).join('\n'))
         .build();
 };

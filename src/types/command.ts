@@ -59,6 +59,12 @@ export interface Command {
     // Command category (used in /help)
     category?: string;
 
+    // Detailed help menu metadata
+    parameters?: string;
+    information?: string;
+    syntax?: string;
+    example?: string;
+
     // Subcommands metadata for help menu
     subcommands?: { name: string; description: string }[];
 
