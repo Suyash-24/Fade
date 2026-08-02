@@ -270,6 +270,4 @@ export default {
             .build();
         await sendMessage(message, [card]);
     },
-    syntax: "f!rolealias",
-    example: "f!rolealias"
 } satisfies Command;
