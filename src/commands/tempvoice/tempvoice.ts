@@ -183,5 +183,5 @@ export default {
         }
     },
     syntax: "/tempvoice <subcommand> [args]",
-    example: "/tempvoice view"
+    example: "/tempvoice setup category:123 channel:123",
 } satisfies Command;

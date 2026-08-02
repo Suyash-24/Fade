@@ -434,5 +434,5 @@ export default {
         }
     },
     syntax: "/automod <subcommand> [args]",
-    example: "/automod view"
+    example: "/automod view",
 } satisfies Command;

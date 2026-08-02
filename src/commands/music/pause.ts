@@ -36,6 +36,6 @@ export default {
         );
         await musicReply(message, [card]);
     },
-    syntax: "/pause",
-    example: "/pause"
+    syntax: "f!pause",
+    example: "f!pause",
 } satisfies Command;

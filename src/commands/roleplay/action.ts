@@ -174,5 +174,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/action <type> <user>",
-    example: "/action type:value user:value"
+    example: "/action type:hug user:@friend",
 } as Command;

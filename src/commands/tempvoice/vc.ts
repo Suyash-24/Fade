@@ -360,5 +360,5 @@ export default {
         }
     },
     syntax: "/vc <subcommand> [args]",
-    example: "/vc name"
+    example: "/vc name newname",
 } satisfies Command;

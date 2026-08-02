@@ -382,5 +382,5 @@ export default {
         }
     },
     syntax: "/ticket <subcommand> [args]",
-    example: "/ticket create"
+    example: "/ticket create category:Support",
 } satisfies Command;

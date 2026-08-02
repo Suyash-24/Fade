@@ -704,6 +704,6 @@ export default {
             }
         }
     },
-    syntax: "/reactionrole",
-    example: "/reactionrole"
+    syntax: "/reactionrole <subcommand> [args]",
+    example: "/reactionrole add message:12345 emoji:wave role:@Role",
 } satisfies Command;

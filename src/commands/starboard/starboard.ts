@@ -343,5 +343,5 @@ export default {
         }
     },
     syntax: "/starboard <subcommand> [args]",
-    example: "/starboard view"
+    example: "/starboard setup channel:#starboard threshold:3",
 } satisfies Command;

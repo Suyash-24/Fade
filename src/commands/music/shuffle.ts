@@ -38,6 +38,6 @@ export default {
             `Shuffled **${player.queue.length} tracks** in the queue.`
         )]);
     },
-    syntax: "/shuffle",
-    example: "/shuffle"
+    syntax: "f!shuffle",
+    example: "f!shuffle",
 } satisfies Command;

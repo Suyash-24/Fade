@@ -99,6 +99,6 @@ export default {
 
         await searchMsg.edit({ components: [card], flags: IS_CV2 } as any);
     },
-    syntax: "/lyrics",
-    example: "/lyrics"
+    syntax: "f!lyrics [song]",
+    example: "f!lyrics",
 } satisfies Command;

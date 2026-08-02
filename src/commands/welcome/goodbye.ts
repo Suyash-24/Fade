@@ -280,5 +280,5 @@ export default {
         }
     },
     syntax: "/goodbye <subcommand> [args]",
-    example: "/goodbye view"
+    example: "/goodbye enable channel:#leaves",
 } satisfies Command;

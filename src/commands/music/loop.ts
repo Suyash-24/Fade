@@ -56,6 +56,6 @@ export default {
         player.setLoop(mode);
         await musicReply(message, [buildMusicInfoCard(MODES[mode], `-# Loop mode changed to **${mode}**.`)]);
     },
-    syntax: "/loop",
-    example: "/loop"
+    syntax: "f!loop [mode]",
+    example: "f!loop track",
 } satisfies Command;

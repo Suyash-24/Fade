@@ -127,5 +127,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/reputation <user> <category>",
-    example: "/reputation user:value category:value"
+    example: "/reputation user:@friend category:Helpful",
 } satisfies Command;

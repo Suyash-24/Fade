@@ -51,6 +51,6 @@ export default {
             ]);
         }
     },
-    syntax: "/autoplay",
-    example: "/autoplay"
+    syntax: "f!autoplay",
+    example: "f!autoplay",
 } satisfies Command;

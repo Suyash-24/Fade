@@ -114,6 +114,6 @@ export default {
             ),
         ]);
     },
-    syntax: "/djrole",
-    example: "/djrole"
+    syntax: "f!djrole <role>",
+    example: "f!djrole @DJ",
 } satisfies Command;

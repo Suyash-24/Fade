@@ -346,5 +346,5 @@ export default {
         }
     },
     syntax: "/welcome <subcommand> [args]",
-    example: "/welcome view"
+    example: "/welcome enable channel:#joins",
 } satisfies Command;

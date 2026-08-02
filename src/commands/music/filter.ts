@@ -145,6 +145,6 @@ export default {
             ),
         ]);
     },
-    syntax: "/filter",
-    example: "/filter"
+    syntax: "f!filter <filter>",
+    example: "f!filter bassboost",
 } satisfies Command;

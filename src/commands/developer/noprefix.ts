@@ -65,6 +65,6 @@ export default {
             .build();
         await sendMessage(message, [card]);
     },
-    syntax: "f!noprefix",
-    example: "f!noprefix"
+    syntax: "f!noprefix <user>",
+    example: "f!noprefix 123456789012345678",
 } satisfies Command;

@@ -486,5 +486,5 @@ export default {
         }
     },
     syntax: "/antinuke <subcommand> [args]",
-    example: "/antinuke view"
+    example: "/antinuke enable",
 } satisfies Command;

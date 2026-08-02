@@ -78,5 +78,5 @@ export default {
         await reply.edit({ content: '', files: [attachment] });
     },
     syntax: "/rep [user]",
-    example: "/rep user:value"
+    example: "/rep user:@friend",
 } satisfies Command;

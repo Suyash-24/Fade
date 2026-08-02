@@ -88,6 +88,6 @@ export default {
             
         await musicReply(message, [card]);
     },
-    syntax: "/join",
-    example: "/join"
+    syntax: "f!join",
+    example: "f!join",
 } as Command;

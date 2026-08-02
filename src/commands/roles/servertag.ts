@@ -173,5 +173,5 @@ export default {
         }
     },
     syntax: "/servertag <subcommand> [args]",
-    example: "/servertag role"
+    example: "/servertag set tag:Fade",
 } satisfies Command;

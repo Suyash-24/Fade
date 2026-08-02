@@ -287,5 +287,5 @@ export default {
         }
     },
     syntax: "/logs <subcommand> [args]",
-    example: "/logs view"
+    example: "/logs enable channel:#logs",
 } satisfies Command;

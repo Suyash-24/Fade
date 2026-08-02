@@ -483,5 +483,5 @@ export default {
         }
     },
     syntax: "/giveaway <subcommand> [args]",
-    example: "/giveaway start"
+    example: "/giveaway start channel:#giveaways time:1h winners:1 prize:Nitro",
 } satisfies Command;

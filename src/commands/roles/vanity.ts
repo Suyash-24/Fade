@@ -189,5 +189,5 @@ export default {
         }
     },
     syntax: "/vanity <subcommand> [args]",
-    example: "/vanity set"
+    example: "/vanity set url:fade",
 } satisfies Command;

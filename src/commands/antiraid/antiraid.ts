@@ -369,5 +369,5 @@ export default {
         }
     },
     syntax: "/antiraid <subcommand> [args]",
-    example: "/antiraid view"
+    example: "/antiraid enable",
 } satisfies Command;

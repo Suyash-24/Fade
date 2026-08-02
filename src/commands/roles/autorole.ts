@@ -241,5 +241,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/autorole <subcommand> [args]",
-    example: "/autorole add"
+    example: "/autorole add role:@Member",
 } satisfies Command;

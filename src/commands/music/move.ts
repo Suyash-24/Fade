@@ -71,6 +71,6 @@ export default {
             ),
         ]);
     },
-    syntax: "/move",
-    example: "/move"
+    syntax: "f!move <from> <to>",
+    example: "f!move 1 3",
 } satisfies Command;

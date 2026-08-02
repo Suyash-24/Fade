@@ -86,6 +86,6 @@ export default {
             await player.play();
         }
     },
-    syntax: "/play",
-    example: "/play"
+    syntax: "f!play <song>",
+    example: "f!play Never Gonna Give You Up",
 } satisfies Command;

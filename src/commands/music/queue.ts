@@ -26,6 +26,6 @@ export default {
         const card = buildQueueCard(player, isNaN(page) ? 1 : page);
         await musicReply(message, [card]);
     },
-    syntax: "/queue",
-    example: "/queue"
+    syntax: "f!queue [page]",
+    example: "f!queue",
 } satisfies Command;
