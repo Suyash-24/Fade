@@ -613,7 +613,21 @@ const sectionsData = {
       <h2>Reminders & AFK</h2>
       <div class="docs-cmd-block">
           <div class="cmd-row"><code>/remind set &lt;time&gt; &lt;reason&gt;</code><span>Set a personal reminder</span></div>
-          <div class="cmd-row"><code>/afk &lt;status&gt;</code><span>Sets you to AFK. Fade will notify anyone who pings you.</span></div>
+          <div class="cmd-row"><code>f!afk &lt;status&gt;</code><span>Sets you to AFK. Fade will notify anyone who pings you.</span></div>
+      </div>
+
+      <h2>Confessions</h2>
+      <p>Allow users to anonymously confess in your server.</p>
+      <div class="docs-cmd-block">
+          <div class="cmd-row"><code>/confession setup</code><span>Set up the confession channel</span></div>
+          <div class="cmd-row"><code>f!confess &lt;message&gt;</code><span>Send an anonymous confession to the channel</span></div>
+      </div>
+
+      <h2>AI Image & Chat</h2>
+      <p>Fade comes with powerful built-in AI models for image generation and chat, featuring Safe Search and multi-provider fallback.</p>
+      <div class="docs-cmd-block">
+          <div class="cmd-row"><code>f!imagine &lt;prompt&gt;</code><span>Generate high-quality images completely for free using FLUX</span></div>
+          <div class="cmd-row"><code>f!askai &lt;question&gt;</code><span>Ask Fade's AI any question for a quick response</span></div>
       </div>
     `
   },
