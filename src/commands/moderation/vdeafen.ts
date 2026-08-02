@@ -95,4 +95,6 @@ export default {
             await sendMessage(message, [c]);
         }
     },
+    syntax: "f!vdeafen",
+    example: "f!vdeafen"
 } as Command;

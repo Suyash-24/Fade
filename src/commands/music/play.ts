@@ -86,4 +86,6 @@ export default {
             await player.play();
         }
     },
+    syntax: "/play",
+    example: "/play"
 } satisfies Command;

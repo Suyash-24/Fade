@@ -174,4 +174,6 @@ export default {
             .build();
         await sendMessage(message, [card]);
     },
+    syntax: "/warn <user> <reason>",
+    example: "/warn user:value reason:value"
 } satisfies Command;

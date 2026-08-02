@@ -95,4 +95,6 @@ export default {
             await sendMessage(message, [c]);
         }
     },
+    syntax: "f!vdisconnect",
+    example: "f!vdisconnect"
 } as Command;

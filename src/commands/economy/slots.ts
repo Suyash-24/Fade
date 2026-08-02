@@ -122,4 +122,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
+    syntax: "/slots",
+    example: "/slots"
 } satisfies Command;

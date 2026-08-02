@@ -139,6 +139,8 @@ export default {
 
         await sendMessage(message, [container]);
     },
+    syntax: "/avatar [user]",
+    example: "/avatar user:value"
 } satisfies Command;
 
 export { buildAvatar };

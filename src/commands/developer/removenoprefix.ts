@@ -38,4 +38,6 @@ export default {
             .build();
         await sendMessage(message, [card]);
     },
+    syntax: "f!removenoprefix",
+    example: "f!removenoprefix"
 } satisfies Command;

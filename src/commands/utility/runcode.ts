@@ -117,4 +117,6 @@ export default {
             await sendMessage(message, [failCard]);
         }
     },
+    syntax: "f!runcode",
+    example: "f!runcode"
 } as Command;

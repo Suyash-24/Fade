@@ -174,6 +174,8 @@ export default {
     },
 
     aliases: ['quiz'],
+    syntax: "/trivia",
+    example: "/trivia"
 } satisfies Command;
 
 // ── Button handler ────────────────────────────────────────────────────────────

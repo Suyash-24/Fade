@@ -88,4 +88,6 @@ export default {
             return;
         }
     },
+    syntax: "/levelrewards",
+    example: "/levelrewards"
 } satisfies Command;

@@ -53,4 +53,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
+    syntax: "/inventory",
+    example: "/inventory"
 } satisfies Command;

@@ -433,4 +433,6 @@ export default {
             return;
         }
     },
+    syntax: "/automod",
+    example: "/automod"
 } satisfies Command;

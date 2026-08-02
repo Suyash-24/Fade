@@ -149,4 +149,6 @@ export default {
     },
 
     aliases: ['invokemsg'],
+    syntax: "/invoke",
+    example: "/invoke"
 } satisfies Command;

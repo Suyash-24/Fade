@@ -91,4 +91,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
+    syntax: "/coinflip",
+    example: "/coinflip"
 } satisfies Command;

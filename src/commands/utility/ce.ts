@@ -296,4 +296,6 @@ export default {
     },
 
     aliases: ['embed', 'createembed'],
+    syntax: "/ce",
+    example: "/ce"
 } satisfies Command;

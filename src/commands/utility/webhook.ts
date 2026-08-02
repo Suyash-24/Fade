@@ -350,4 +350,6 @@ export default {
     },
 
     aliases: ['wh'],
+    syntax: "/webhook",
+    example: "/webhook"
 } satisfies Command;

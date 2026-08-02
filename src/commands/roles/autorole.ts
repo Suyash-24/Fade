@@ -240,4 +240,6 @@ export default {
             .build();
         await sendMessage(message, [card]);
     },
+    syntax: "/autorole",
+    example: "/autorole"
 } satisfies Command;

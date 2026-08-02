@@ -109,4 +109,6 @@ export default {
         const card = buildCard(channel as any, allStats, wStats, tStats, client.user!.username);
         await sendMessage(message, [card]);
     },
+    syntax: "/channelstats [channel]",
+    example: "/channelstats channel:value"
 } satisfies Command;

@@ -124,4 +124,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
+    syntax: "/msglb [timeframe] [page]",
+    example: "/msglb timeframe:value"
 } satisfies Command;

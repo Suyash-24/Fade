@@ -101,4 +101,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
+    syntax: "/modstats [moderator]",
+    example: "/modstats moderator:value"
 } satisfies Command;

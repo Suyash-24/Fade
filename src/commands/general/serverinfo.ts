@@ -92,6 +92,8 @@ export default {
         const container = await buildServerInfo(message.guild!);
         await sendMessage(message, [container]);
     },
+    syntax: "/serverinfo",
+    example: "/serverinfo"
 } satisfies Command;
 
 export { buildServerInfo };

@@ -394,4 +394,6 @@ export default {
             }
         }
     },
+    syntax: "/economy",
+    example: "/economy"
 } satisfies Command;

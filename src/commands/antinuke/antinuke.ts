@@ -485,4 +485,6 @@ export default {
             return;
         }
     },
+    syntax: "/antinuke",
+    example: "/antinuke"
 } satisfies Command;

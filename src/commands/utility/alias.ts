@@ -147,4 +147,6 @@ export default {
             await interaction.reply({ components: [card] as any, flags: MessageFlags.Ephemeral });
         }
     },
+    syntax: "/alias",
+    example: "/alias"
 } satisfies Command;

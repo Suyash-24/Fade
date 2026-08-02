@@ -172,5 +172,7 @@ export default {
             .build();
 
         await sendMessage(message, [card]);
-    }
+    },
+    syntax: "/action <type> <user>",
+    example: "/action type:value user:value"
 } as Command;

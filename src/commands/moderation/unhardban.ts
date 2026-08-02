@@ -123,4 +123,6 @@ export default {
             .build();
         await sendMessage(message, [card]);
     },
+    syntax: "/unhardban <user_id> [reason]",
+    example: "/unhardban user_id:value"
 } satisfies Command;

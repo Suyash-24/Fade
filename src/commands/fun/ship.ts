@@ -137,6 +137,8 @@ export default {
             allowedMentions: { parse: [] }
         } as any);
     },
+    syntax: "/ship [user1] [user2]",
+    example: "/ship user1:value"
 } satisfies Command;
 
 async function generateShipCanvas(user1: any, user2: any, percentage: number): Promise<Buffer> {

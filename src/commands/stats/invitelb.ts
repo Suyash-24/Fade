@@ -101,4 +101,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
+    syntax: "/invitelb [page]",
+    example: "/invitelb page:value"
 } satisfies Command;

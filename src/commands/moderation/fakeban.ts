@@ -99,4 +99,6 @@ export default {
             
         await sendMessage(message, [card]);
     },
+    syntax: "/fakeban <user> [reason]",
+    example: "/fakeban user:value"
 } satisfies Command;

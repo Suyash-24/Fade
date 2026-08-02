@@ -85,5 +85,7 @@ export default {
                 .build();
             await sendMessage(message, [errCard]);
         }
-    }
+    },
+    syntax: "/askai <prompt>",
+    example: "/askai prompt:value"
 } as Command;

@@ -175,4 +175,6 @@ export default {
             await sendResponse(interaction, [card], true);
         }
     },
+    syntax: "/timer",
+    example: "/timer"
 } satisfies Command;

@@ -47,4 +47,6 @@ export default {
             .build();
         await sendMessage(message, [card]);
     },
+    syntax: "/addxp <user> <amount>",
+    example: "/addxp user:value amount:value"
 } satisfies Command;

@@ -76,4 +76,6 @@ export default {
         await player.seek(ms);
         await musicReply(message, [buildMusicInfoCard('⏩ Seeked', `Jumped to \`${msToTimestamp(ms)}\`.`)]);
     },
+    syntax: "/seek",
+    example: "/seek"
 } satisfies Command;

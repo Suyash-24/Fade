@@ -209,4 +209,6 @@ export default {
         const attachment = new AttachmentBuilder(buffer, { name: 'serverstats.png' });
         await msg.edit({ content: null, embeds: [], files: [attachment] });
     },
+    syntax: "/serverstats",
+    example: "/serverstats"
 } satisfies Command;

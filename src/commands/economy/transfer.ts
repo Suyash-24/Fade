@@ -95,4 +95,6 @@ export default {
             await sendMessage(message, [card]);
         }
     },
+    syntax: "/transfer",
+    example: "/transfer"
 } satisfies Command;

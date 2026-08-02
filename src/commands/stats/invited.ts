@@ -76,4 +76,6 @@ export default {
         const card = buildInvitedCard(target as any, records, guild.name, guild.members.cache);
         await sendMessage(message, [card]);
     },
+    syntax: "/invited [user]",
+    example: "/invited user:value"
 } satisfies Command;

@@ -145,4 +145,6 @@ export default {
             ),
         ]);
     },
+    syntax: "/filter",
+    example: "/filter"
 } satisfies Command;

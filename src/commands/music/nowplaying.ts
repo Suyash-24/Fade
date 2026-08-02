@@ -25,4 +25,6 @@ export default {
         const card = buildNowPlayingCard(player, player.queue.current!);
         await musicReply(message, [card]);
     },
+    syntax: "/nowplaying",
+    example: "/nowplaying"
 } satisfies Command;

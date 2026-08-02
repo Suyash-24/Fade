@@ -130,4 +130,6 @@ export default {
         );
         await sendMessage(message, [card]);
     },
+    syntax: "/voicestats [user]",
+    example: "/voicestats user:value"
 } satisfies Command;

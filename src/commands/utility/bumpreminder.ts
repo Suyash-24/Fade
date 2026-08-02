@@ -122,4 +122,6 @@ export default {
             return;
         }
     },
+    syntax: "/bumpreminder",
+    example: "/bumpreminder"
 } satisfies Command;

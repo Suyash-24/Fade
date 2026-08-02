@@ -249,4 +249,6 @@ export default {
             .build();
         await sendMessage(message, [card]);
     },
+    syntax: "/managestats",
+    example: "/managestats"
 } satisfies Command;

@@ -663,4 +663,6 @@ export default {
     },
 
     aliases: ['br', 'boosterroles'],
+    syntax: "/boosterrole",
+    example: "/boosterrole"
 } satisfies Command;

@@ -154,4 +154,6 @@ export default {
 
         await message.reply(`${e('error')} Usage: \`f!warnthreshold <add|remove|list|clear>\``);
     },
+    syntax: "/warnthreshold",
+    example: "/warnthreshold"
 } satisfies Command;

@@ -342,4 +342,6 @@ export default {
             return;
         }
     },
+    syntax: "/starboard",
+    example: "/starboard"
 } satisfies Command;

@@ -218,4 +218,6 @@ export default {
             ).build()
         );
     },
+    syntax: "f!botprofile",
+    example: "f!botprofile"
 } satisfies Command;

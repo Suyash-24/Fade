@@ -248,4 +248,6 @@ export default {
             return;
         }
     },
+    syntax: "/counter",
+    example: "/counter"
 } satisfies Command;

@@ -704,4 +704,6 @@ export default {
             }
         }
     },
+    syntax: "/reactionrole",
+    example: "/reactionrole"
 } satisfies Command;

@@ -345,4 +345,6 @@ export default {
             return;
         }
     },
+    syntax: "/welcome",
+    example: "/welcome"
 } satisfies Command;

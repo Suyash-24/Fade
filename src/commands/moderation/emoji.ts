@@ -152,4 +152,6 @@ export default {
             `\`f!emoji remove <emoji|name|id>\``
         );
     },
+    syntax: "f!emoji",
+    example: "f!emoji"
 } satisfies Command;

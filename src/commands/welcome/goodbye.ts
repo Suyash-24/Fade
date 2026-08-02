@@ -279,4 +279,6 @@ export default {
             return;
         }
     },
+    syntax: "/goodbye",
+    example: "/goodbye"
 } satisfies Command;

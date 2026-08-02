@@ -79,4 +79,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
+    syntax: "/deposit",
+    example: "/deposit"
 } satisfies Command;

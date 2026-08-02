@@ -275,4 +275,6 @@ export default {
             await sendResponse(interaction, [card], true);
         }
     },
+    syntax: "/sticky",
+    example: "/sticky"
 } satisfies Command;

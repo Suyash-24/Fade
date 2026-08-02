@@ -107,4 +107,6 @@ export default {
             .build();
         await sendMessage(message, [card]);
     },
+    syntax: "/unlock [target] [channel] [reason]",
+    example: "/unlock target:value"
 } satisfies Command;

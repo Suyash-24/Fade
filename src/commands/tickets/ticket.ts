@@ -381,4 +381,6 @@ export default {
             return;
         }
     },
+    syntax: "/ticket",
+    example: "/ticket"
 } satisfies Command;

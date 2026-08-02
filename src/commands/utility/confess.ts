@@ -31,7 +31,9 @@ export default {
 
         const messageText = args.join(' ');
         await handleConfession(message as any, guild, message.author, messageText, false);
-    }
+    },
+    syntax: "/confess <message>",
+    example: "/confess message:value"
 } as Command;
 
 async function handleConfession(ctx: any, guild: any, user: any, messageText: string, isSlash: boolean) {

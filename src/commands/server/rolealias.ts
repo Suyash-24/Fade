@@ -10,6 +10,8 @@ export default {
     data: { name: 'rolealias', description: 'Manage custom role aliases.' },
     prefixOnly: true,
     category: 'server',
+    syntax: "f!rolealias <subcommand> [args]",
+    example: "f!rolealias add admin @Administrator",
     subcommands: [
         { name: 'list', description: 'List all custom role aliases.' },
         { name: 'add', description: 'Add a new custom role alias.' },
@@ -268,4 +270,6 @@ export default {
             .build();
         await sendMessage(message, [card]);
     },
+    syntax: "f!rolealias",
+    example: "f!rolealias"
 } satisfies Command;

@@ -67,4 +67,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
+    syntax: "/economyleaderboard",
+    example: "/economyleaderboard"
 } satisfies Command;

@@ -118,4 +118,6 @@ export default {
             await interaction.reply({ flags: MessageFlags.Ephemeral, components: [card] as any });
         }
     },
+    syntax: "/fakeperms",
+    example: "/fakeperms"
 } satisfies Command;

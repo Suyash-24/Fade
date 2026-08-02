@@ -71,4 +71,6 @@ export default {
             ),
         ]);
     },
+    syntax: "/move",
+    example: "/move"
 } satisfies Command;

@@ -78,4 +78,6 @@ export default {
         const card = await buildRankCard(target, message.guild!.id, displayName, message.guild);
         await sendMessage(message, [card]);
     },
+    syntax: "/rank [user]",
+    example: "/rank user:value"
 } satisfies Command;

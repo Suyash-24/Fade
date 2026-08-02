@@ -162,4 +162,6 @@ export default {
             `-# Example: \`f!roleicon @VIP 🔥\` or \`f!roleicon @VIP https://example.com/icon.png\``
         );
     },
+    syntax: "f!roleicon",
+    example: "f!roleicon"
 } satisfies Command;

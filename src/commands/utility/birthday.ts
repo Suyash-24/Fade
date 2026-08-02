@@ -309,4 +309,6 @@ export default {
     },
 
     aliases: ['bday', 'bd'],
+    syntax: "/birthday",
+    example: "/birthday"
 } satisfies Command;

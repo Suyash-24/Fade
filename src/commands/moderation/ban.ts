@@ -228,4 +228,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
+    syntax: "/ban <user> [reason] [duration] [delete_messages]",
+    example: "/ban user:value"
 } satisfies Command;

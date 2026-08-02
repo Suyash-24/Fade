@@ -132,4 +132,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
+    syntax: "/vclb [timeframe] [page]",
+    example: "/vclb timeframe:value"
 } satisfies Command;

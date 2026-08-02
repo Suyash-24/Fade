@@ -95,4 +95,6 @@ export default {
             await sendMessage(message, [c]);
         }
     },
+    syntax: "f!vunmute",
+    example: "f!vunmute"
 } as Command;

@@ -182,4 +182,6 @@ export default {
             return;
         }
     },
+    syntax: "/tempvoice",
+    example: "/tempvoice"
 } satisfies Command;

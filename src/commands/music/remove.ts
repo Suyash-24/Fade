@@ -42,4 +42,6 @@ export default {
             `Removed **[${removed.title}](${removed.uri ?? 'https://discord.com'})** from the queue.`
         )]);
     },
+    syntax: "/remove",
+    example: "/remove"
 } satisfies Command;

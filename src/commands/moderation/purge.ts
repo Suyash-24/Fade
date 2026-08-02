@@ -171,5 +171,7 @@ export default {
             userId:    message.author.id,
             channelId: channel.id,
         });
-    }
+    },
+    syntax: "f!purge",
+    example: "f!purge"
 } satisfies Command;

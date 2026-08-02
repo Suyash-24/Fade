@@ -158,4 +158,6 @@ export default {
             }
         }
     },
+    syntax: "f!vmove",
+    example: "f!vmove"
 } as Command;

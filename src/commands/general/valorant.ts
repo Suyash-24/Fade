@@ -223,4 +223,6 @@ export default {
     },
 
     aliases: ['val', 'valo'],
+    syntax: "/valorant",
+    example: "/valorant"
 } satisfies Command;

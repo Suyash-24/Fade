@@ -64,4 +64,6 @@ export default {
         );
         await musicReply(message, [card]);
     },
+    syntax: "/stop",
+    example: "/stop"
 } satisfies Command;

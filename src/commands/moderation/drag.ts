@@ -100,4 +100,6 @@ export default {
             await sendMessage(message, [c]);
         }
     },
+    syntax: "f!drag",
+    example: "f!drag"
 } as Command;

@@ -53,4 +53,6 @@ export default {
             .build();
         await message.reply({ components: [card] as any, flags: 1 << 15 } as any);
     },
+    syntax: "f!translator",
+    example: "f!translator"
 } satisfies Command;

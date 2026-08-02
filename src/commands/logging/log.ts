@@ -286,4 +286,6 @@ export default {
             return;
         }
     },
+    syntax: "/logs",
+    example: "/logs"
 } satisfies Command;

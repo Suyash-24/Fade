@@ -103,4 +103,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
+    syntax: "/gamble",
+    example: "/gamble"
 } satisfies Command;

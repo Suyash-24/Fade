@@ -482,4 +482,6 @@ export default {
             return;
         }
     },
+    syntax: "/giveaway",
+    example: "/giveaway"
 } satisfies Command;

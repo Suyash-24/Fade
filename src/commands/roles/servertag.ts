@@ -172,4 +172,6 @@ export default {
             return;
         }
     },
+    syntax: "/servertag",
+    example: "/servertag"
 } satisfies Command;

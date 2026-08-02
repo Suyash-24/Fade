@@ -99,5 +99,7 @@ export default {
             .build();
 
         await sendMessage(message, [card]);
-    }
+    },
+    syntax: "/repadmin <user> <type> <amount>",
+    example: "/repadmin user:value type:value amount:value"
 } satisfies Command;

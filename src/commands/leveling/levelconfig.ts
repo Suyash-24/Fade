@@ -186,4 +186,6 @@ export default {
             return;
         }
     },
+    syntax: "/levelconfig",
+    example: "/levelconfig"
 } satisfies Command;

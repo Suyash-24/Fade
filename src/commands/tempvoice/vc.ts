@@ -359,4 +359,6 @@ export default {
             return;
         }
     },
+    syntax: "/vc",
+    example: "/vc"
 } satisfies Command;

@@ -43,4 +43,6 @@ export default {
         const icon = vol <= 30 ? '🔈' : vol <= 70 ? '🔉' : '🔊';
         await musicReply(message, [buildMusicInfoCard(`${icon} Volume Updated`, `Volume set to **${vol}%**.`)]);
     },
+    syntax: "/volume",
+    example: "/volume"
 } satisfies Command;

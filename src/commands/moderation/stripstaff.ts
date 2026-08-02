@@ -138,4 +138,6 @@ export default {
 
         await sendMessage(message, [invoke.message ? new FadeContainer(Colours.SUCCESS).text(invoke.message).build() : card]);
     },
+    syntax: "f!stripstaff",
+    example: "f!stripstaff"
 } as Command;

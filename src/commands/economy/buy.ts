@@ -100,4 +100,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
+    syntax: "/buy",
+    example: "/buy"
 } satisfies Command;

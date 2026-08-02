@@ -94,5 +94,7 @@ export default {
                 await sendMessage(message, [errCard]);
             }
         }
-    }
+    },
+    syntax: "/imagine <prompt>",
+    example: "/imagine prompt:value"
 } as Command;

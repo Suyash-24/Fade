@@ -92,4 +92,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
+    syntax: "/warnings <user> [clear]",
+    example: "/warnings user:value"
 } satisfies Command;

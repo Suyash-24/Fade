@@ -114,4 +114,6 @@ export default {
             
         await musicReply(message, [card]);
     },
+    syntax: "/247",
+    example: "/247"
 } as Command;

@@ -114,4 +114,6 @@ export default {
             ),
         ]);
     },
+    syntax: "/djrole",
+    example: "/djrole"
 } satisfies Command;

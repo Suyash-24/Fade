@@ -96,5 +96,7 @@ export default {
             .text(successText)
             .build();
         await sendMessage(message, [success]);
-    }
+    },
+    syntax: "f!slowmode",
+    example: "f!slowmode"
 } as Command;

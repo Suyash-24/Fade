@@ -36,4 +36,6 @@ export default {
             files: [{ attachment: url, name: `${name}.${ext}` }],
         });
     },
+    syntax: "f!enlarge",
+    example: "f!enlarge"
 } satisfies Command;

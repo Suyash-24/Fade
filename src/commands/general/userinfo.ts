@@ -99,6 +99,8 @@ export default {
         const container = await buildUserInfo(target, member, client);
         await sendMessage(message, [container]);
     },
+    syntax: "/userinfo [user]",
+    example: "/userinfo user:value"
 } satisfies Command;
 
 export { buildUserInfo };

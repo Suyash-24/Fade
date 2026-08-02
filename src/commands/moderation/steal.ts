@@ -111,4 +111,6 @@ export default {
             } as any);
         }
     },
+    syntax: "f!steal",
+    example: "f!steal"
 } satisfies Command;

@@ -76,5 +76,7 @@ export default {
 
         const attachment = new AttachmentBuilder(buffer, { name: 'reputation.png' });
         await reply.edit({ content: '', files: [attachment] });
-    }
+    },
+    syntax: "/rep [user]",
+    example: "/rep user:value"
 } satisfies Command;

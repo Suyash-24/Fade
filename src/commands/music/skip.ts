@@ -51,4 +51,6 @@ export default {
         );
         await musicReply(message, [card]);
     },
+    syntax: "/skip",
+    example: "/skip"
 } satisfies Command;

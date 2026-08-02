@@ -162,4 +162,6 @@ export default {
     },
 
     aliases: ['remindme', 'reminder'],
+    syntax: "/remind",
+    example: "/remind"
 } satisfies Command;

@@ -209,4 +209,6 @@ export default {
 
         await message.reply(`Usage: \`f!reactiontrigger list\` · \`add <trigger> <emoji>\` · \`delete <id>\``);
     },
+    syntax: "/reactiontrigger",
+    example: "/reactiontrigger"
 } satisfies Command;

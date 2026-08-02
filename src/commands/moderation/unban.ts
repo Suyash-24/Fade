@@ -120,4 +120,6 @@ export default {
             .build();
         await sendMessage(message, [card]);
     },
+    syntax: "/unban <user_id> [reason]",
+    example: "/unban user_id:value"
 } satisfies Command;

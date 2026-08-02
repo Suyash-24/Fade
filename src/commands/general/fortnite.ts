@@ -236,4 +236,6 @@ export default {
     },
 
     aliases: ['fn'],
+    syntax: "/fortnite",
+    example: "/fortnite"
 } satisfies Command;

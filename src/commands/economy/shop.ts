@@ -62,4 +62,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
+    syntax: "/shop",
+    example: "/shop"
 } satisfies Command;
