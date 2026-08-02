@@ -68,5 +68,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/invites [user]",
-    example: "/invites user:value"
+    example: "/invites user:@member",
 } satisfies Command;

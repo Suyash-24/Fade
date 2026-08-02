@@ -33,7 +33,7 @@ export default {
         await handleConfession(message as any, guild, message.author, messageText, false);
     },
     syntax: "/confess <message>",
-    example: "/confess message:value"
+    example: "/confess message:I love this server!",
 } as Command;
 
 async function handleConfession(ctx: any, guild: any, user: any, messageText: string, isSlash: boolean) {

@@ -77,5 +77,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/invited [user]",
-    example: "/invited user:value"
+    example: "/invited user:@member",
 } satisfies Command;

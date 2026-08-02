@@ -87,5 +87,5 @@ export default {
         }
     },
     syntax: "/askai <prompt>",
-    example: "/askai prompt:value"
+    example: "/askai prompt:How far is the moon?",
 } as Command;

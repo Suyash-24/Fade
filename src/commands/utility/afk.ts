@@ -119,5 +119,5 @@ export default {
 
     aliases: ['away'],
     syntax: "/afk [reason]",
-    example: "/afk reason:value"
+    example: "/afk reason:Eating dinner",
 } satisfies Command;

@@ -249,5 +249,5 @@ export default {
         }
     },
     syntax: "/counter <subcommand> [args]",
-    example: "/counter create"
+    example: "/counter create channel:#members type:All Members",
 } satisfies Command;

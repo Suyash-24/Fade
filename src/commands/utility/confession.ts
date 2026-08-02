@@ -155,5 +155,5 @@ export default {
         await sendMessage(message, [helpCard]);
     },
     syntax: "/confession <subcommand> [args]",
-    example: "/confession setup"
+    example: "/confession setup channel:#confessions",
 } satisfies Command;

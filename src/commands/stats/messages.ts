@@ -122,5 +122,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/messages [user]",
-    example: "/messages user:value"
+    example: "/messages user:@member",
 } satisfies Command;

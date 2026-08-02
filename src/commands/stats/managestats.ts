@@ -250,5 +250,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/managestats <subcommand> [args]",
-    example: "/managestats addmessages"
+    example: "/managestats addmessages user:@member amount:100",
 } satisfies Command;

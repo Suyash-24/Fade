@@ -276,5 +276,5 @@ export default {
         }
     },
     syntax: "/sticky <subcommand> [args]",
-    example: "/sticky set"
+    example: "/sticky set channel:#general message:Please read the rules!",
 } satisfies Command;

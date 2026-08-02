@@ -148,5 +148,5 @@ export default {
         }
     },
     syntax: "/alias <subcommand> [args]",
-    example: "/alias add"
+    example: "/alias add name:mod action:/ban user:$1 reason:Spam",
 } satisfies Command;

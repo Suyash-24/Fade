@@ -296,6 +296,6 @@ export default {
     },
 
     aliases: ['embed', 'createembed'],
-    syntax: "/ce",
-    example: "/ce"
+    syntax: "/ce <subcommand> [args]",
+    example: "/ce create name:hi response:hello",
 } satisfies Command;

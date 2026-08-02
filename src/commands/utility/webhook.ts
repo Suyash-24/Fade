@@ -350,6 +350,6 @@ export default {
     },
 
     aliases: ['wh'],
-    syntax: "/webhook",
-    example: "/webhook"
+    syntax: "/webhook <subcommand> [args]",
+    example: "/webhook create name:Announcements channel:#news",
 } satisfies Command;

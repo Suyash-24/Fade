@@ -110,5 +110,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/channelstats [channel]",
-    example: "/channelstats channel:value"
+    example: "/channelstats channel:#general",
 } satisfies Command;

@@ -210,5 +210,5 @@ export default {
         await message.reply(`Usage: \`f!reactiontrigger list\` · \`add <trigger> <emoji>\` · \`delete <id>\``);
     },
     syntax: "/reactiontrigger <subcommand> [args]",
-    example: "/reactiontrigger add"
+    example: "/reactiontrigger add trigger:hello emoji:wave",
 } satisfies Command;

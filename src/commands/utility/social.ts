@@ -232,5 +232,5 @@ export default {
 
     aliases: ['notify', 'notifications'],
     syntax: "/social <subcommand> [args]",
-    example: "/social add"
+    example: "/social add platform:Twitter url:https://twitter.com/myhandle",
 } satisfies Command;

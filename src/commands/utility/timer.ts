@@ -176,5 +176,5 @@ export default {
         }
     },
     syntax: "/timer <subcommand> [args]",
-    example: "/timer add"
+    example: "/timer add duration:10m name:Tea",
 } satisfies Command;

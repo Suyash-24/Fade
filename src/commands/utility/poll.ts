@@ -198,5 +198,5 @@ export default {
         await db.update(polls).set({ messageId: msg.id }).where(eq(polls.id, poll.id));
     },
     syntax: "/poll <subcommand> [args]",
-    example: "/poll create"
+    example: "/poll create question:Favorite color? options:Red, Blue, Green",
 } satisfies Command;

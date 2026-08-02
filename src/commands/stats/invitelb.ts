@@ -102,5 +102,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/invitelb [page]",
-    example: "/invitelb page:value"
+    example: "/invitelb page:1",
 } satisfies Command;

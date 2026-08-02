@@ -96,5 +96,5 @@ export default {
         }
     },
     syntax: "/imagine <prompt>",
-    example: "/imagine prompt:value"
+    example: "/imagine prompt:A futuristic city at sunset",
 } as Command;
