@@ -48,5 +48,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/removexp <user> <amount>",
-    example: "/removexp user:value amount:value"
+    example: "/removexp user:@member amount:100",
 } satisfies Command;

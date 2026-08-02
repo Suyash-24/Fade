@@ -95,6 +95,6 @@ export default {
             await sendMessage(message, [card]);
         }
     },
-    syntax: "/transfer",
-    example: "/transfer"
+    syntax: "/transfer <user> <amount>",
+    example: "/transfer user:@friend amount:5000",
 } satisfies Command;

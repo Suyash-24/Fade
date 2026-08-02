@@ -93,7 +93,7 @@ export default {
         await sendMessage(message, [container]);
     },
     syntax: "/serverinfo",
-    example: "/serverinfo"
+    example: "/serverinfo",
 } satisfies Command;
 
 export { buildServerInfo };

@@ -122,6 +122,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
-    syntax: "/slots",
-    example: "/slots"
+    syntax: "/slots <amount>",
+    example: "/slots amount:200",
 } satisfies Command;

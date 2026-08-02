@@ -224,5 +224,5 @@ export default {
 
     aliases: ['val', 'valo'],
     syntax: "/valorant <subcommand> [args]",
-    example: "/valorant agent"
+    example: "/valorant rank user:TenZ tag:NA1",
 } satisfies Command;

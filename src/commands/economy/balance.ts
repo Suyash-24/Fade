@@ -58,6 +58,6 @@ export default {
         const card = await buildBalanceCard(message.guild!.id, target.id, name, avatar, config);
         await sendMessage(message, [card]);
     },
-    syntax: "/balance",
-    example: "/balance"
+    syntax: "/balance [user]",
+    example: "/balance user:@member",
 } satisfies Command;

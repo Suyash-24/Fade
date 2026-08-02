@@ -45,5 +45,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/setxp <user> <amount>",
-    example: "/setxp user:value amount:value"
+    example: "/setxp user:@member amount:10000",
 } satisfies Command;

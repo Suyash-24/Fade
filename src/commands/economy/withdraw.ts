@@ -79,6 +79,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
-    syntax: "/withdraw",
-    example: "/withdraw"
+    syntax: "/withdraw <amount>",
+    example: "/withdraw amount:100",
 } satisfies Command;

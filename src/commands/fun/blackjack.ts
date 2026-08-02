@@ -161,8 +161,8 @@ export default {
     },
 
     aliases: ['bj'],
-    syntax: "/blackjack",
-    example: "/blackjack"
+    syntax: "/blackjack <bet>",
+    example: "/blackjack bet:100",
 } satisfies Command;
 
 // ── Button handler (called from interactioncreate.ts) ─────────────────────────

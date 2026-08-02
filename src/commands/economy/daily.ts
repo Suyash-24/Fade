@@ -68,5 +68,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/daily",
-    example: "/daily"
+    example: "/daily",
 } satisfies Command;

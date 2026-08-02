@@ -187,5 +187,5 @@ export default {
         }
     },
     syntax: "/levelconfig <subcommand> [args]",
-    example: "/levelconfig view"
+    example: "/levelconfig set channel:#level-ups",
 } satisfies Command;

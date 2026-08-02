@@ -133,6 +133,6 @@ export default {
             await sendMessage(message, [card]); return;
         }
     },
-    syntax: "/rob",
-    example: "/rob"
+    syntax: "/rob <user>",
+    example: "/rob user:@wealthy",
 } satisfies Command;

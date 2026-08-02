@@ -45,5 +45,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/setlevel <user> <level>",
-    example: "/setlevel user:value level:value"
+    example: "/setlevel user:@member level:50",
 } satisfies Command;

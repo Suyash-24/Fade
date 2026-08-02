@@ -82,5 +82,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/work",
-    example: "/work"
+    example: "/work",
 } satisfies Command;

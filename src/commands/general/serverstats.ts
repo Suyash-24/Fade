@@ -210,5 +210,5 @@ export default {
         await msg.edit({ content: null, embeds: [], files: [attachment] });
     },
     syntax: "/serverstats",
-    example: "/serverstats"
+    example: "/serverstats",
 } satisfies Command;

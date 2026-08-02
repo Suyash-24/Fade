@@ -100,7 +100,7 @@ export default {
         await sendMessage(message, [container]);
     },
     syntax: "/userinfo [user]",
-    example: "/userinfo user:value"
+    example: "/userinfo user:@member",
 } satisfies Command;
 
 export { buildUserInfo };

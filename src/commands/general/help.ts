@@ -235,5 +235,5 @@ export default {
         await sendMessage(message, [buildOverview(client)]);
     },
     syntax: "/help [command]",
-    example: "/help command:value"
+    example: "/help command:avatar",
 } satisfies Command;

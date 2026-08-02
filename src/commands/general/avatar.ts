@@ -140,7 +140,7 @@ export default {
         await sendMessage(message, [container]);
     },
     syntax: "/avatar [user]",
-    example: "/avatar user:value"
+    example: "/avatar user:@member",
 } satisfies Command;
 
 export { buildAvatar };

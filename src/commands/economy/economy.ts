@@ -394,6 +394,6 @@ export default {
             }
         }
     },
-    syntax: "/economy",
-    example: "/economy"
+    syntax: "/economy <subcommand> [args]",
+    example: "/economy edit balance user:@member amount:5000",
 } satisfies Command;

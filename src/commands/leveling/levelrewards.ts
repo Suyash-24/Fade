@@ -89,5 +89,5 @@ export default {
         }
     },
     syntax: "/levelrewards <subcommand> [args]",
-    example: "/levelrewards list"
+    example: "/levelrewards add level:10 role:@Veteran",
 } satisfies Command;

@@ -108,5 +108,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/leaderboard [page]",
-    example: "/leaderboard page:value"
+    example: "/leaderboard page:1",
 } satisfies Command;

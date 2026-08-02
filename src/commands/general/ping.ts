@@ -76,7 +76,7 @@ export default {
         await sendMessage(message, [container]);
     },
     syntax: "/ping",
-    example: "/ping"
+    example: "/ping",
 } satisfies Command;
 
 // Export builder for refresh button handler

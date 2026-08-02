@@ -79,5 +79,5 @@ export default {
         await sendMessage(message, [card]);
     },
     syntax: "/rank [user]",
-    example: "/rank user:value"
+    example: "/rank user:@member",
 } satisfies Command;

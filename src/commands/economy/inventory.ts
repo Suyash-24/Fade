@@ -53,6 +53,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
-    syntax: "/inventory",
-    example: "/inventory"
+    syntax: "/inventory [user]",
+    example: "/inventory user:@member",
 } satisfies Command;

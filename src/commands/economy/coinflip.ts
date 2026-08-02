@@ -91,6 +91,6 @@ export default {
 
         await sendMessage(message, [card]);
     },
-    syntax: "/coinflip",
-    example: "/coinflip"
+    syntax: "/coinflip <side> <amount>",
+    example: "/coinflip side:Heads amount:100",
 } satisfies Command;
