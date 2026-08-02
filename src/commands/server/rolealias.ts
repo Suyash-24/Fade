@@ -10,6 +10,12 @@ export default {
     data: { name: 'rolealias', description: 'Manage custom role aliases.' },
     prefixOnly: true,
     category: 'server',
+    subcommands: [
+        { name: 'list', description: 'List all custom role aliases.' },
+        { name: 'add', description: 'Add a new custom role alias.' },
+        { name: 'remove', description: 'Remove a custom role alias.' },
+        { name: 'reqrole', description: 'Set or remove the required role for managing aliases.' }
+    ],
     
     async prefixExecute(message: Message, args: string[], client: FadeClient) {
         if (!message.guild || !message.member) return;

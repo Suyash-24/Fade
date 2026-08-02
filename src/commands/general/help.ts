@@ -59,7 +59,10 @@ const buildCategoryInfo = (client: any, category: string) => {
     
     const title = `## ${e('heartdot')} ${category.charAt(0).toUpperCase() + category.slice(1)} Commands`;
     
-    const lines = cmds.map(cmd => `**/${cmd.data.name}** — ${cmd.data.description}`);
+    const lines = cmds.map(cmd => {
+        const prefix = cmd.prefixOnly ? 'f!' : '/';
+        return `**${prefix}${cmd.data.name}** — ${cmd.data.description}`;
+    });
 
     return new FadeContainer(Colours.FADE)
         .text(title)
@@ -71,7 +74,8 @@ const buildCategoryInfo = (client: any, category: string) => {
 };
 
 const buildCommandInfo = (cmd: any, subName?: string) => {
-    let title = `## ${e('search')} \`/${cmd.data.name}\``;
+    const prefix = cmd.prefixOnly ? 'f!' : '/';
+    let title = `## ${e('search')} \`${prefix}${cmd.data.name}\``;
     let desc = cmd.data.description;
     
     // Subcommand matching
@@ -80,7 +84,7 @@ const buildCommandInfo = (cmd: any, subName?: string) => {
         if (cmd.subcommands) {
             const sub = cmd.subcommands.find((s: any) => s.name.toLowerCase() === subName);
             if (sub) {
-                title = `## ${e('search')} \`/${cmd.data.name} ${sub.name}\``;
+                title = `## ${e('search')} \`${prefix}${cmd.data.name} ${sub.name}\``;
                 desc = sub.description;
                 foundSub = true;
             }
@@ -89,7 +93,7 @@ const buildCommandInfo = (cmd: any, subName?: string) => {
             const subOpt = cmd.data.options.find((o: any) => (o.toJSON().type === 1 || o.toJSON().type === 2) && o.toJSON().name === subName);
             if (subOpt) {
                 const subJson = subOpt.toJSON();
-                title = `## ${e('search')} \`/${cmd.data.name} ${subJson.name}\``;
+                title = `## ${e('search')} \`${prefix}${cmd.data.name} ${subJson.name}\``;
                 desc = subJson.description;
                 foundSub = true;
             }
