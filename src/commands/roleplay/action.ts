@@ -142,9 +142,17 @@ export default {
             return;
         }
 
-        const target = message.mentions.users.first();
+        let target = message.mentions.users.first();
         if (!target) {
-            await message.reply(`${e('error')} You need to mention someone to ${action}!`);
+            const targetStr = args.find(a => /^\d{17,20}$/.test(a.replace(/\D/g, '')));
+            if (targetStr) {
+                const targetId = targetStr.replace(/\D/g, '');
+                target = await message.client.users.fetch(targetId).catch(() => null) ?? undefined;
+            }
+        }
+
+        if (!target) {
+            await message.reply(`${e('error')} You need to mention someone or provide their ID to ${action}!`);
             return;
         }
 
