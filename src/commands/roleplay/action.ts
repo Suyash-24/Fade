@@ -5,7 +5,7 @@ import type { Command } from '../../types/command.js';
 import { e, Colours } from '../../components/emojis.js';
 
 // The actions we support
-const ACTIONS = ['hug', 'kiss', 'pat', 'slap', 'bite', 'cuddle', 'bully', 'lick', 'yeet', 'highfive', 'handhold', 'nom', 'kill', 'kick', 'poke'] as const;
+const ACTIONS = ['hug', 'kiss', 'pat', 'slap', 'bite', 'cuddle', 'bully', 'lick', 'yeet', 'highfive', 'handhold', 'nom', 'kill', 'poke'] as const;
 type ActionType = typeof ACTIONS[number];
 
 // Config for each action (messages)
@@ -23,7 +23,6 @@ const ACTION_CONFIG: Record<ActionType, { text: string }> = {
     handhold: { text: 'holds hands with' },
     nom:      { text: 'noms on' },
     kill:     { text: 'kills' },
-    kick:     { text: 'kicks' },
     poke:     { text: 'pokes' },
 };
 
