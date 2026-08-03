@@ -118,5 +118,5 @@ export default {
         }
     },
     syntax: "f!runcode <language> <code>",
-    example: "f!runcode js console.log("Hello")",
+    example: "f!runcode js console.log('Hello')",
 } as Command;

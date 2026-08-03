@@ -74,6 +74,15 @@ export const roleAliases = pgTable('role_aliases', {
     primaryKey({ columns: [t.guildId, t.alias] }),
 ]);
 
+export const boundRoles = pgTable('bound_roles', {
+    guildId:   snowflake('guild_id').notNull().references(() => guilds.guildId, { onDelete: 'cascade' }),
+    roleId:    snowflake('role_id').notNull(),
+    type:      varchar('type', { length: 32 }).notNull(), // e.g., 'staff'
+    createdAt: now(),
+}, (t) => [
+    primaryKey({ columns: [t.guildId, t.roleId, t.type] }),
+]);
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MODERATION
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
