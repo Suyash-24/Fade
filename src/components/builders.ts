@@ -20,6 +20,7 @@ import type {
     ChatInputCommandInteraction,
     MessageComponentInteraction,
     Message,
+    MessageMentionOptions,
 } from 'discord.js';
 
 export {
@@ -160,11 +161,12 @@ export async function sendResponse(
 export async function sendMessage(
     message: Message,
     containers: ContainerBuilder[],
+    allowedMentions: MessageMentionOptions = { repliedUser: false, roles: [], users: [] }
 ): Promise<Message> {
     const payload = {
         components: containers,
         flags: MessageFlags.IsComponentsV2,
-        allowedMentions: { repliedUser: false },
+        allowedMentions,
     } as any;
 
     return message.reply(payload).catch((err) => {

@@ -58,7 +58,7 @@ async function processMassRole(message: Message, members: GuildMember[], role: R
             resultCard.text(`\nFailed to process **${failed}** members.`);
         }
         
-        await statusMsg.edit({ components: [resultCard.build()], flags: 1 << 13 } as any).catch(() => {});
+        await statusMsg.edit({ components: [resultCard.build()], flags: 1 << 13, allowedMentions: { parse: [] } } as any).catch(() => {});
     })();
 }
 
