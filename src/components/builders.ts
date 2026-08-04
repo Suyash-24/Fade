@@ -161,7 +161,7 @@ export async function sendResponse(
 export async function sendMessage(
     message: Message,
     containers: ContainerBuilder[],
-    allowedMentions: MessageMentionOptions = { repliedUser: false, roles: [], users: [] }
+    allowedMentions: MessageMentionOptions = { repliedUser: false }
 ): Promise<Message> {
     const payload = {
         components: containers,
