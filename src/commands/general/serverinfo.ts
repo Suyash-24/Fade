@@ -14,10 +14,10 @@ const buildServerInfo = async (guild: any) => {
     const stageCh    = guild.channels.cache.filter((c: any) => c.type === ChannelType.GuildStageVoice).size;
     const categories = guild.channels.cache.filter((c: any) => c.type === ChannelType.GuildCategory).size;
 
-    const boosts     = guild.premiumSubscriptionCount ?? 0;
-    const boostTier  = guild.premiumTier;
-    const roleCount  = guild.roles.cache.size - 1;
-    const emojiCount = guild.emojis.cache.size;
+    const boosts      = guild.premiumSubscriptionCount ?? 0;
+    const boostTier   = guild.premiumTier;
+    const roleCount   = guild.roles.cache.size - 1;
+    const emojiCount  = guild.emojis.cache.size;
     const stickerCount = guild.stickers?.cache?.size ?? 0;
 
     const verifyLabel =
@@ -50,7 +50,7 @@ const buildServerInfo = async (guild: any) => {
         c.separator(false);
     }
 
-    // ── Header: name · id · created ────────────────────────────────────────
+    // ── Header ─────────────────────────────────────────────────────────────
     c.section(
         [
             `## ${guild.name}`,
@@ -62,42 +62,38 @@ const buildServerInfo = async (guild: any) => {
 
     c.separator(true);
 
-    // ── General ────────────────────────────────────────────────────────────
+    // ── Info ───────────────────────────────────────────────────────────────
     c.text(
-        `${e('owner')}  **Owner** · <@${owner.id}>\n` +
-        `${e('members')}  **Members** · \`${guild.memberCount.toLocaleString()}\`\n` +
-        `${e('roles')}  **Roles** · \`${roleCount}\`\n` +
-        `${verifyEmoji}  **Verification** · \`${verifyLabel}\``
+        `${e('owner')} **Owner** · <@${owner.id}>\n` +
+        `${e('members')} **Members** · \`${guild.memberCount.toLocaleString()}\` · ` +
+            `${e('roles')} **Roles** · \`${roleCount}\`\n` +
+        `${verifyEmoji} **Verification** · \`${verifyLabel}\``
     );
 
     c.separator(false);
 
     // ── Channels ───────────────────────────────────────────────────────────
-    const channelParts = [
-        `${e('channels')}  **Text** · \`${textCh}\``,
-        `${e('voice')}  **Voice** · \`${voiceCh}\``,
-        `${e('category')}  **Categories** · \`${categories}\``,
-    ];
-    if (stageCh > 0) channelParts.push(`${e('stats')}  **Stage** · \`${stageCh}\``);
-
-    c.text(channelParts.join('\n'));
+    const chLine = `${e('channels')} **Text** \`${textCh}\`  ·  ` +
+        `${e('voice')} **Voice** \`${voiceCh}\`  ·  ` +
+        `${e('category')} **Categories** \`${categories}\`` +
+        (stageCh > 0 ? `  ·  **Stage** \`${stageCh}\`` : '');
+    c.text(chLine);
 
     c.separator(false);
 
-    // ── Boost ──────────────────────────────────────────────────────────────
+    // ── Boosts ─────────────────────────────────────────────────────────────
     c.text(
-        `${e('boost')}  **Boost Tier** · \`${boostTier}\`\n` +
-        `${e('boost')}  **Boosts** · \`${boosts}\`\n` +
+        `${e('boost')} **Boost Tier ${boostTier}** · \`${boosts}\` boost${boosts !== 1 ? 's' : ''}\n` +
         `-# ${boostBar} ${boosts}/14`
     );
 
     // ── Extras ─────────────────────────────────────────────────────────────
     if (emojiCount > 0 || stickerCount > 0) {
         c.separator(false);
-        const extraParts: string[] = [];
-        if (emojiCount > 0)   extraParts.push(`${e('star')}  **Emojis** · \`${emojiCount}\``);
-        if (stickerCount > 0) extraParts.push(`${e('gift')}  **Stickers** · \`${stickerCount}\``);
-        c.text(extraParts.join('\n'));
+        const parts: string[] = [];
+        if (emojiCount > 0)   parts.push(`**Emojis** \`${emojiCount}\``);
+        if (stickerCount > 0) parts.push(`**Stickers** \`${stickerCount}\``);
+        c.text(`${e('star')} ${parts.join('  ·  ')}`);
     }
 
     c.separator(true);
