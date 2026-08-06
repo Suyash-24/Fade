@@ -13,91 +13,91 @@ const buildServerInfo = async (guild: any) => {
     const voiceCh    = guild.channels.cache.filter((c: any) => c.type === ChannelType.GuildVoice).size;
     const stageCh    = guild.channels.cache.filter((c: any) => c.type === ChannelType.GuildStageVoice).size;
     const categories = guild.channels.cache.filter((c: any) => c.type === ChannelType.GuildCategory).size;
-    const threads    = guild.channels.cache.filter((c: any) =>
-        c.type === ChannelType.PublicThread ||
-        c.type === ChannelType.PrivateThread ||
-        c.type === ChannelType.AnnouncementThread
-    ).size;
 
     const boosts     = guild.premiumSubscriptionCount ?? 0;
     const boostTier  = guild.premiumTier;
     const roleCount  = guild.roles.cache.size - 1;
     const emojiCount = guild.emojis.cache.size;
-    const stickerCount = guild.stickers.cache.size;
+    const stickerCount = guild.stickers?.cache?.size ?? 0;
 
-    const verifyLabel = ['None', 'Low', 'Medium', 'High', 'Very High'][guild.verificationLevel] ?? 'Unknown';
+    const verifyLabel =
+        guild.verificationLevel === GuildVerificationLevel.None     ? 'None' :
+        guild.verificationLevel === GuildVerificationLevel.Low      ? 'Low' :
+        guild.verificationLevel === GuildVerificationLevel.Medium   ? 'Medium' :
+        guild.verificationLevel === GuildVerificationLevel.High     ? 'High' :
+        guild.verificationLevel === GuildVerificationLevel.VeryHigh ? 'Very High' : 'None';
+
     const verifyEmoji =
-        guild.verificationLevel === GuildVerificationLevel.None     ? '🔓' :
-        guild.verificationLevel === GuildVerificationLevel.Low      ? '🔒' :
-        guild.verificationLevel === GuildVerificationLevel.Medium   ? '🔐' :
-        guild.verificationLevel === GuildVerificationLevel.High     ? '🛡️' :
-        guild.verificationLevel === GuildVerificationLevel.VeryHigh ? '🔏' : '🔒';
+        guild.verificationLevel === GuildVerificationLevel.None     ? e('shield') :
+        guild.verificationLevel === GuildVerificationLevel.Low      ? e('verificationlevellow') :
+        guild.verificationLevel === GuildVerificationLevel.Medium   ? e('verificationlevelmedium') :
+        guild.verificationLevel === GuildVerificationLevel.High     ? e('verificationlevelhigh') :
+        guild.verificationLevel === GuildVerificationLevel.VeryHigh ? e('verificationlevelhighest') :
+        e('shield');
 
-    const boostBar = boosts > 0
-        ? `${'▰'.repeat(Math.min(boosts, 14))}${'▱'.repeat(Math.max(0, 14 - boosts))}`
-        : '▱▱▱▱▱▱▱▱▱▱▱▱▱▱';
+    const boostBar = `${'▰'.repeat(Math.min(boosts, 14))}${'▱'.repeat(Math.max(0, 14 - boosts))}`;
 
-    const iconUrl = guild.iconURL({ size: 512 })
+    const iconUrl  = guild.iconURL({ size: 512 })
         ?? guild.client.user?.displayAvatarURL({ size: 512 })
         ?? 'https://cdn.discordapp.com/embed/avatars/0.png';
     const bannerUrl = guild.bannerURL({ size: 1024 });
 
-    // No accent color — clean look as requested
     const c = new FadeContainer();
 
-    // ── Banner (hero image at top if present) ──────────────────────────────
+    // ── Banner ─────────────────────────────────────────────────────────────
     if (bannerUrl) {
         c.gallery([{ url: bannerUrl, description: `${guild.name} banner` }]);
         c.separator(false);
     }
 
-    // ── Header: server name + icon thumbnail ───────────────────────────────
+    // ── Header: name · id · created ────────────────────────────────────────
     c.section(
         [
             `## ${guild.name}`,
-            `-# ${e('id')} \`${guild.id}\`  ·  ${e('date')} Created <t:${createdAt}:D>`,
+            `-# ${e('id')} \`${guild.id}\``,
+            `-# ${e('date')} <t:${createdAt}:D> · <t:${createdAt}:R>`,
         ],
         thumb(iconUrl),
     );
 
     c.separator(true);
 
-    // ── Overview ───────────────────────────────────────────────────────────
+    // ── General ────────────────────────────────────────────────────────────
     c.text(
-        `### 👑 Overview\n` +
-        `${e('owner')} **Owner** · <@${owner.id}>\n` +
-        `${e('members')} **Members** · \`${guild.memberCount.toLocaleString()}\`  ·  ${e('roles')} **Roles** · \`${roleCount}\`\n` +
-        `${verifyEmoji} **Verification** · \`${verifyLabel}\``
+        `${e('owner')}  **Owner** · <@${owner.id}>\n` +
+        `${e('members')}  **Members** · \`${guild.memberCount.toLocaleString()}\`\n` +
+        `${e('roles')}  **Roles** · \`${roleCount}\`\n` +
+        `${verifyEmoji}  **Verification** · \`${verifyLabel}\``
     );
 
     c.separator(false);
 
     // ── Channels ───────────────────────────────────────────────────────────
-    c.text(
-        `### 💬 Channels\n` +
-        `${e('channels')} **Text** \`${textCh}\`  ·  ${e('voice')} **Voice** \`${voiceCh}\`  ·  ${e('category')} **Categories** \`${categories}\`` +
-        (stageCh > 0 ? `  ·  🎙️ **Stage** \`${stageCh}\`` : '') +
-        (threads > 0 ? `  ·  🧵 **Threads** \`${threads}\`` : '')
-    );
+    const channelParts = [
+        `${e('channels')}  **Text** · \`${textCh}\``,
+        `${e('voice')}  **Voice** · \`${voiceCh}\``,
+        `${e('category')}  **Categories** · \`${categories}\``,
+    ];
+    if (stageCh > 0) channelParts.push(`${e('stats')}  **Stage** · \`${stageCh}\``);
+
+    c.text(channelParts.join('\n'));
 
     c.separator(false);
 
-    // ── Boost Status ───────────────────────────────────────────────────────
+    // ── Boost ──────────────────────────────────────────────────────────────
     c.text(
-        `### ${e('boost')} Boost Status · Tier ${boostTier}\n` +
-        `-# ${boostBar} ${boosts}/14\n` +
-        `${e('boost')} **${boosts}** boost${boosts !== 1 ? 's' : ''} active`
+        `${e('boost')}  **Boost Tier** · \`${boostTier}\`\n` +
+        `${e('boost')}  **Boosts** · \`${boosts}\`\n` +
+        `-# ${boostBar} ${boosts}/14`
     );
 
     // ── Extras ─────────────────────────────────────────────────────────────
     if (emojiCount > 0 || stickerCount > 0) {
         c.separator(false);
-        c.text(
-            `### 🎨 Extras\n` +
-            (emojiCount > 0 ? `😄 **Emojis** · \`${emojiCount}\`` : '') +
-            (emojiCount > 0 && stickerCount > 0 ? `  ·  ` : '') +
-            (stickerCount > 0 ? `🎭 **Stickers** · \`${stickerCount}\`` : '')
-        );
+        const extraParts: string[] = [];
+        if (emojiCount > 0)   extraParts.push(`${e('star')}  **Emojis** · \`${emojiCount}\``);
+        if (stickerCount > 0) extraParts.push(`${e('gift')}  **Stickers** · \`${stickerCount}\``);
+        c.text(extraParts.join('\n'));
     }
 
     c.separator(true);
