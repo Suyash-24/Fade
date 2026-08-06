@@ -65,11 +65,17 @@ const buildServerInfo = async (guild: any) => {
     c.separator(true);
 
     // ── Overview ───────────────────────────────────────────────────────────
-    c.text(
+    const region  = guild.preferredLocale ?? 'Unknown';
+    const vanity  = guild.vanityURLCode ? `discord.gg/${guild.vanityURLCode}` : null;
+
+    let overviewText =
         `${hd} **Overview**\n` +
         `**Owner** · <@${owner.id}>\n` +
-        `**Verification** · \`${verifyLabel}\``
-    );
+        `**Verification** · \`${verifyLabel}\`\n` +
+        `**Locale** · \`${region}\``;
+    if (vanity) overviewText += `\n**Vanity** · \`${vanity}\``;
+
+    c.text(overviewText);
 
     c.separator(false);
 
@@ -87,8 +93,8 @@ const buildServerInfo = async (guild: any) => {
     let channelLine =
         `**Text** \`${textCh}\`  ·  **Voice** \`${voiceCh}\`  ·  **Categories** \`${categories}\``;
     if (stageCh > 0) channelLine += `  ·  **Stage** \`${stageCh}\``;
-    if (afkCh) channelLine += `\n**AFK Channel** · ${afkCh.toString()}`;
-    if (sysCh) channelLine += `\n**System Channel** · ${sysCh.toString()}`;
+    channelLine += `\n**AFK Channel** · ${afkCh ? afkCh.toString() : '`None`'}`;
+    channelLine += `\n**System Channel** · ${sysCh ? sysCh.toString() : '`None`'}`;
 
     c.text(`${hd} **Channels**\n${channelLine}`);
 
