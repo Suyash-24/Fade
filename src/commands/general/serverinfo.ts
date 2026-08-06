@@ -46,11 +46,7 @@ const buildServerInfo = async (guild: any) => {
 
     const c = new FadeContainer();
 
-    // ── Banner ─────────────────────────────────────────────────────────────
-    if (bannerUrl) {
-        c.gallery([{ url: bannerUrl, description: `${guild.name} banner` }]);
-        c.separator(false);
-    }
+
 
     // ── Header ─────────────────────────────────────────────────────────────
     c.section(
@@ -114,6 +110,12 @@ const buildServerInfo = async (guild: any) => {
         if (emojiCount > 0)    parts.push(`**Emojis** \`${emojiCount}\``);
         if (stickerCount > 0)  parts.push(`**Stickers** \`${stickerCount}\``);
         c.text(`${hd} **Extras**\n${parts.join('  ·  ')}`);
+    }
+
+    // ── Banner at bottom ───────────────────────────────────────────────────
+    if (bannerUrl) {
+        c.separator(false);
+        c.gallery([{ url: bannerUrl, description: `${guild.name} banner` }]);
     }
 
     c.separator(true);
