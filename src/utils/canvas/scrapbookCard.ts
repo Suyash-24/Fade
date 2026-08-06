@@ -256,16 +256,21 @@ export async function generateScrapbookCard(data: ScrapbookData): Promise<Buffer
     ctx.fillText('Most messages between 12 AM and 6 AM', 80, 515);
 
     if (data.topNightOwl) {
-        // Always use loadAvatarSafe — loadImage succeeds on GIF but renders transparent
-        await loadAvatarSafe(data.topNightOwl.avatarUrl, 80, 550, 100, 50, data.topNightOwl.username);
+        // Small avatar on the left, text to the right
+        const avatarSize = 60;
+        const avatarX = 80;
+        const avatarY = 545;
+        await loadAvatarSafe(data.topNightOwl.avatarUrl, avatarX, avatarY, avatarSize, avatarSize / 2, data.topNightOwl.username);
 
-        ctx.font = 'bold 32px RobotoBold, sans-serif';
+        const textX = avatarX + avatarSize + 20;
+        ctx.font = 'bold 28px RobotoBold, sans-serif';
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillText(data.topNightOwl.username, 210, 595);
+        ctx.textAlign = 'left';
+        ctx.fillText(data.topNightOwl.username, textX, avatarY + 28);
 
-        ctx.font = '22px Roboto, sans-serif';
+        ctx.font = '20px Roboto, sans-serif';
         ctx.fillStyle = '#AAAAAA';
-        ctx.fillText(`${data.topNightOwl.messages} late night msgs`, 210, 630);
+        ctx.fillText(`${data.topNightOwl.messages} late night msgs`, textX, avatarY + 55);
     } else {
         ctx.font = '20px Roboto, sans-serif';
         ctx.fillStyle = '#555555';
