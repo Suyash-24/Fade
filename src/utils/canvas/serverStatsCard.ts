@@ -29,7 +29,7 @@ const C = {
     card:      '#161728',
     border:    'rgba(255,255,255,0.07)',
     text:      '#e2e8f0',
-    muted:     '#64748b',
+    muted:     '#8b9ab5',
     dim:       '#2d3748',
     gold:      '#e8b96a',
     goldFade:  'rgba(232,185,106,0.14)',
@@ -40,7 +40,7 @@ const C = {
     orange:    '#fb923c',
     red:       '#f87171',
     yellow:    '#fbbf24',
-    silver:    '#94a3b8',
+    silver:    '#b8c5d6',
     bronze:    '#cd7f32',
 };
 
@@ -136,7 +136,7 @@ function donut(ctx: any, cx: number, cy: number, r: number, thick: number,
 }
 
 function slabel(ctx: any, text: string, x: number, y: number) {
-    ctx.fillStyle = '#475569'; ctx.font = `11px ${BOLD}`; ctx.fillText(text, x, y);
+    ctx.fillStyle = '#8b9ab5'; ctx.font = `11px ${BOLD}`; ctx.fillText(text, x, y);
 }
 
 function aline(ctx: any, x: number, y: number, color: string) {
@@ -287,7 +287,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
         card(ctx, cx, y, CW, STAT_H, 14, s.tint);
         ctx.beginPath(); ctx.arc(cx + 18, y + 22, 5, 0, Math.PI * 2);
         ctx.fillStyle = s.dot; ctx.fill();
-        ctx.fillStyle = '#94a3b8'; ctx.font = `10px ${BOLD}`; ctx.fillText(s.label, cx + 30, y + 26);
+        ctx.fillStyle = '#b8c5d6'; ctx.font = `10px ${BOLD}`; ctx.fillText(s.label, cx + 30, y + 26);
         ctx.fillStyle = s.nc; ctx.font = `40px ${BOLD}`; ctx.fillText(s.value, cx + 16, y + 72);
         ctx.fillStyle = s.sub.startsWith('↑') ? C.green : s.sub.startsWith('↓') ? C.red : C.muted;
         ctx.font = `11px ${REGULAR}`; ctx.fillText(s.sub, cx + 16, y + 90);
@@ -393,7 +393,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
             for (let i = 0; i < Math.min(items.length, 5); i++) {
                 const it = items[i];
                 const iy = y + 50 + i * CROW;
-                ctx.fillStyle = '#94a3b8'; ctx.font = `12px ${REGULAR}`;
+                ctx.fillStyle = '#b8c5d6'; ctx.font = `12px ${REGULAR}`;
                 let nm = it.name;
                 while (ctx.measureText(`# ${nm}`).width > CPW - 108) nm = nm.slice(0, -1);
                 if (nm !== it.name) nm += '..';
@@ -404,7 +404,7 @@ export async function buildServerStatsCard(data: ServerStatsData): Promise<Buffe
             }
         }
         const total = items.reduce((s, it) => s + it.count, 0);
-        ctx.fillStyle = '#64748b'; ctx.font = `11px ${REGULAR}`;
+        ctx.fillStyle = '#8b9ab5'; ctx.font = `11px ${REGULAR}`;
         ctx.fillText(`Total ${total.toLocaleString()} ${items[0]?.unit ?? ''} across all channels`, sx + 16, y + CH_H - 14);
     };
 
