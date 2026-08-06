@@ -13,12 +13,20 @@ const buildServerInfo = async (guild: any) => {
     const voiceCh    = guild.channels.cache.filter((c: any) => c.type === ChannelType.GuildVoice).size;
     const stageCh    = guild.channels.cache.filter((c: any) => c.type === ChannelType.GuildStageVoice).size;
     const categories = guild.channels.cache.filter((c: any) => c.type === ChannelType.GuildCategory).size;
+    const afkCh      = guild.afkChannel;
+    const sysCh      = guild.systemChannel;
 
     const boosts      = guild.premiumSubscriptionCount ?? 0;
     const boostTier   = guild.premiumTier;
     const roleCount   = guild.roles.cache.size - 1;
     const emojiCount  = guild.emojis.cache.size;
     const stickerCount = guild.stickers?.cache?.size ?? 0;
+
+    // Fetch members to get accurate human/bot split
+    const totalMembers = guild.memberCount;
+    const cachedMembers = guild.members.cache;
+    const humans = cachedMembers.filter((m: any) => !m.user.bot).size;
+    const bots   = cachedMembers.filter((m: any) => m.user.bot).size;
 
     const verifyLabel =
         guild.verificationLevel === GuildVerificationLevel.None     ? 'None' :
@@ -60,8 +68,17 @@ const buildServerInfo = async (guild: any) => {
     c.text(
         `${hd} **Overview**\n` +
         `**Owner** · <@${owner.id}>\n` +
-        `**Members** · \`${guild.memberCount.toLocaleString()}\`  ·  **Roles** · \`${roleCount}\`\n` +
         `**Verification** · \`${verifyLabel}\``
+    );
+
+    c.separator(false);
+
+    // ── Community ──────────────────────────────────────────────────────────
+    c.text(
+        `${hd} **Community**\n` +
+        `**Total:** \`${totalMembers.toLocaleString()}\`\n` +
+        `**Humans:** \`${humans}\` · **Bots:** \`${bots}\`\n` +
+        `**Roles:** \`${roleCount}\``
     );
 
     c.separator(false);
@@ -70,6 +87,8 @@ const buildServerInfo = async (guild: any) => {
     let channelLine =
         `**Text** \`${textCh}\`  ·  **Voice** \`${voiceCh}\`  ·  **Categories** \`${categories}\``;
     if (stageCh > 0) channelLine += `  ·  **Stage** \`${stageCh}\``;
+    if (afkCh) channelLine += `\n**AFK Channel** · ${afkCh.toString()}`;
+    if (sysCh) channelLine += `\n**System Channel** · ${sysCh.toString()}`;
 
     c.text(`${hd} **Channels**\n${channelLine}`);
 
@@ -77,9 +96,9 @@ const buildServerInfo = async (guild: any) => {
 
     // ── Boost Status ───────────────────────────────────────────────────────
     c.text(
-        `${hd} **Boost Status** · Tier ${boostTier}\n` +
-        `-# ${boostBar} ${boosts}/14\n` +
-        `\`${boosts}\` boost${boosts !== 1 ? 's' : ''} active`
+        `${hd} **Boost Status**\n` +
+        `**Tier** \`${boostTier}\`  ·  **Boosts** \`${boosts}\`\n` +
+        `-# ${boostBar} ${boosts}/14`
     );
 
     // ── Extras ─────────────────────────────────────────────────────────────
