@@ -27,20 +27,14 @@ const buildServerInfo = async (guild: any) => {
         guild.verificationLevel === GuildVerificationLevel.High     ? 'High' :
         guild.verificationLevel === GuildVerificationLevel.VeryHigh ? 'Very High' : 'None';
 
-    const verifyEmoji =
-        guild.verificationLevel === GuildVerificationLevel.None     ? e('shield') :
-        guild.verificationLevel === GuildVerificationLevel.Low      ? e('verificationlevellow') :
-        guild.verificationLevel === GuildVerificationLevel.Medium   ? e('verificationlevelmedium') :
-        guild.verificationLevel === GuildVerificationLevel.High     ? e('verificationlevelhigh') :
-        guild.verificationLevel === GuildVerificationLevel.VeryHigh ? e('verificationlevelhighest') :
-        e('shield');
-
     const boostBar = `${'▰'.repeat(Math.min(boosts, 14))}${'▱'.repeat(Math.max(0, 14 - boosts))}`;
 
     const iconUrl  = guild.iconURL({ size: 512 })
         ?? guild.client.user?.displayAvatarURL({ size: 512 })
         ?? 'https://cdn.discordapp.com/embed/avatars/0.png';
     const bannerUrl = guild.bannerURL({ size: 1024 });
+
+    const hd = e('heartdot'); // single emoji used only on section headers
 
     const c = new FadeContainer();
 
@@ -62,38 +56,39 @@ const buildServerInfo = async (guild: any) => {
 
     c.separator(true);
 
-    // ── Info ───────────────────────────────────────────────────────────────
+    // ── Overview ───────────────────────────────────────────────────────────
     c.text(
-        `${e('owner')} **Owner** · <@${owner.id}>\n` +
-        `${e('members')} **Members** · \`${guild.memberCount.toLocaleString()}\` · ` +
-            `${e('roles')} **Roles** · \`${roleCount}\`\n` +
-        `${verifyEmoji} **Verification** · \`${verifyLabel}\``
+        `${hd} **Overview**\n` +
+        `**Owner** · <@${owner.id}>\n` +
+        `**Members** · \`${guild.memberCount.toLocaleString()}\`  ·  **Roles** · \`${roleCount}\`\n` +
+        `**Verification** · \`${verifyLabel}\``
     );
 
     c.separator(false);
 
     // ── Channels ───────────────────────────────────────────────────────────
-    const chLine = `${e('channels')} **Text** \`${textCh}\`  ·  ` +
-        `${e('voice')} **Voice** \`${voiceCh}\`  ·  ` +
-        `${e('category')} **Categories** \`${categories}\`` +
-        (stageCh > 0 ? `  ·  **Stage** \`${stageCh}\`` : '');
-    c.text(chLine);
+    let channelLine =
+        `**Text** \`${textCh}\`  ·  **Voice** \`${voiceCh}\`  ·  **Categories** \`${categories}\``;
+    if (stageCh > 0) channelLine += `  ·  **Stage** \`${stageCh}\``;
+
+    c.text(`${hd} **Channels**\n${channelLine}`);
 
     c.separator(false);
 
-    // ── Boosts ─────────────────────────────────────────────────────────────
+    // ── Boost Status ───────────────────────────────────────────────────────
     c.text(
-        `${e('boost')} **Boost Tier ${boostTier}** · \`${boosts}\` boost${boosts !== 1 ? 's' : ''}\n` +
-        `-# ${boostBar} ${boosts}/14`
+        `${hd} **Boost Status** · Tier ${boostTier}\n` +
+        `-# ${boostBar} ${boosts}/14\n` +
+        `\`${boosts}\` boost${boosts !== 1 ? 's' : ''} active`
     );
 
     // ── Extras ─────────────────────────────────────────────────────────────
     if (emojiCount > 0 || stickerCount > 0) {
         c.separator(false);
         const parts: string[] = [];
-        if (emojiCount > 0)   parts.push(`**Emojis** \`${emojiCount}\``);
-        if (stickerCount > 0) parts.push(`**Stickers** \`${stickerCount}\``);
-        c.text(`${e('star')} ${parts.join('  ·  ')}`);
+        if (emojiCount > 0)    parts.push(`**Emojis** \`${emojiCount}\``);
+        if (stickerCount > 0)  parts.push(`**Stickers** \`${stickerCount}\``);
+        c.text(`${hd} **Extras**\n${parts.join('  ·  ')}`);
     }
 
     c.separator(true);
