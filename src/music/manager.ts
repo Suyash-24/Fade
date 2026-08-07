@@ -37,6 +37,13 @@ function getLavalinkNodes() {
             url:    'lavalink.oops.wtf:2000',
             auth:   'www.freelavalink.rest',
             secure: false,
+        },
+        // Fallback Node 3 (HeavenCloud Public Node)
+        {
+            name:   'Fallback-Heaven',
+            url:    '89.106.84.59:4000',
+            auth:   'heavencloud.in',
+            secure: false,
         }
     ];
 }
