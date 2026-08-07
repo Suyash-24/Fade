@@ -17,12 +17,27 @@ import { buildNowPlayingCard } from './cards.js';
 
 function getLavalinkNodes() {
     return [
+        // Primary Node (From .env)
         {
             name:   process.env.LAVALINK_NAME   ?? 'Fade-Node',
             url:    `${process.env.LAVALINK_HOST ?? 'node.jigsromeo.site'}:${process.env.LAVALINK_PORT ?? '3040'}`,
             auth:   process.env.LAVALINK_AUTH   ?? 'Ronlly',
             secure: process.env.LAVALINK_SECURE === 'true' ? true : false,
         },
+        // Fallback Node 1 (Public DarrenOfficial List)
+        {
+            name:   'Fallback-Darren',
+            url:    'lava.link:80',
+            auth:   'youshallnotpass',
+            secure: false,
+        },
+        // Fallback Node 2 (Public AjieDev List)
+        {
+            name:   'Fallback-Ajie',
+            url:    'lavalink.oops.wtf:2000',
+            auth:   'www.freelavalink.rest',
+            secure: false,
+        }
     ];
 }
 
